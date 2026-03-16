@@ -2,6 +2,7 @@
 KHNP Education AI Platform - FastAPI Backend
 강의안 업로드 → 파싱 → RAG 증강 → 스크립트/문제은행 생성 API
 """
+import json
 import logging
 import os
 from dataclasses import asdict
@@ -1172,6 +1173,135 @@ async def record_ab_result(experiment_id: str, request: ABResultRequest):
 
 
 # ---------------------------------------------------------------------------
+# Collaboration Portal — 실시간 협업 포털 API
+# ---------------------------------------------------------------------------
+
+import time as _time
+import uuid as _uuid
+from datetime import datetime as _dt
+from fastapi.responses import StreamingResponse
+
+# 접속 코드 → 사용자 매핑
+_COLLAB_USERS = {
+    "KHNP-KDH-2026": {"name": "김도한", "title": "차장", "org": "한수원", "role": "PM", "color": "#1e40af"},
+    "KHNP-PSY-2026": {"name": "박소연", "title": "주임", "org": "한수원", "role": "실무", "color": "#7c3aed"},
+    "KHNP-SJS-2026": {"name": "서진수", "title": "교수", "org": "한수원", "role": "자문위원", "color": "#0891b2"},
+    "KHNP-JSS-2026": {"name": "조성수", "title": "교수", "org": "한수원", "role": "자문위원", "color": "#059669"},
+    "KHNP-KJI-2026": {"name": "구진일", "title": "교수", "org": "한수원", "role": "자문위원", "color": "#d97706"},
+    "EY-COLLAB-2026": {"name": "EY 컨설팅팀", "title": "", "org": "EY", "role": "컨설팅", "color": "#ffe600"},
+    "UPSTAGE-COLLAB-2026": {"name": "Upstage 기술팀", "title": "", "org": "Upstage", "role": "AI 기술", "color": "#6366f1"},
+}
+
+# In-memory 저장소 (PoC)
+_collab_comments: list[dict] = []
+_collab_sessions: dict[str, dict] = {}  # session_id -> user info
+_collab_event_id: int = 0
+
+
+class CollabCommentRequest(BaseModel):
+    session_id: str
+    section: str  # architecture, discussion, internal, standards, general
+    content: str
+    parent_id: str = ""  # 대댓글
+
+
+class CollabLoginRequest(BaseModel):
+    access_code: str
+
+
+@app.post("/api/v1/collab/login")
+async def collab_login(request: CollabLoginRequest):
+    """접속 코드로 로그인"""
+    user = _COLLAB_USERS.get(request.access_code)
+    if not user:
+        raise HTTPException(401, "유효하지 않은 접속 코드입니다.")
+    session_id = str(_uuid.uuid4())[:12]
+    _collab_sessions[session_id] = {**user, "login_at": _dt.now().isoformat()}
+    return {"session_id": session_id, "user": user}
+
+
+@app.get("/api/v1/collab/comments")
+async def get_collab_comments(section: str = "", since_id: int = 0):
+    """코멘트 조회 (section 필터, since_id 이후 것만)"""
+    comments = _collab_comments
+    if section:
+        comments = [c for c in comments if c["section"] == section]
+    if since_id > 0:
+        comments = [c for c in comments if c["id"] > since_id]
+    return {"comments": comments, "total": len(comments)}
+
+
+@app.post("/api/v1/collab/comments")
+async def add_collab_comment(request: CollabCommentRequest):
+    """코멘트 추가"""
+    global _collab_event_id
+    user = _collab_sessions.get(request.session_id)
+    if not user:
+        raise HTTPException(401, "로그인이 필요합니다.")
+    _collab_event_id += 1
+    comment = {
+        "id": _collab_event_id,
+        "section": request.section,
+        "content": request.content,
+        "parent_id": request.parent_id,
+        "author": user["name"],
+        "org": user["org"],
+        "role": user.get("role", ""),
+        "color": user.get("color", "#6b7280"),
+        "created_at": _dt.now().isoformat(),
+        "timestamp": _time.time(),
+    }
+    _collab_comments.append(comment)
+    return {"status": "ok", "comment": comment}
+
+
+@app.delete("/api/v1/collab/comments/{comment_id}")
+async def delete_collab_comment(comment_id: int, session_id: str = ""):
+    """코멘트 삭제 (본인만)"""
+    user = _collab_sessions.get(session_id)
+    if not user:
+        raise HTTPException(401, "로그인이 필요합니다.")
+    for i, c in enumerate(_collab_comments):
+        if c["id"] == comment_id and c["author"] == user["name"]:
+            _collab_comments.pop(i)
+            return {"status": "deleted"}
+    raise HTTPException(404, "코멘트를 찾을 수 없거나 권한이 없습니다.")
+
+
+@app.get("/api/v1/collab/online")
+async def get_online_users():
+    """현재 접속 중인 사용자 목록"""
+    cutoff = _time.time() - 600  # 10분 이내 로그인
+    online = []
+    for sid, u in _collab_sessions.items():
+        online.append({"name": u["name"], "org": u["org"], "role": u.get("role", ""), "color": u.get("color", "")})
+    # 중복 제거
+    seen = set()
+    unique = []
+    for u in online:
+        if u["name"] not in seen:
+            seen.add(u["name"])
+            unique.append(u)
+    return {"online": unique}
+
+
+import asyncio as _asyncio
+
+@app.get("/api/v1/collab/events")
+async def collab_sse(since_id: int = 0):
+    """SSE 스트림 — 실시간 코멘트 업데이트"""
+    async def event_stream():
+        last_id = since_id
+        while True:
+            new_comments = [c for c in _collab_comments if c["id"] > last_id]
+            for c in new_comments:
+                last_id = c["id"]
+                yield f"data: {json.dumps(c, ensure_ascii=False)}\n\n"
+            await _asyncio.sleep(1)
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ---------------------------------------------------------------------------
 # 웹 정적 파일 서빙
 # ---------------------------------------------------------------------------
 
@@ -1185,6 +1315,15 @@ async def serve_index():
     if index_file.exists():
         return FileResponse(str(index_file))
     return {"message": "KHNP Education AI Platform API", "docs": "/docs"}
+
+
+@app.get("/collab")
+async def serve_collab():
+    """협업 포털 페이지"""
+    collab_file = _web_dir / "collab.html"
+    if collab_file.exists():
+        return FileResponse(str(collab_file))
+    raise HTTPException(404, "협업 포털 페이지를 찾을 수 없습니다.")
 
 
 # StaticFiles는 모든 라우트 뒤에 마운트 (catch-all 방지)

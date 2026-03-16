@@ -2986,22 +2986,38 @@
 // ============================================================
 const API_BASE = window.location.origin + '/api/v1';
 
-async function apiCall(path, options = {}) {
+async function apiCall(path, options = {}, timeoutMs = 300000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
+        const { headers: customHeaders, ...restOptions } = options;
         const resp = await fetch(API_BASE + path, {
-            headers: {'Content-Type': 'application/json'},
-            ...options,
+            headers: { 'Content-Type': 'application/json', ...customHeaders },
+            signal: controller.signal,
+            ...restOptions,
         });
-        if (!resp.ok) throw new Error(`API Error: ${resp.status}`);
+        clearTimeout(timer);
+        if (!resp.ok) {
+            const errBody = await resp.text().catch(() => '');
+            let detail = '';
+            try { detail = JSON.parse(errBody).detail || errBody; } catch { detail = errBody; }
+            throw new Error(`API ${resp.status}: ${detail || resp.statusText}`);
+        }
         return await resp.json();
     } catch (e) {
-        console.warn('API call failed:', path, e.message);
-        return null;
+        clearTimeout(timer);
+        if (e.name === 'AbortError') {
+            console.error('API timeout:', path);
+            throw new Error(`요청 시간 초과 (${Math.round(timeoutMs/1000)}초). 서버 처리 중일 수 있습니다.`);
+        }
+        console.error('API call failed:', path, e.message);
+        throw e;
     }
 }
 
 async function loadPendingReviews() {
-    const data = await apiCall('/sme/pending');
+    let data;
+    try { data = await apiCall('/sme/pending'); } catch { data = null; }
     const el = document.getElementById('sme-pending-list');
     const countEl = document.getElementById('sme-pending-count');
     if (!data || !Array.isArray(data)) {
@@ -3049,18 +3065,21 @@ async function submitSMEReview() {
     catch { alert('수정본 JSON 형식이 올바르지 않습니다.'); return; }
     const status = document.getElementById('sme-review-status').value;
     const comment = document.getElementById('sme-review-comment').value;
-    const result = await apiCall('/sme/submit-revision', {
-        method: 'POST',
-        body: JSON.stringify({ review_id: reviewId, status, revised_question: revised, overall_comment: comment }),
-    });
-    if (result) {
-        alert('검토가 제출되었습니다.');
-        loadPendingReviews();
-    }
+    try {
+        const result = await apiCall('/sme/submit-revision', {
+            method: 'POST',
+            body: JSON.stringify({ review_id: reviewId, status, revised_question: revised, overall_comment: comment }),
+        });
+        if (result) {
+            alert('검토가 제출되었습니다.');
+            loadPendingReviews();
+        }
+    } catch (e) { alert('제출 실패: ' + e.message); }
 }
 
 async function loadSMEInsights() {
-    const data = await apiCall('/sme/insights');
+    let data;
+    try { data = await apiCall('/sme/insights'); } catch { data = null; }
     const el = document.getElementById('sme-insights');
     if (!data) { el.innerHTML = '<p style="color:#9ca3af;">API 연결 필요</p>'; return; }
     if (typeof data === 'object' && data.insights) {
@@ -3078,7 +3097,8 @@ async function loadSMEInsights() {
 // Dashboard Functions
 // ============================================================
 async function loadDashboard() {
-    const data = await apiCall('/dashboard');
+    let data;
+    try { data = await apiCall('/dashboard'); } catch { data = null; }
     document.getElementById('dashboard-timestamp').textContent = '업데이트: ' + new Date().toLocaleTimeString();
     if (!data) {
         document.getElementById('kpi-modules').textContent = '-';
@@ -3126,7 +3146,8 @@ async function loadDashboard() {
 // Prompt Management Functions
 // ============================================================
 async function loadPromptList() {
-    const data = await apiCall('/prompts/list');
+    let data;
+    try { data = await apiCall('/prompts/list'); } catch { data = null; }
     const el = document.getElementById('prompt-list');
     if (!data || !data.templates) {
         el.innerHTML = '<p style="color:#9ca3af;">API 연결 필요</p>';
@@ -3150,7 +3171,8 @@ async function loadPromptList() {
 }
 
 async function loadPromptDetail(key) {
-    const data = await apiCall('/prompts/' + key);
+    let data;
+    try { data = await apiCall('/prompts/' + key); } catch { data = null; }
     if (!data) return;
     document.getElementById('prompt-editor-key').textContent = key;
     document.getElementById('prompt-editor-version').textContent = 'Version: ' + (data.version || '-');
@@ -3164,20 +3186,24 @@ async function applyPromptOverride() {
     const key = window._currentPromptKey;
     if (!key) { alert('프롬프트를 먼저 선택하세요.'); return; }
     const prompt = document.getElementById('prompt-editor-content').value;
-    const result = await apiCall('/prompts/override', {
-        method: 'POST',
-        body: JSON.stringify({ key, system_prompt: prompt }),
-    });
-    if (result) { alert(`오버라이드 적용됨: ${key}`); loadPromptList(); }
+    try {
+        const result = await apiCall('/prompts/override', {
+            method: 'POST',
+            body: JSON.stringify({ key, system_prompt: prompt }),
+        });
+        if (result) { alert(`오버라이드 적용됨: ${key}`); loadPromptList(); }
+    } catch (e) { alert('오버라이드 실패: ' + e.message); }
 }
 
 async function clearPromptOverride() {
     const key = window._currentPromptKey;
     if (!key) return;
-    await apiCall('/prompts/override/' + key, { method: 'DELETE' });
-    alert(`오버라이드 해제됨: ${key}`);
-    loadPromptList();
-    loadPromptDetail(key);
+    try {
+        await apiCall('/prompts/override/' + key, { method: 'DELETE' });
+        alert(`오버라이드 해제됨: ${key}`);
+        loadPromptList();
+        loadPromptDetail(key);
+    } catch (e) { alert('해제 실패: ' + e.message); }
 }
 
 // ============================================================
@@ -3227,12 +3253,17 @@ async function handleFileSelect(file) {
             document.getElementById('gen-results').style.display = 'none';
             document.getElementById('gen-progress').style.display = 'block';
 
-            const parseResp = await apiCall('/parse/' + _generatorFileId, { method: 'POST' });
-            if (parseResp) {
-                updateGenProgress(30, `파싱 완료: ${parseResp.slides_count}개 슬라이드, VLM 보강 ${parseResp.vlm_enriched_count}개`);
-                document.getElementById('gen-status-text').textContent =
-                    `파싱 완료 — ${parseResp.slides_count}개 슬라이드 준비됨`;
-                document.getElementById('gen-step3').style.display = 'none';
+            try {
+                const parseResp = await apiCall('/parse/' + _generatorFileId, { method: 'POST' }, 600000);
+                if (parseResp) {
+                    updateGenProgress(30, `파싱 완료: ${parseResp.slides_count}개 슬라이드, VLM 보강 ${parseResp.vlm_enriched_count}개`);
+                    document.getElementById('gen-status-text').textContent =
+                        `파싱 완료 — ${parseResp.slides_count}개 슬라이드 준비됨`;
+                    document.getElementById('gen-step3').style.display = 'none';
+                }
+            } catch (parseErr) {
+                updateGenProgress(0, `파싱 실패: ${parseErr.message}`);
+                document.getElementById('gen-status-text').textContent = '파싱 오류 발생';
             }
         } else {
             alert(`업로드 실패: ${data.detail || '알 수 없는 오류'}`);
@@ -3292,22 +3323,17 @@ async function runGeneration(mode) {
 
         const result = await apiCall(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
-        });
+        }, 600000);
 
-        if (result) {
-            _generatorResult = result;
-            updateGenProgress(100, '생성 완료!');
-            document.getElementById('gen-status-text').textContent =
-                `완료 — 스크립트 ${result.scripts_count || 0}개, 문항 ${result.questions_count || 0}개`;
-            renderGenerationResults(result);
-        } else {
-            updateGenProgress(0, '생성 실패');
-            document.getElementById('gen-status-text').textContent = '오류 발생';
-        }
+        _generatorResult = result;
+        updateGenProgress(100, '생성 완료!');
+        document.getElementById('gen-status-text').textContent =
+            `완료 — 스크립트 ${result.scripts_count || 0}개, 문항 ${result.questions_count || 0}개`;
+        renderGenerationResults(result);
     } catch (err) {
         updateGenProgress(0, `오류: ${err.message}`);
+        document.getElementById('gen-status-text').textContent = `오류: ${err.message}`;
     } finally {
         document.querySelectorAll('#gen-step2 button').forEach(b => b.disabled = false);
     }
@@ -3437,7 +3463,8 @@ function downloadResult(format) {
 // 환류 루프 상태 로드
 // ============================================================
 async function loadFeedbackLoopStatus() {
-    const data = await apiCall('/feedback/loop-status');
+    let data;
+    try { data = await apiCall('/feedback/loop-status'); } catch { data = null; }
     if (!data) return;
     // 대시보드에 표시할 수 있도록 전역 저장
     window._feedbackLoopData = data;

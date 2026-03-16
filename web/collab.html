@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoC2 협업 포털 — KHNP Education AI Platform</title>
+    <style>
+        :root {
+            --khnp-primary: #1e3a5f;
+            --khnp-secondary: #2c5282;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --bg-card: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+        /* Login Screen */
+        .login-overlay {
+            position: fixed; inset: 0; background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3b82f6 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        .login-overlay.hidden { opacity: 0; pointer-events: none; }
+        .login-box {
+            background: white; border-radius: 20px; padding: 48px 40px; width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25); text-align: center;
+        }
+        .login-box h1 { font-size: 1.5rem; color: var(--khnp-primary); margin-bottom: 8px; }
+        .login-box .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; }
+        .login-box input {
+            width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px;
+            font-size: 1rem; text-align: center; letter-spacing: 2px; outline: none; transition: border 0.2s;
+        }
+        .login-box input:focus { border-color: var(--accent); }
+        .login-box .login-btn {
+            width: 100%; padding: 14px; margin-top: 16px; background: var(--khnp-primary); color: white;
+            border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .login-box .login-btn:hover { background: var(--khnp-secondary); }
+        .login-error { color: var(--danger); font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+
+        /* Header */
+        .header {
+            background: white; border-bottom: 1px solid var(--border); padding: 16px 32px;
+            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-left .logo { font-size: 1.15rem; font-weight: 700; color: var(--khnp-primary); }
+        .header-left .badge {
+            padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+            background: #dbeafe; color: #2563eb;
+        }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .user-badge {
+            display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+            background: var(--bg); border-radius: 8px; font-size: 0.85rem;
+        }
+        .user-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+        .online-count { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* Layout */
+        .layout { display: flex; height: calc(100vh - 65px); }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px; background: white; border-right: 1px solid var(--border);
+            padding: 20px 0; flex-shrink: 0; overflow-y: auto;
+        }
+        .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+        .sidebar-section h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 8px; padding: 0 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+            cursor: pointer; transition: all 0.15s; font-size: 0.88rem; color: var(--text);
+        }
+        .nav-item:hover { background: var(--bg); }
+        .nav-item.active { background: #eff6ff; color: var(--accent); font-weight: 600; }
+        .nav-item .icon { width: 20px; text-align: center; font-size: 1rem; }
+        .nav-item .count {
+            margin-left: auto; font-size: 0.7rem; background: var(--accent); color: white;
+            padding: 1px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+        }
+
+        /* Online Users */
+        .online-list { padding: 0 16px; }
+        .online-user {
+            display: flex; align-items: center; gap: 8px; padding: 6px 8px; font-size: 0.82rem;
+            border-radius: 6px;
+        }
+        .online-user .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .page-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+        .page-desc { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+        }
+        .card h3 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+        /* Architecture Diagram */
+        .arch-flow {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            padding: 20px; background: #f0f9ff; border-radius: 12px; margin-bottom: 16px;
+        }
+        .arch-box {
+            padding: 14px 18px; border-radius: 10px; text-align: center;
+            font-size: 0.82rem; font-weight: 600; min-width: 120px;
+            border: 2px solid transparent; transition: transform 0.2s;
+        }
+        .arch-box:hover { transform: translateY(-2px); }
+        .arch-box .sub { font-size: 0.72rem; font-weight: 400; color: rgba(255,255,255,0.85); margin-top: 4px; }
+        .arch-arrow { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
+
+        /* Comment System */
+        .comment-input-area {
+            display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start;
+        }
+        .comment-input-area textarea {
+            flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 10px;
+            font-size: 0.9rem; resize: vertical; min-height: 60px; outline: none;
+            font-family: inherit; transition: border 0.2s;
+        }
+        .comment-input-area textarea:focus { border-color: var(--accent); }
+        .comment-input-area button {
+            padding: 12px 24px; background: var(--accent); color: white; border: none;
+            border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.88rem;
+            white-space: nowrap; transition: background 0.2s;
+        }
+        .comment-input-area button:hover { background: #2563eb; }
+
+        .comment-list { display: flex; flex-direction: column; gap: 12px; }
+        .comment-item {
+            padding: 16px; background: var(--bg); border-radius: 10px;
+            border-left: 4px solid #cbd5e1; transition: background 0.2s;
+        }
+        .comment-item:hover { background: #f1f5f9; }
+        .comment-header {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+        }
+        .comment-author {
+            font-weight: 600; font-size: 0.88rem;
+        }
+        .comment-org {
+            font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;
+            font-weight: 600;
+        }
+        .comment-time { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
+        .comment-body { font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
+        .comment-actions { margin-top: 8px; display: flex; gap: 12px; }
+        .comment-actions button {
+            background: none; border: none; font-size: 0.78rem; color: var(--text-secondary);
+            cursor: pointer; padding: 2px 4px;
+        }
+        .comment-actions button:hover { color: var(--accent); }
+
+        /* Section Tabs */
+        .section-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .section-tab {
+            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+            font-size: 0.82rem; cursor: pointer; background: white; transition: all 0.15s;
+        }
+        .section-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .section-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+        /* Architecture Detail */
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .module-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 10px;
+            background: white; transition: box-shadow 0.2s;
+        }
+        .module-card:hover { box-shadow: var(--shadow-lg); }
+        .module-card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+        .module-card .desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+        .module-card .tech { margin-top: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
+        .module-card .tech span {
+            font-size: 0.7rem; padding: 2px 8px; background: #f0f9ff; color: #0369a1;
+            border-radius: 4px;
+        }
+
+        /* Standards Table */
+        .std-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .std-table th, .std-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        .std-table th { background: var(--bg); font-weight: 600; color: var(--text-secondary); font-size: 0.78rem; text-transform: uppercase; }
+        .std-table tr:hover td { background: #f8fafc; }
+
+        .status-badge {
+            padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600;
+        }
+        .status-badge.done { background: #d1fae5; color: #065f46; }
+        .status-badge.progress { background: #dbeafe; color: #1e40af; }
+        .status-badge.pending { background: #fef3c7; color: #92400e; }
+        .status-badge.blocked { background: #fee2e2; color: #991b1b; }
+
+        /* Pulse animation for live indicator */
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .live-dot { animation: pulse 2s infinite; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            padding: 12px 20px; background: var(--khnp-primary); color: white; border-radius: 10px;
+            font-size: 0.85rem; box-shadow: var(--shadow-lg); animation: slideIn 0.3s;
+        }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { padding: 16px; }
+            .arch-flow { flex-direction: column; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+        <div style="font-size: 2rem; margin-bottom: 12px;">&#x1f3ed;</div>
+        <h1>PoC2 협업 포털</h1>
+        <div class="subtitle">KHNP Education AI Platform<br>Slides-to-Script & Question Bank</div>
+        <input type="text" id="login-code" placeholder="접속 코드 입력" autocomplete="off"
+               onkeydown="if(event.key==='Enter') doLogin()">
+        <button class="login-btn" onclick="doLogin()">접속</button>
+        <div class="login-error" id="login-error"></div>
+        <div style="margin-top: 24px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6;">
+            한수원 인재개발원 / EY / Upstage<br>
+            부여된 접속 코드로 로그인하세요
+        </div>
+    </div>
+</div>
+
+<!-- Header -->
+<header class="header" id="main-header" style="display:none;">
+    <div class="header-left">
+        <span class="logo">PoC2 협업 포털</span>
+        <span class="badge">Slides → Script & Question Bank</span>
+        <span style="font-size:0.75rem; color:var(--success); display:flex; align-items:center; gap:4px;">
+            <span class="live-dot" style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;"></span>
+            LIVE
+        </span>
+    </div>
+    <div class="header-right">
+        <span class="online-count" id="online-count"></span>
+        <div class="user-badge" id="user-badge">
+            <span class="user-dot"></span>
+            <span id="user-name-display"></span>
+        </div>
+        <button onclick="doLogout()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:0.8rem;cursor:pointer;color:var(--text-secondary);">로그아웃</button>
+    </div>
+</header>
+
+<!-- Main Layout -->
+<div class="layout" id="main-layout" style="display:none;">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-section">
+            <h3>메뉴</h3>
+            <div class="nav-item active" onclick="switchPage('architecture')" data-page="architecture">
+                <span class="icon">&#x1f3d7;</span> 시스템 아키텍처
+            </div>
+            <div class="nav-item" onclick="switchPage('discussion')" data-page="discussion">
+                <span class="icon">&#x1f4ac;</span> 의견/토론
+                <span class="count" id="count-discussion">0</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('internal')" data-page="internal">
+                <span class="icon">&#x1f4cb;</span> 한수원 내부정리
+                <span class="count" id="count-internal">0</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('standards')" data-page="standards">
+                <span class="icon">&#x1f4d0;</span> 기준/표준 관리
+            </div>
+            <div class="nav-item" onclick="switchPage('timeline')" data-page="timeline">
+                <span class="icon">&#x1f4c5;</span> 프로젝트 일정
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <h3>접속 중</h3>
+            <div id="online-list" class="online-list"></div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="main-content">
+
+        <!-- 1. 시스템 아키텍처 -->
+        <div class="page active" id="page-architecture">
+            <div class="page-title">시스템 아키텍처</div>
+            <div class="page-desc">PoC2 — 슬라이드 기반 강의 스크립트 &amp; 문제은행 자동 생성 시스템</div>
+
+            <div class="card">
+                <h3>&#x1f504; 전체 파이프라인 흐름</h3>
+                <div class="arch-flow">
+                    <div class="arch-box" style="background:#1e40af;color:white;">
+                        PDF/PPTX 업로드
+                        <div class="sub">강의 슬라이드</div>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#7c3aed;color:white;">
+                        Document Parse
+                        <div class="sub">Upstage API</div>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#0891b2;color:white;">
+                        VLM 시각분석
+                        <div class="sub">Solar Pro3 (102B)</div>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#059669;color:white;">
+                        스크립트 생성
+                        <div class="sub">슬라이드별 강의안</div>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#d97706;color:white;">
+                        문제은행 생성
+                        <div class="sub">2-Pass 엔진</div>
+                    </div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#dc2626;color:white;">
+                        품질검증/SME
+                        <div class="sub">QA + 전문가 검토</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f9e9; 핵심 모듈 구성</h3>
+                <div class="module-grid">
+                    <div class="module-card">
+                        <h4>&#x1f4c4; Document Parser</h4>
+                        <div class="desc">PDF/PPTX를 슬라이드 단위로 파싱. 텍스트, 이미지, 표를 구조화된 JSON으로 변환</div>
+                        <div class="tech"><span>Upstage Document Parse API</span><span>OCR</span><span>Chart Recognition</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x1f441; VLM Analyzer</h4>
+                        <div class="desc">시각자료(도면, 차트, 다이어그램)를 AI가 해석하여 텍스트 설명 자동 생성</div>
+                        <div class="tech"><span>Solar Pro3 VLM</span><span>Base64 이미지</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x1f4dd; Script Generator</h4>
+                        <div class="desc">슬라이드별 강사용 강의 스크립트 자동 생성. 도입-전개-요약 3단 구조</div>
+                        <div class="tech"><span>Solar Pro3</span><span>Prompt Engineering</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x2753; Question Generator</h4>
+                        <div class="desc">Bloom 분류체계 기반 4지선다형 문항 자동 생성. 2-Pass로 오답 매력도 강화</div>
+                        <div class="tech"><span>2-Pass Engine</span><span>Bloom Taxonomy</span><span>오답 정교화</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x2699; Quality Validator</h4>
+                        <div class="desc">생성된 문항의 품질 자동 검증. 난이도, 변별도, 안전등급 태깅</div>
+                        <div class="tech"><span>IRT 교정</span><span>Safety Tagging</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x1f91d; SME Review</h4>
+                        <div class="desc">전문가(SME) 검토 워크플로우. 승인/수정/반려/에스컬레이션</div>
+                        <div class="tech"><span>검토 큐</span><span>버전 관리</span><span>Few-shot 수집</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x1f500; LLM Router</h4>
+                        <div class="desc">Solar Pro + AtomicGPT(KAERI) 하이브리드 라우팅. 안전등급 문항은 크로스체크</div>
+                        <div class="tech"><span>Solar Pro3</span><span>AtomicGPT</span><span>Fallback</span></div>
+                    </div>
+                    <div class="module-card">
+                        <h4>&#x1f4ca; 교육 환류 루프</h4>
+                        <div class="desc">시험 응시 데이터 수집 → IRT 교정 → 프롬프트 개선 자동화 선순환</div>
+                        <div class="tech"><span>Kirkpatrick L2-3</span><span>CTT/IRT</span><span>A/B Testing</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f4ac; 아키텍처 관련 의견</h3>
+                <div id="comments-architecture"></div>
+            </div>
+        </div>
+
+        <!-- 2. 의견/토론 -->
+        <div class="page" id="page-discussion">
+            <div class="page-title">의견/토론 게시판</div>
+            <div class="page-desc">프로젝트 전반에 대한 자유 토론. 실시간으로 공유됩니다.</div>
+
+            <div class="section-tabs">
+                <div class="section-tab active" onclick="switchDiscussionTab('general')">전체 토론</div>
+                <div class="section-tab" onclick="switchDiscussionTab('technical')">기술 이슈</div>
+                <div class="section-tab" onclick="switchDiscussionTab('content')">교육 컨텐츠</div>
+                <div class="section-tab" onclick="switchDiscussionTab('process')">프로세스/일정</div>
+            </div>
+
+            <div id="comments-discussion"></div>
+        </div>
+
+        <!-- 3. 한수원 내부정리 -->
+        <div class="page" id="page-internal">
+            <div class="page-title">한수원 내부 정리사항</div>
+            <div class="page-desc">인재개발원 내부적으로 정리가 필요한 사항들. 기준, 의사결정, 선행조건 등</div>
+
+            <div class="card">
+                <h3>&#x2705; 의사결정 필요 사항</h3>
+                <table class="std-table">
+                    <thead>
+                        <tr><th>항목</th><th>내용</th><th>상태</th><th>담당</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>대상 교과목 선정</strong></td>
+                            <td>PoC 적용 대상 교과목 확정 (원자력 일반, 방사선 안전 등)</td>
+                            <td><span class="status-badge progress">진행중</span></td>
+                            <td>김도한 차장</td>
+                        </tr>
+                        <tr>
+                            <td><strong>안전등급 분류기준</strong></td>
+                            <td>safety_critical / safety_related / general 3단계 분류 기준 확정</td>
+                            <td><span class="status-badge pending">검토중</span></td>
+                            <td>서진수 교수</td>
+                        </tr>
+                        <tr>
+                            <td><strong>기존 문제은행 현황</strong></td>
+                            <td>현행 문제은행 문항수, 형식, 관리체계 파악</td>
+                            <td><span class="status-badge pending">검토중</span></td>
+                            <td>박소연 주임</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SME 검토 프로세스</strong></td>
+                            <td>AI 생성 문항에 대한 전문가 검토 절차 및 승인 기준</td>
+                            <td><span class="status-badge pending">검토중</span></td>
+                            <td>조성수 교수</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bloom 분류 배분비</strong></td>
+                            <td>지식(30%) / 이해(30%) / 적용(25%) / 분석(15%) 기본안 확인</td>
+                            <td><span class="status-badge done">확정</span></td>
+                            <td>구진일 교수</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AtomicGPT 도입 시기</strong></td>
+                            <td>KAERI AtomicGPT API 가용 시점 확인 및 통합 계획</td>
+                            <td><span class="status-badge blocked">대기</span></td>
+                            <td>Upstage</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f4ac; 내부 정리 관련 의견</h3>
+                <div id="comments-internal"></div>
+            </div>
+        </div>
+
+        <!-- 4. 기준/표준 관리 -->
+        <div class="page" id="page-standards">
+            <div class="page-title">기준/표준 관리</div>
+            <div class="page-desc">교육 컨텐츠 품질 기준, 문제은행 표준, SAT 프레임워크 정합성</div>
+
+            <div class="card">
+                <h3>&#x1f4d0; SAT(Systematic Approach to Training) 정합성</h3>
+                <div class="arch-flow" style="background:#fefce8;">
+                    <div class="arch-box" style="background:#1e40af;color:white;">Analysis<div class="sub">직무분석</div></div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#7c3aed;color:white;">Design<div class="sub">교육설계</div></div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#059669;color:white;border:3px solid #fbbf24;">Development<div class="sub">교재개발 (PoC 핵심)</div></div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#d97706;color:white;">Implementation<div class="sub">교육실행</div></div>
+                    <span class="arch-arrow">&rarr;</span>
+                    <div class="arch-box" style="background:#dc2626;color:white;">Evaluation<div class="sub">평가환류</div></div>
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:12px;">
+                    &#x2B50; <strong>Development 단계</strong>가 PoC의 핵심 영역입니다. AI가 슬라이드 기반으로 강의 스크립트와 문제은행을 자동 생성하고, SME가 검토하는 구조.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f4cb; 문제은행 품질 기준</h3>
+                <table class="std-table">
+                    <thead><tr><th>기준 항목</th><th>목표값</th><th>측정 방법</th><th>현재 상태</th></tr></thead>
+                    <tbody>
+                        <tr><td>문항 정답률</td><td>40-80%</td><td>CTT 정답률 분석</td><td><span class="status-badge progress">데이터 수집중</span></td></tr>
+                        <tr><td>변별도</td><td>>0.2</td><td>상하위 27% 비교</td><td><span class="status-badge progress">데이터 수집중</span></td></tr>
+                        <tr><td>오답 매력도</td><td>각 선택지 >5%</td><td>선택지 분포 분석</td><td><span class="status-badge done">2-Pass 적용</span></td></tr>
+                        <tr><td>안전등급 정확도</td><td>>95%</td><td>Hybrid Safety Tagging</td><td><span class="status-badge done">키워드+LLM</span></td></tr>
+                        <tr><td>SME 승인율</td><td>>80%</td><td>검토 워크플로우</td><td><span class="status-badge pending">검토 시작전</span></td></tr>
+                        <tr><td>Bloom 분류 정확도</td><td>>85%</td><td>전문가 교차검증</td><td><span class="status-badge pending">검증 예정</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f4ac; 기준/표준 관련 의견</h3>
+                <div id="comments-standards"></div>
+            </div>
+        </div>
+
+        <!-- 5. 프로젝트 일정 -->
+        <div class="page" id="page-timeline">
+            <div class="page-title">프로젝트 일정</div>
+            <div class="page-desc">PoC2 마일스톤 및 주요 일정</div>
+
+            <div class="card">
+                <h3>&#x1f4c5; 마일스톤</h3>
+                <div style="position:relative;padding-left:32px;">
+                    <div style="position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--border);"></div>
+
+                    <div style="margin-bottom:24px;position:relative;">
+                        <div style="position:absolute;left:-27px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--success);border:2px solid white;"></div>
+                        <div style="font-weight:600;">Phase 1: 기본 파이프라인 구축 <span class="status-badge done">완료</span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">Document Parse + VLM + Script Generation + Question Generation</div>
+                    </div>
+
+                    <div style="margin-bottom:24px;position:relative;">
+                        <div style="position:absolute;left:-27px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid white;"></div>
+                        <div style="font-weight:600;">Phase 2: 품질 고도화 <span class="status-badge progress">진행중</span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">2-Pass 오답 정교화, Safety Tagging, SME Review, 교육 환류 루프</div>
+                    </div>
+
+                    <div style="margin-bottom:24px;position:relative;">
+                        <div style="position:absolute;left:-27px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid white;"></div>
+                        <div style="font-weight:600;">Phase 3: 실증 및 검증 <span class="status-badge pending">예정</span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">실제 교과목 적용, SME 검토, IRT 교정, 교육생 피드백 수집</div>
+                    </div>
+
+                    <div style="margin-bottom:24px;position:relative;">
+                        <div style="position:absolute;left:-27px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid white;"></div>
+                        <div style="font-weight:600;">Phase 4: AtomicGPT 통합 <span class="status-badge blocked">대기</span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">KAERI AtomicGPT 원자력 특화 모델 통합, 하이브리드 라우팅 실전 적용</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>&#x1f4ac; 일정 관련 의견</h3>
+                <div id="comments-timeline"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+const API_BASE = window.location.origin + '/api/v1';
+let _session = null;
+let _user = null;
+let _currentPage = 'architecture';
+let _discussionTab = 'general';
+let _commentCache = {};
+let _lastEventId = 0;
+let _sseSource = null;
+
+// ============================================================
+// Login
+// ============================================================
+async function doLogin() {
+    const code = document.getElementById('login-code').value.trim();
+    if (!code) return;
+    const errEl = document.getElementById('login-error');
+    try {
+        const resp = await fetch(API_BASE + '/collab/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({access_code: code}),
+        });
+        const data = await resp.json();
+        if (!resp.ok) { errEl.textContent = data.detail || '접속 실패'; return; }
+        _session = data.session_id;
+        _user = data.user;
+        errEl.textContent = '';
+        localStorage.setItem('poc2_session', _session);
+        localStorage.setItem('poc2_user', JSON.stringify(_user));
+        enterApp();
+    } catch (e) {
+        errEl.textContent = '서버 연결 실패. 서버가 실행 중인지 확인하세요.';
+    }
+}
+
+function enterApp() {
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('main-header').style.display = '';
+    document.getElementById('main-layout').style.display = '';
+    document.getElementById('user-name-display').textContent = `${_user.name} (${_user.org})`;
+    loadAllComments();
+    loadOnlineUsers();
+    startSSE();
+    setInterval(loadOnlineUsers, 30000);
+}
+
+function doLogout() {
+    _session = null; _user = null;
+    localStorage.removeItem('poc2_session');
+    localStorage.removeItem('poc2_user');
+    if (_sseSource) _sseSource.close();
+    document.getElementById('login-overlay').classList.remove('hidden');
+    document.getElementById('main-header').style.display = 'none';
+    document.getElementById('main-layout').style.display = 'none';
+}
+
+// Auto-login from localStorage
+(function() {
+    const s = localStorage.getItem('poc2_session');
+    const u = localStorage.getItem('poc2_user');
+    if (s && u) { _session = s; _user = JSON.parse(u); enterApp(); }
+})();
+
+// ============================================================
+// Navigation
+// ============================================================
+function switchPage(page) {
+    _currentPage = page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.page === page);
+    });
+}
+
+function switchDiscussionTab(tab) {
+    _discussionTab = tab;
+    document.querySelectorAll('.section-tabs .section-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['general','technical','content','process'][i] === tab);
+    });
+    renderComments('discussion');
+}
+
+// ============================================================
+// Comments
+// ============================================================
+function getCommentSection(page) {
+    if (page === 'discussion') return 'discussion_' + _discussionTab;
+    return page;
+}
+
+async function loadAllComments() {
+    try {
+        const resp = await fetch(API_BASE + '/collab/comments');
+        const data = await resp.json();
+        _commentCache = {};
+        (data.comments || []).forEach(c => {
+            if (!_commentCache[c.section]) _commentCache[c.section] = [];
+            _commentCache[c.section].push(c);
+            if (c.id > _lastEventId) _lastEventId = c.id;
+        });
+        updateAllCommentCounts();
+        renderComments(_currentPage);
+    } catch (e) {
+        console.warn('Failed to load comments:', e);
+    }
+}
+
+function updateAllCommentCounts() {
+    const sections = {discussion: 0, internal: 0};
+    for (const [section, comments] of Object.entries(_commentCache)) {
+        if (section.startsWith('discussion_')) sections.discussion += comments.length;
+        else if (section === 'internal') sections.internal = comments.length;
+    }
+    const dEl = document.getElementById('count-discussion');
+    const iEl = document.getElementById('count-internal');
+    if (dEl) dEl.textContent = sections.discussion || '';
+    if (iEl) iEl.textContent = sections.internal || '';
+}
+
+function renderComments(page) {
+    const section = getCommentSection(page);
+    const container = document.getElementById('comments-' + page);
+    if (!container) return;
+    const comments = _commentCache[section] || [];
+
+    let html = `
+        <div class="comment-input-area">
+            <textarea id="input-${page}" placeholder="의견을 입력하세요... (Ctrl+Enter로 전송)"></textarea>
+            <button onclick="postComment('${page}')">전송</button>
+        </div>
+        <div class="comment-list" id="list-${page}">
+    `;
+
+    if (comments.length === 0) {
+        html += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
+    } else {
+        [...comments].reverse().forEach(c => {
+            const orgColors = {
+                '한수원': {bg:'#dbeafe',color:'#1e40af'},
+                'EY': {bg:'#fef3c7',color:'#92400e'},
+                'Upstage': {bg:'#ede9fe',color:'#5b21b6'},
+            };
+            const oc = orgColors[c.org] || {bg:'#f3f4f6',color:'#374151'};
+            const isOwn = _user && c.author === _user.name;
+            const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+            html += `
+                <div class="comment-item" style="border-left-color:${c.color || '#cbd5e1'}">
+                    <div class="comment-header">
+                        <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
+                        <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>
+                        ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
+                        <span class="comment-time">${time}</span>
+                    </div>
+                    <div class="comment-body">${escapeHtml(c.content)}</div>
+                    ${isOwn ? `<div class="comment-actions"><button onclick="deleteComment(${c.id},'${page}')">삭제</button></div>` : ''}
+                </div>
+            `;
+        });
+    }
+    html += '</div>';
+    container.innerHTML = html;
+
+    // Ctrl+Enter 전송
+    const textarea = document.getElementById('input-' + page);
+    if (textarea) {
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                postComment(page);
+            }
+        });
+    }
+}
+
+async function postComment(page) {
+    if (!_session) { alert('로그인이 필요합니다.'); return; }
+    const input = document.getElementById('input-' + page);
+    const content = input.value.trim();
+    if (!content) return;
+
+    const section = getCommentSection(page);
+    try {
+        const resp = await fetch(API_BASE + '/collab/comments', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({session_id: _session, section, content}),
+        });
+        if (!resp.ok) {
+            const err = await resp.json();
+            if (resp.status === 401) { alert('세션 만료. 다시 로그인하세요.'); doLogout(); return; }
+            alert(err.detail || '전송 실패');
+            return;
+        }
+        const data = await resp.json();
+        input.value = '';
+        // SSE가 업데이트하겠지만 즉시 반영
+        addCommentToCache(data.comment);
+        renderComments(page);
+        updateAllCommentCounts();
+    } catch (e) {
+        alert('전송 실패: ' + e.message);
+    }
+}
+
+async function deleteComment(id, page) {
+    if (!confirm('이 의견을 삭제하시겠습니까?')) return;
+    try {
+        await fetch(API_BASE + `/collab/comments/${id}?session_id=${_session}`, {method: 'DELETE'});
+        // Remove from cache
+        for (const section of Object.keys(_commentCache)) {
+            _commentCache[section] = _commentCache[section].filter(c => c.id !== id);
+        }
+        renderComments(page);
+        updateAllCommentCounts();
+    } catch (e) { console.warn('Delete failed:', e); }
+}
+
+function addCommentToCache(comment) {
+    if (!_commentCache[comment.section]) _commentCache[comment.section] = [];
+    if (!_commentCache[comment.section].find(c => c.id === comment.id)) {
+        _commentCache[comment.section].push(comment);
+    }
+    if (comment.id > _lastEventId) _lastEventId = comment.id;
+}
+
+// ============================================================
+// SSE - Real-time updates
+// ============================================================
+function startSSE() {
+    if (_sseSource) _sseSource.close();
+    try {
+        _sseSource = new EventSource(API_BASE + '/collab/events?since_id=' + _lastEventId);
+        _sseSource.onmessage = (event) => {
+            try {
+                const comment = JSON.parse(event.data);
+                addCommentToCache(comment);
+                updateAllCommentCounts();
+                renderComments(_currentPage);
+                // Toast notification if from someone else
+                if (_user && comment.author !== _user.name) {
+                    showToast(`${comment.author} (${comment.org}): ${comment.content.substring(0, 50)}...`);
+                }
+            } catch (e) { /* ignore parse errors */ }
+        };
+        _sseSource.onerror = () => {
+            _sseSource.close();
+            // Reconnect after 5s
+            setTimeout(startSSE, 5000);
+        };
+    } catch (e) {
+        // SSE not supported, fall back to polling
+        setInterval(loadAllComments, 5000);
+    }
+}
+
+// ============================================================
+// Online Users
+// ============================================================
+async function loadOnlineUsers() {
+    try {
+        const resp = await fetch(API_BASE + '/collab/online');
+        const data = await resp.json();
+        const list = data.online || [];
+        document.getElementById('online-count').textContent = `${list.length}명 접속중`;
+        document.getElementById('online-list').innerHTML = list.map(u => `
+            <div class="online-user">
+                <span class="dot" style="background:${u.color || '#10b981'}"></span>
+                <span>${u.name}</span>
+                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">${u.org}</span>
+            </div>
+        `).join('');
+    } catch (e) { /* ignore */ }
+}
+
+// ============================================================
+// Utilities
+// ============================================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+// Render all comment sections on page switch
+const _origSwitchPage = switchPage;
+switchPage = function(page) {
+    _origSwitchPage(page);
+    renderComments(page);
+};
+
+// Initial render for architecture page
+setTimeout(() => renderComments('architecture'), 100);
+</script>
+</body>
+</html>
