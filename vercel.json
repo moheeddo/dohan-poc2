@@ -4,6 +4,7 @@
   "outputDirectory": "web",
   "framework": null,
   "rewrites": [
+    { "source": "/collab", "destination": "/collab.html" },
     { "source": "/static/(.*)", "destination": "/static/$1" }
   ]
 }
