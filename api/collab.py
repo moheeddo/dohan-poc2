@@ -220,6 +220,7 @@ class handler(BaseHTTPRequestHandler):
     # ────────────────────────────────────────
     def _post_comment(self, body):
         session_id = body.get("session_id", "")
+        access_code = body.get("access_code", "")
         section = body.get("section", "")
         content = body.get("content", "").strip()
         parent_id = body.get("parent_id", "")
@@ -228,14 +229,18 @@ class handler(BaseHTTPRequestHandler):
             self._send_json(400, {"detail": "내용을 입력하세요."})
             return
 
-        # Validate session
-        user = None
-        if redis_ok():
+        # Validate: try access_code first (stateless), then session (Redis)
+        user = USERS.get(access_code)
+        if not user and redis_ok():
             raw = _redis(["GET", f"session:{session_id}"])
             if raw:
                 user = json.loads(raw) if isinstance(raw, str) else raw
         if not user:
-            self._send_json(401, {"detail": "세션이 만료되었습니다. 다시 로그인하세요."})
+            self._send_json(401, {"detail": "인증 실패. 다시 로그인하세요."})
+            return
+
+        if not redis_ok():
+            self._send_json(503, {"detail": "서버 스토리지(Redis) 미설정. 관리자에게 문의하세요."})
             return
 
         # Generate ID
@@ -278,13 +283,17 @@ class handler(BaseHTTPRequestHandler):
             self._send_json(400, {"detail": "Invalid comment ID"})
             return
 
-        user = None
-        if redis_ok():
+        parsed = urlparse(self.path)
+        params = parse_qs(parsed.query)
+        access_code = params.get("access_code", [""])[0]
+
+        user = USERS.get(access_code)
+        if not user and redis_ok():
             raw = _redis(["GET", f"session:{session_id}"])
             if raw:
                 user = json.loads(raw) if isinstance(raw, str) else raw
         if not user:
-            self._send_json(401, {"detail": "세션이 만료되었습니다."})
+            self._send_json(401, {"detail": "인증 실패."})
             return
 
         if redis_ok():

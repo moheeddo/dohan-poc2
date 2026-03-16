@@ -946,10 +946,11 @@ async function postComment(page) {
     }
 
     try {
+        const access_code = localStorage.getItem('poc2_access_code') || '';
         const resp = await fetch(API_BASE + '/collab/comments', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({session_id: _session, section, content}),
+            body: JSON.stringify({session_id: _session, access_code, section, content}),
         });
         if (!resp.ok) {
             const err = await resp.json();
@@ -993,10 +994,11 @@ async function postReply(page, parentId) {
     }
 
     try {
+        const access_code = localStorage.getItem('poc2_access_code') || '';
         const resp = await fetch(API_BASE + '/collab/comments', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({session_id: _session, section, content, parent_id: String(parentId)}),
+            body: JSON.stringify({session_id: _session, access_code, section, content, parent_id: String(parentId)}),
         });
         if (!resp.ok) {
             const err = await resp.json();
@@ -1022,7 +1024,8 @@ async function deleteComment(id, page) {
         _lsSaveComments(all);
     } else {
         try {
-            await fetch(API_BASE + `/collab/comments/${id}?session_id=${_session}`, {method: 'DELETE'});
+            const ac = localStorage.getItem('poc2_access_code') || '';
+            await fetch(API_BASE + `/collab/comments/${id}?session_id=${_session}&access_code=${ac}`, {method: 'DELETE'});
         } catch (e) { console.warn('Delete failed:', e); }
     }
 
