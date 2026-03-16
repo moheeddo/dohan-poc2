@@ -274,10 +274,7 @@
     <div class="header-left">
         <span class="logo">PoC2 협업 포털</span>
         <span class="badge">Slides → Script & Question Bank</span>
-        <span style="font-size:0.75rem; color:var(--success); display:flex; align-items:center; gap:4px;">
-            <span class="live-dot" style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;"></span>
-            LIVE
-        </span>
+        <span id="mode-indicator" style="font-size:0.72rem; padding:3px 10px; border-radius:12px; font-weight:600; background:#d1fae5; color:#065f46;">LIVE</span>
     </div>
     <div class="header-right">
         <span class="online-count" id="online-count"></span>
@@ -588,6 +585,48 @@ let _discussionTab = 'general';
 let _commentCache = {};
 let _lastEventId = 0;
 let _sseSource = null;
+let _useLocalMode = false; // true면 localStorage 전용 (Vercel 등 서버 없는 환경)
+
+// ============================================================
+// 클라이언트 사이드 사용자 DB (서버 없이도 인증 가능)
+// ============================================================
+const _LOCAL_USERS = {
+    "KHNP-KDH-2026": {name:"김도한", title:"차장", org:"한수원", role:"PM", color:"#1e40af"},
+    "KHNP-PSY-2026": {name:"박소연", title:"주임", org:"한수원", role:"실무", color:"#7c3aed"},
+    "KHNP-SJS-2026": {name:"서진수", title:"교수", org:"한수원", role:"자문위원", color:"#0891b2"},
+    "KHNP-JSS-2026": {name:"조성수", title:"교수", org:"한수원", role:"자문위원", color:"#059669"},
+    "KHNP-KJI-2026": {name:"구진일", title:"교수", org:"한수원", role:"자문위원", color:"#d97706"},
+    "EY-COLLAB-2026": {name:"EY 컨설팅팀", title:"", org:"EY", role:"컨설팅", color:"#ffe600"},
+    "UPSTAGE-COLLAB-2026": {name:"Upstage 기술팀", title:"", org:"Upstage", role:"AI 기술", color:"#6366f1"},
+};
+
+const LS_COMMENTS_KEY = 'poc2_collab_comments';
+const LS_NEXT_ID_KEY = 'poc2_collab_next_id';
+
+// localStorage 코멘트 관리
+function _lsLoadComments() {
+    try { return JSON.parse(localStorage.getItem(LS_COMMENTS_KEY)) || []; } catch { return []; }
+}
+function _lsSaveComments(comments) {
+    localStorage.setItem(LS_COMMENTS_KEY, JSON.stringify(comments));
+}
+function _lsNextId() {
+    let id = parseInt(localStorage.getItem(LS_NEXT_ID_KEY) || '0') + 1;
+    localStorage.setItem(LS_NEXT_ID_KEY, String(id));
+    return id;
+}
+
+// ============================================================
+// API 가용성 감지
+// ============================================================
+async function detectMode() {
+    try {
+        const resp = await fetch(API_BASE + '/collab/online', {signal: AbortSignal.timeout(2000)});
+        if (resp.ok) { _useLocalMode = false; return; }
+    } catch {}
+    _useLocalMode = true;
+    console.log('API 서버 미감지 → localStorage 모드');
+}
 
 // ============================================================
 // Login
@@ -596,6 +635,24 @@ async function doLogin() {
     const code = document.getElementById('login-code').value.trim();
     if (!code) return;
     const errEl = document.getElementById('login-error');
+
+    await detectMode();
+
+    if (_useLocalMode) {
+        // 클라이언트 사이드 인증
+        const user = _LOCAL_USERS[code];
+        if (!user) { errEl.textContent = '유효하지 않은 접속 코드입니다.'; return; }
+        _session = 'local_' + Date.now();
+        _user = user;
+        errEl.textContent = '';
+        localStorage.setItem('poc2_session', _session);
+        localStorage.setItem('poc2_user', JSON.stringify(_user));
+        localStorage.setItem('poc2_access_code', code);
+        enterApp();
+        return;
+    }
+
+    // 서버 인증
     try {
         const resp = await fetch(API_BASE + '/collab/login', {
             method: 'POST',
@@ -609,9 +666,20 @@ async function doLogin() {
         errEl.textContent = '';
         localStorage.setItem('poc2_session', _session);
         localStorage.setItem('poc2_user', JSON.stringify(_user));
+        localStorage.setItem('poc2_access_code', code);
         enterApp();
     } catch (e) {
-        errEl.textContent = '서버 연결 실패. 서버가 실행 중인지 확인하세요.';
+        // 서버 실패 → 로컬 모드 폴백
+        _useLocalMode = true;
+        const user = _LOCAL_USERS[code];
+        if (!user) { errEl.textContent = '유효하지 않은 접속 코드입니다.'; return; }
+        _session = 'local_' + Date.now();
+        _user = user;
+        errEl.textContent = '';
+        localStorage.setItem('poc2_session', _session);
+        localStorage.setItem('poc2_user', JSON.stringify(_user));
+        localStorage.setItem('poc2_access_code', code);
+        enterApp();
     }
 }
 
@@ -620,16 +688,36 @@ function enterApp() {
     document.getElementById('main-header').style.display = '';
     document.getElementById('main-layout').style.display = '';
     document.getElementById('user-name-display').textContent = `${_user.name} (${_user.org})`;
+
+    // 모드 표시
+    const modeEl = document.getElementById('mode-indicator');
+    if (modeEl) {
+        if (_useLocalMode) {
+            modeEl.textContent = 'LOCAL';
+            modeEl.style.background = '#fef3c7';
+            modeEl.style.color = '#92400e';
+            modeEl.title = '로컬 저장 모드 (이 브라우저에만 저장됩니다)';
+        } else {
+            modeEl.textContent = 'LIVE';
+            modeEl.style.background = '#d1fae5';
+            modeEl.style.color = '#065f46';
+            modeEl.title = '서버 연결 — 실시간 동기화';
+        }
+    }
+
     loadAllComments();
     loadOnlineUsers();
-    startSSE();
-    setInterval(loadOnlineUsers, 30000);
+    if (!_useLocalMode) {
+        startSSE();
+        setInterval(loadOnlineUsers, 30000);
+    }
 }
 
 function doLogout() {
     _session = null; _user = null;
     localStorage.removeItem('poc2_session');
     localStorage.removeItem('poc2_user');
+    localStorage.removeItem('poc2_access_code');
     if (_sseSource) _sseSource.close();
     document.getElementById('login-overlay').classList.remove('hidden');
     document.getElementById('main-header').style.display = 'none';
@@ -637,10 +725,41 @@ function doLogout() {
 }
 
 // Auto-login from localStorage
-(function() {
-    const s = localStorage.getItem('poc2_session');
+(async function() {
     const u = localStorage.getItem('poc2_user');
-    if (s && u) { _session = s; _user = JSON.parse(u); enterApp(); }
+    const code = localStorage.getItem('poc2_access_code');
+    if (!u || !code) return;
+    // 코드 유효성 재확인
+    if (!_LOCAL_USERS[code]) { localStorage.clear(); return; }
+    _user = JSON.parse(u);
+    await detectMode();
+    if (_useLocalMode) {
+        _session = 'local_' + Date.now();
+        enterApp();
+    } else {
+        // 서버에 새 세션 요청
+        try {
+            const resp = await fetch(API_BASE + '/collab/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({access_code: code}),
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+                _session = data.session_id;
+                localStorage.setItem('poc2_session', _session);
+                enterApp();
+            } else {
+                _session = 'local_' + Date.now();
+                _useLocalMode = true;
+                enterApp();
+            }
+        } catch {
+            _session = 'local_' + Date.now();
+            _useLocalMode = true;
+            enterApp();
+        }
+    }
 })();
 
 // ============================================================
@@ -672,20 +791,29 @@ function getCommentSection(page) {
 }
 
 async function loadAllComments() {
-    try {
-        const resp = await fetch(API_BASE + '/collab/comments');
-        const data = await resp.json();
-        _commentCache = {};
-        (data.comments || []).forEach(c => {
-            if (!_commentCache[c.section]) _commentCache[c.section] = [];
-            _commentCache[c.section].push(c);
-            if (c.id > _lastEventId) _lastEventId = c.id;
-        });
-        updateAllCommentCounts();
-        renderComments(_currentPage);
-    } catch (e) {
-        console.warn('Failed to load comments:', e);
+    let allComments = [];
+
+    if (_useLocalMode) {
+        allComments = _lsLoadComments();
+    } else {
+        try {
+            const resp = await fetch(API_BASE + '/collab/comments');
+            const data = await resp.json();
+            allComments = data.comments || [];
+        } catch (e) {
+            console.warn('Failed to load comments, fallback to local:', e);
+            allComments = _lsLoadComments();
+        }
     }
+
+    _commentCache = {};
+    allComments.forEach(c => {
+        if (!_commentCache[c.section]) _commentCache[c.section] = [];
+        _commentCache[c.section].push(c);
+        if (c.id > _lastEventId) _lastEventId = c.id;
+    });
+    updateAllCommentCounts();
+    renderComments(_currentPage);
 }
 
 function updateAllCommentCounts() {
@@ -795,6 +923,24 @@ async function postComment(page) {
     if (!content) return;
 
     const section = getCommentSection(page);
+
+    if (_useLocalMode) {
+        const comment = {
+            id: _lsNextId(), section, content, parent_id: '',
+            author: _user.name, org: _user.org, role: _user.role || '',
+            color: _user.color || '#6b7280',
+            created_at: new Date().toISOString(), timestamp: Date.now() / 1000,
+        };
+        const all = _lsLoadComments();
+        all.push(comment);
+        _lsSaveComments(all);
+        input.value = '';
+        addCommentToCache(comment);
+        renderComments(page);
+        updateAllCommentCounts();
+        return;
+    }
+
     try {
         const resp = await fetch(API_BASE + '/collab/comments', {
             method: 'POST',
@@ -809,7 +955,6 @@ async function postComment(page) {
         }
         const data = await resp.json();
         input.value = '';
-        // SSE가 업데이트하겠지만 즉시 반영
         addCommentToCache(data.comment);
         renderComments(page);
         updateAllCommentCounts();
@@ -825,6 +970,24 @@ async function postReply(page, parentId) {
     if (!content) return;
 
     const section = getCommentSection(page);
+
+    if (_useLocalMode) {
+        const comment = {
+            id: _lsNextId(), section, content, parent_id: String(parentId),
+            author: _user.name, org: _user.org, role: _user.role || '',
+            color: _user.color || '#6b7280',
+            created_at: new Date().toISOString(), timestamp: Date.now() / 1000,
+        };
+        const all = _lsLoadComments();
+        all.push(comment);
+        _lsSaveComments(all);
+        input.value = '';
+        addCommentToCache(comment);
+        renderComments(page);
+        updateAllCommentCounts();
+        return;
+    }
+
     try {
         const resp = await fetch(API_BASE + '/collab/comments', {
             method: 'POST',
@@ -849,15 +1012,21 @@ async function postReply(page, parentId) {
 
 async function deleteComment(id, page) {
     if (!confirm('이 의견을 삭제하시겠습니까?')) return;
-    try {
-        await fetch(API_BASE + `/collab/comments/${id}?session_id=${_session}`, {method: 'DELETE'});
-        // Remove from cache
-        for (const section of Object.keys(_commentCache)) {
-            _commentCache[section] = _commentCache[section].filter(c => c.id !== id);
-        }
-        renderComments(page);
-        updateAllCommentCounts();
-    } catch (e) { console.warn('Delete failed:', e); }
+
+    if (_useLocalMode) {
+        const all = _lsLoadComments().filter(c => c.id !== id);
+        _lsSaveComments(all);
+    } else {
+        try {
+            await fetch(API_BASE + `/collab/comments/${id}?session_id=${_session}`, {method: 'DELETE'});
+        } catch (e) { console.warn('Delete failed:', e); }
+    }
+
+    for (const section of Object.keys(_commentCache)) {
+        _commentCache[section] = _commentCache[section].filter(c => c.id !== id);
+    }
+    renderComments(page);
+    updateAllCommentCounts();
 }
 
 function addCommentToCache(comment) {
@@ -902,6 +1071,19 @@ function startSSE() {
 // Online Users
 // ============================================================
 async function loadOnlineUsers() {
+    if (_useLocalMode) {
+        // 로컬 모드: 현재 사용자만 표시
+        const list = _user ? [{name: _user.name, org: _user.org, color: _user.color}] : [];
+        document.getElementById('online-count').textContent = `${list.length}명 (로컬)`;
+        document.getElementById('online-list').innerHTML = list.map(u => `
+            <div class="online-user">
+                <span class="dot" style="background:${u.color || '#10b981'}"></span>
+                <span>${u.name}</span>
+                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">${u.org}</span>
+            </div>
+        `).join('');
+        return;
+    }
     try {
         const resp = await fetch(API_BASE + '/collab/online');
         const data = await resp.json();
