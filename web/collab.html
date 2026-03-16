@@ -168,6 +168,29 @@
         }
         .comment-actions button:hover { color: var(--accent); }
 
+        /* Reply thread */
+        .reply-list {
+            margin-top: 10px; margin-left: 20px; padding-left: 12px;
+            border-left: 2px solid var(--border);
+        }
+        .reply-item {
+            padding: 10px 12px; margin-bottom: 6px; background: white; border-radius: 8px;
+            font-size: 0.84rem;
+        }
+        .reply-item .comment-header { margin-bottom: 4px; }
+        .reply-input-area {
+            display: flex; gap: 8px; margin-top: 8px; align-items: center;
+        }
+        .reply-input-area input {
+            flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.84rem; outline: none; font-family: inherit;
+        }
+        .reply-input-area input:focus { border-color: var(--accent); }
+        .reply-input-area button {
+            padding: 8px 16px; background: var(--accent); color: white; border: none;
+            border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+        }
+
         /* Section Tabs */
         .section-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
         .section-tab {
@@ -373,9 +396,9 @@
                         <div class="tech"><span>검토 큐</span><span>버전 관리</span><span>Few-shot 수집</span></div>
                     </div>
                     <div class="module-card">
-                        <h4>&#x1f500; LLM Router</h4>
-                        <div class="desc">Solar Pro + AtomicGPT(KAERI) 하이브리드 라우팅. 안전등급 문항은 크로스체크</div>
-                        <div class="tech"><span>Solar Pro3</span><span>AtomicGPT</span><span>Fallback</span></div>
+                        <h4>&#x1f500; LLM Router + 전용 RAG</h4>
+                        <div class="desc">Solar Pro3 기반 생성 + 교육훈련 전용 RAG 지식베이스 연동 (본사업 '26 하반기 구축 예정)</div>
+                        <div class="tech"><span>Solar Pro3</span><span>교육훈련 RAG</span><span>Knowledge Base</span></div>
                     </div>
                     <div class="module-card">
                         <h4>&#x1f4ca; 교육 환류 루프</h4>
@@ -449,10 +472,10 @@
                             <td>구진일 교수</td>
                         </tr>
                         <tr>
-                            <td><strong>AtomicGPT 도입 시기</strong></td>
-                            <td>KAERI AtomicGPT API 가용 시점 확인 및 통합 계획</td>
-                            <td><span class="status-badge blocked">대기</span></td>
-                            <td>Upstage</td>
+                            <td><strong>교육훈련 전용 RAG 구축</strong></td>
+                            <td>본사업('26 하반기) 원자력 교육훈련 전용 RAG 지식베이스 구축 계획 수립</td>
+                            <td><span class="status-badge pending">계획중</span></td>
+                            <td>Upstage / 한수원</td>
                         </tr>
                     </tbody>
                 </table>
@@ -538,8 +561,8 @@
 
                     <div style="margin-bottom:24px;position:relative;">
                         <div style="position:absolute;left:-27px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid white;"></div>
-                        <div style="font-weight:600;">Phase 4: AtomicGPT 통합 <span class="status-badge blocked">대기</span></div>
-                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">KAERI AtomicGPT 원자력 특화 모델 통합, 하이브리드 라우팅 실전 적용</div>
+                        <div style="font-weight:600;">Phase 4: 교육훈련 전용 RAG 구축 <span class="status-badge pending">본사업 '26 하반기</span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">원자력 교육훈련 전용 지식베이스 구축, 규정/절차서/기술문서 RAG 연동, 도메인 특화 생성 품질 고도화</div>
                     </div>
                 </div>
             </div>
@@ -681,7 +704,15 @@ function renderComments(page) {
     const section = getCommentSection(page);
     const container = document.getElementById('comments-' + page);
     if (!container) return;
-    const comments = _commentCache[section] || [];
+    const allComments = _commentCache[section] || [];
+
+    // 부모/답글 분리
+    const topLevel = allComments.filter(c => !c.parent_id);
+    const repliesMap = {};
+    allComments.filter(c => c.parent_id).forEach(c => {
+        if (!repliesMap[c.parent_id]) repliesMap[c.parent_id] = [];
+        repliesMap[c.parent_id].push(c);
+    });
 
     let html = `
         <div class="comment-input-area">
@@ -691,28 +722,26 @@ function renderComments(page) {
         <div class="comment-list" id="list-${page}">
     `;
 
-    if (comments.length === 0) {
+    if (topLevel.length === 0) {
         html += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
     } else {
-        [...comments].reverse().forEach(c => {
-            const orgColors = {
-                '한수원': {bg:'#dbeafe',color:'#1e40af'},
-                'EY': {bg:'#fef3c7',color:'#92400e'},
-                'Upstage': {bg:'#ede9fe',color:'#5b21b6'},
-            };
-            const oc = orgColors[c.org] || {bg:'#f3f4f6',color:'#374151'};
-            const isOwn = _user && c.author === _user.name;
-            const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        [...topLevel].reverse().forEach(c => {
+            html += renderSingleComment(c, page);
+            // 답글들
+            const replies = repliesMap[String(c.id)] || [];
+            if (replies.length > 0) {
+                html += '<div class="reply-list">';
+                replies.forEach(r => {
+                    html += renderSingleComment(r, page, true);
+                });
+                html += '</div>';
+            }
+            // 답글 입력
             html += `
-                <div class="comment-item" style="border-left-color:${c.color || '#cbd5e1'}">
-                    <div class="comment-header">
-                        <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
-                        <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>
-                        ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
-                        <span class="comment-time">${time}</span>
-                    </div>
-                    <div class="comment-body">${escapeHtml(c.content)}</div>
-                    ${isOwn ? `<div class="comment-actions"><button onclick="deleteComment(${c.id},'${page}')">삭제</button></div>` : ''}
+                <div class="reply-input-area" id="reply-area-${c.id}" style="margin-left:20px;margin-bottom:12px;">
+                    <input type="text" id="reply-input-${c.id}" placeholder="답글 입력..."
+                           onkeydown="if(event.key==='Enter'){event.preventDefault();postReply('${page}',${c.id})}">
+                    <button onclick="postReply('${page}',${c.id})">답글</button>
                 </div>
             `;
         });
@@ -730,6 +759,33 @@ function renderComments(page) {
             }
         });
     }
+}
+
+function renderSingleComment(c, page, isReply = false) {
+    const orgColors = {
+        '한수원': {bg:'#dbeafe',color:'#1e40af'},
+        'EY': {bg:'#fef3c7',color:'#92400e'},
+        'Upstage': {bg:'#ede9fe',color:'#5b21b6'},
+    };
+    const oc = orgColors[c.org] || {bg:'#f3f4f6',color:'#374151'};
+    const isOwn = _user && c.author === _user.name;
+    const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const cls = isReply ? 'reply-item' : 'comment-item';
+    return `
+        <div class="${cls}" style="border-left-color:${c.color || '#cbd5e1'}">
+            <div class="comment-header">
+                <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
+                <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>
+                ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
+                <span class="comment-time">${time}</span>
+            </div>
+            <div class="comment-body">${escapeHtml(c.content)}</div>
+            <div class="comment-actions">
+                ${!isReply ? `<button onclick="document.getElementById('reply-input-${c.id}').focus()">답글</button>` : ''}
+                ${isOwn ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
+            </div>
+        </div>
+    `;
 }
 
 async function postComment(page) {
@@ -759,6 +815,35 @@ async function postComment(page) {
         updateAllCommentCounts();
     } catch (e) {
         alert('전송 실패: ' + e.message);
+    }
+}
+
+async function postReply(page, parentId) {
+    if (!_session) { alert('로그인이 필요합니다.'); return; }
+    const input = document.getElementById('reply-input-' + parentId);
+    const content = input.value.trim();
+    if (!content) return;
+
+    const section = getCommentSection(page);
+    try {
+        const resp = await fetch(API_BASE + '/collab/comments', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({session_id: _session, section, content, parent_id: String(parentId)}),
+        });
+        if (!resp.ok) {
+            const err = await resp.json();
+            if (resp.status === 401) { alert('세션 만료. 다시 로그인하세요.'); doLogout(); return; }
+            alert(err.detail || '전송 실패');
+            return;
+        }
+        const data = await resp.json();
+        input.value = '';
+        addCommentToCache(data.comment);
+        renderComments(page);
+        updateAllCommentCounts();
+    } catch (e) {
+        alert('답글 전송 실패: ' + e.message);
     }
 }
 
