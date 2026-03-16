@@ -620,10 +620,14 @@ function _lsNextId() {
 // API 가용성 감지
 // ============================================================
 async function detectMode() {
-    try {
-        const resp = await fetch(API_BASE + '/collab/online', {signal: AbortSignal.timeout(2000)});
-        if (resp.ok) { _useLocalMode = false; return; }
-    } catch {}
+    // 서버 API 가용성 확인 (localhost 또는 Vercel serverless)
+    const endpoints = ['/collab/online', '/collab/health'];
+    for (const ep of endpoints) {
+        try {
+            const resp = await fetch(API_BASE + ep, {signal: AbortSignal.timeout(3000)});
+            if (resp.ok) { _useLocalMode = false; console.log('API 서버 감지됨:', ep); return; }
+        } catch {}
+    }
     _useLocalMode = true;
     console.log('API 서버 미감지 → localStorage 모드');
 }
@@ -708,7 +712,7 @@ function enterApp() {
     loadAllComments();
     loadOnlineUsers();
     if (!_useLocalMode) {
-        startSSE();
+        startRealtime();
         setInterval(loadOnlineUsers, 30000);
     }
 }
@@ -1038,8 +1042,22 @@ function addCommentToCache(comment) {
 }
 
 // ============================================================
-// SSE - Real-time updates
+// Real-time updates (SSE on localhost, polling on Vercel)
 // ============================================================
+let _pollTimer = null;
+let _sseFailCount = 0;
+
+function startRealtime() {
+    // Vercel serverless doesn't support SSE (10s timeout)
+    // Use SSE only on localhost, polling everywhere else
+    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocalhost && !_useLocalMode) {
+        startSSE();
+    } else if (!_useLocalMode) {
+        startPolling();
+    }
+}
+
 function startSSE() {
     if (_sseSource) _sseSource.close();
     try {
@@ -1050,21 +1068,51 @@ function startSSE() {
                 addCommentToCache(comment);
                 updateAllCommentCounts();
                 renderComments(_currentPage);
-                // Toast notification if from someone else
                 if (_user && comment.author !== _user.name) {
                     showToast(`${comment.author} (${comment.org}): ${comment.content.substring(0, 50)}...`);
                 }
-            } catch (e) { /* ignore parse errors */ }
+            } catch (e) { /* ignore */ }
         };
         _sseSource.onerror = () => {
             _sseSource.close();
-            // Reconnect after 5s
-            setTimeout(startSSE, 5000);
+            _sseFailCount++;
+            if (_sseFailCount >= 2) {
+                // SSE 연결 실패 → polling으로 전환
+                console.log('SSE 실패 → polling 모드 전환');
+                startPolling();
+            } else {
+                setTimeout(startSSE, 5000);
+            }
         };
     } catch (e) {
-        // SSE not supported, fall back to polling
-        setInterval(loadAllComments, 5000);
+        startPolling();
     }
+}
+
+function startPolling() {
+    if (_pollTimer) return; // 이미 polling 중
+    console.log('Polling 모드 시작 (3초 간격)');
+    _pollTimer = setInterval(async () => {
+        try {
+            const resp = await fetch(API_BASE + '/collab/comments?since_id=' + _lastEventId, {
+                signal: AbortSignal.timeout(5000)
+            });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const newComments = data.comments || [];
+            if (newComments.length > 0) {
+                newComments.forEach(c => addCommentToCache(c));
+                updateAllCommentCounts();
+                renderComments(_currentPage);
+                // 알림
+                newComments.forEach(c => {
+                    if (_user && c.author !== _user.name) {
+                        showToast(`${c.author} (${c.org}): ${c.content.substring(0, 50)}...`);
+                    }
+                });
+            }
+        } catch (e) { /* 무시 - 다음 polling에서 재시도 */ }
+    }, 3000);
 }
 
 // ============================================================

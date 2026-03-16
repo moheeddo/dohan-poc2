@@ -3,8 +3,25 @@
   "buildCommand": null,
   "outputDirectory": "web",
   "framework": null,
+  "functions": {
+    "api/collab.py": {
+      "runtime": "@vercel/python@4.5.0",
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
+    { "source": "/api/v1/collab/:path*", "destination": "/api/collab" },
     { "source": "/collab", "destination": "/collab.html" },
     { "source": "/static/(.*)", "destination": "/static/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
   ]
 }
