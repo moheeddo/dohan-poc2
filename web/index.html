@@ -10,6 +10,68 @@
 </head>
 <body>
 
+<!-- ========== LOGIN OVERLAY ========== -->
+<div id="login-overlay" style="
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2744 50%, #0d1f3c 100%);
+    z-index: 99999; display: flex; align-items: center; justify-content: center;
+    font-family: 'Pretendard', sans-serif;
+">
+    <div style="
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px; padding: 48px 40px; max-width: 420px; width: 90%;
+        backdrop-filter: blur(20px); text-align: center;
+    ">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">&#9889;</div>
+        <h1 style="color: #fff; font-size: 1.4rem; margin: 0 0 4px;">KHNP Education AI Platform</h1>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 0 0 32px;">한국수력원자력 인재개발원 | 인가된 사용자만 접근 가능합니다</p>
+        <div id="login-error" style="
+            display: none; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 8px; padding: 10px; margin-bottom: 16px;
+            color: #fca5a5; font-size: 0.85rem;
+        "></div>
+        <input id="login-code" type="password" placeholder="접속 코드 입력" autocomplete="off" style="
+            width: 100%; box-sizing: border-box; padding: 14px 16px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08);
+            color: #fff; font-size: 1rem; outline: none; margin-bottom: 16px;
+            font-family: 'Pretendard', sans-serif;
+        " onkeydown="if(event.key==='Enter')doMainLogin()">
+        <button onclick="doMainLogin()" style="
+            width: 100%; padding: 14px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            font-family: 'Pretendard', sans-serif; transition: opacity 0.2s;
+        " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">로그인</button>
+        <p style="color: rgba(255,255,255,0.3); font-size: 0.75rem; margin-top: 24px;">
+            &#128274; 본 시스템은 프로젝트 관계자 전용입니다
+        </p>
+    </div>
+</div>
+
+<script>
+(function() {
+    const VALID_CODE = 'KHNP-KDH-2026';
+    const STORAGE_KEY = '_khnp_main_auth';
+    // 세션 확인 - 이미 인증된 경우 오버레이 숨김
+    if (sessionStorage.getItem(STORAGE_KEY) === VALID_CODE) {
+        document.getElementById('login-overlay').style.display = 'none';
+    }
+    window.doMainLogin = function() {
+        const code = document.getElementById('login-code').value.trim();
+        const errEl = document.getElementById('login-error');
+        if (code === VALID_CODE) {
+            sessionStorage.setItem(STORAGE_KEY, VALID_CODE);
+            document.getElementById('login-overlay').style.display = 'none';
+        } else {
+            errEl.textContent = '접속 코드가 올바르지 않습니다. 관리자에게 문의하세요.';
+            errEl.style.display = 'block';
+            document.getElementById('login-code').value = '';
+            document.getElementById('login-code').focus();
+        }
+    };
+})();
+</script>
+
 <!-- ========== HEADER ========== -->
 <header class="header">
     <div class="header-top">
