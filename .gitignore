@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Data (sensitive)
+data/raw_slides/*
+data/parsed/*
+data/knowledge_base/*
+data/output/*
+data/chromadb/*
+!data/*/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test/Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data
+data/question_versions/*.json
+data/sme_reviews/
+data/ab_tests/
+demo/output/
+
+# Temp
+test_sample.pdf
+
+# Claude
+.claude/

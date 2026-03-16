@@ -1,0 +1,45 @@
+============================================================
+KHNP Education AI Platform — E2E 데모 결과
+실행 시각: 2026-03-16 05:12:58
+============================================================
+
+강의 제목: 원자력 안전계통 교육 (RCS, PZR, ECCS, LOCA)
+슬라이드 수: 5
+VLM 보강 슬라이드: 3
+학습목표: 4개
+
+--- 강의 스크립트 ---
+  [p.1] 원자로냉각재계통(RCS) 개요 (7분)
+    도입: 이번에는 원자로냉각재계통(RCS) 개요에 대해 알아보겠습니다....
+  [p.2] 가압기(PZR) 구조 및 기능 (7분)
+    도입: 지난 시간에 원자로냉각재계통(RCS) 개요 에 대해 배웠습니다. 이번에는 가압기(PZR) 구조 및 기능에 대해 알아보겠습니다....
+  [p.3] 비상노심냉각계통(ECCS) 개요 (5분)
+    도입: 지난 시간에 가압기(PZR) 구조 및 기능 에 대해 배웠습니다. 이번에는 비상노심냉각계통(ECCS) 개요에 대해 알아보겠습니다....
+  [p.4] LOCA 사고 시나리오 및 ECCS 대응 (7분)
+    도입: 지난 시간에 비상노심냉각계통(ECCS) 개요 에 대해 배웠습니다. 이번에는 LOCA 사고 시나리오 및 ECCS 대응에 대해 알아보겠습니다....
+  [p.5] 학습 정리 및 평가 안내 (5분)
+    도입: 지난 시간에 LOCA 사고 시나리오 및 ECCS 대응 에 대해 배웠습니다. 이번에는 학습 정리 및 평가 안내에 대해 알아보겠습니다....
+  총 예상 강의시간: 31분
+
+--- 문제은행 ---
+  [Q001] [Knowledge] [safety_critical] 원자로냉각재계통(RCS)의 정상 운전압력은?...
+    정답: B
+  [Q002] [Comprehension] [safety_critical] 가압기에서 RCS 압력이 상승할 때 사용하는 제어 방법으로 올바른 것은?...
+    정답: B
+  [Q003] [Application] [safety_critical] 이 시점에서 자동으로 기동되어야 하는 계통은?...
+    정답: B
+  [Q004] [Analysis] [safety_critical] 운전원이 이 시점에서 가장 우선적으로 수행해야 할 조치는?...
+    정답: B
+
+안전 통계: {'safety_critical': 4, 'safety_related': 0, 'general': 0}
+Bloom 분포: {'Knowledge': 1, 'Comprehension': 1, 'Application': 1, 'Analysis': 1}
+평균 난이도: 0.53
+스크립트 품질: 78.5
+용어사전: 23개 용어
+프롬프트 버전: {'script_generation': 'v4.0', 'vlm_analysis': 'v4.0', 'question_generation': 'v4.0', 'distractor_refinement': 'v2.0', 'scenario_generation': 'v3.0', 'quality_validation': 'v3.0'}
+
+--- 파일 출력 ---
+  scripts_20260316_051258.json
+  questions_20260316_051258.json
+  quality_20260316_051258.json
+  qti_20260316_051258.xml

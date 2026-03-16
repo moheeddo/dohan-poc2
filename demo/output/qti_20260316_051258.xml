@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assessmentTest xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" identifier="test_20260316051258" title="RCS/ECCS 교육평가">
+  <testPart identifier="part1" navigationMode="linear" submissionMode="individual">
+    <assessmentSection identifier="section1" title="RCS/ECCS 교육평가" visible="true">
+      <assessmentItemRef identifier="Q001" href="items/Q001.xml"/>
+      <assessmentItemRef identifier="Q002" href="items/Q002.xml"/>
+      <assessmentItemRef identifier="Q003" href="items/Q003.xml"/>
+      <assessmentItemRef identifier="Q004" href="items/Q004.xml"/>
+    </assessmentSection>
+  </testPart>
+</assessmentTest>

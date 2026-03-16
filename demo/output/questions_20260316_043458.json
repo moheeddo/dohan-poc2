@@ -1,0 +1,197 @@
+[
+  {
+    "question_id": "Q001",
+    "bloom_level": "Knowledge",
+    "learning_objective": "RCS 주요 구성요소를 식별하고 기능을 설명할 수 있다",
+    "question_text": "원자로냉각재계통(RCS)의 정상 운전압력은?",
+    "question_type": "multiple_choice",
+    "options": {
+      "A": "1,800 psia",
+      "B": "2,235 psia",
+      "C": "2,485 psia",
+      "D": "2,500 psia"
+    },
+    "correct_answer": "B",
+    "distractor_rationale": {
+      "A": "ECCS(HPSI) 기동 설정값으로, RCS 정상압력과 혼동 가능",
+      "C": "가압기 안전밸브 설정값으로, 정상 운전압력과 혼동 가능",
+      "D": "RCS 설계압력으로, 운전압력과 혼동 가능"
+    },
+    "explanation": "RCS 정상 운전압력은 2,235 psia이며, 가압기에 의해 유지됩니다. 2,500 psia는 설계압력, 2,485 psia는 안전밸브 설정값, 1,800 psia는 HPSI 기동 설정값입니다.",
+    "difficulty": "easy",
+    "keywords": [
+      "RCS",
+      "운전압력",
+      "가압기"
+    ],
+    "source_page": 1,
+    "safety_significance": {
+      "grade": "safety_critical",
+      "matched_keywords": [
+        "안전밸브",
+        "가압기"
+      ],
+      "qa_criteria": {
+        "min_quality_score": 85,
+        "require_two_pass": true,
+        "require_sme_review": true,
+        "max_nonfunctional_distractors": 0,
+        "require_reference_verification": true,
+        "revalidation_interval_months": 6
+      }
+    },
+    "estimated_item_analysis": {
+      "estimated_difficulty_index": 0.3,
+      "difficulty_category": "easy",
+      "bloom_level": "Knowledge"
+    }
+  },
+  {
+    "question_id": "Q002",
+    "bloom_level": "Comprehension",
+    "learning_objective": "가압기의 압력/수위 제어 방법을 설명할 수 있다",
+    "question_text": "가압기에서 RCS 압력이 상승할 때 사용하는 제어 방법으로 올바른 것은?",
+    "question_type": "multiple_choice",
+    "options": {
+      "A": "전기 히터 투입",
+      "B": "살수(Spray) 작동",
+      "C": "보충수 주입 증가",
+      "D": "안전밸브 수동 개방"
+    },
+    "correct_answer": "B",
+    "distractor_rationale": {
+      "A": "히터는 압력 '상승' 시 사용하므로 반대 상황에 적용. 압력 제어 방향을 혼동하는 학습자가 선택 가능",
+      "C": "보충수는 수위 제어 수단으로, 압력 제어와 혼동 가능",
+      "D": "안전밸브는 비정상 고압 시 자동 개방되는 최후 수단으로, 정상 제어와 혼동 가능"
+    },
+    "explanation": "RCS 압력 상승 시 가압기 살수(Spray)를 작동하여 증기를 응축시켜 압력을 낮춥니다. 반대로 압력 하강 시에는 전기 히터를 투입합니다.",
+    "difficulty": "medium",
+    "keywords": [
+      "가압기",
+      "살수",
+      "압력 제어"
+    ],
+    "source_page": 2,
+    "safety_significance": {
+      "grade": "safety_critical",
+      "matched_keywords": [
+        "안전밸브",
+        "가압기"
+      ],
+      "qa_criteria": {
+        "min_quality_score": 85,
+        "require_two_pass": true,
+        "require_sme_review": true,
+        "max_nonfunctional_distractors": 0,
+        "require_reference_verification": true,
+        "revalidation_interval_months": 6
+      }
+    },
+    "estimated_item_analysis": {
+      "estimated_difficulty_index": 0.45,
+      "difficulty_category": "appropriate",
+      "bloom_level": "Comprehension"
+    }
+  },
+  {
+    "question_id": "Q003",
+    "bloom_level": "Application",
+    "learning_objective": "ECCS 자동 기동 조건과 주입 단계를 설명할 수 있다",
+    "scenario": "출력 100% 정상 운전 중 RCS 압력이 2,235 psia에서 급격히 하강하여 1,750 psia까지 떨어졌다. 격납건물 압력이 상승 중이다.",
+    "question_text": "이 시점에서 자동으로 기동되어야 하는 계통은?",
+    "question_type": "multiple_choice",
+    "options": {
+      "A": "잔열제거계통(RHRS)",
+      "B": "고압안전주입(HPSI)",
+      "C": "저압안전주입(LPSI)",
+      "D": "격납건물 살수계통만"
+    },
+    "correct_answer": "B",
+    "distractor_rationale": {
+      "A": "RHRS는 정지냉각 시 사용하며, 사고 초기에는 적용 불가. RCS 압력이 RHRS 운전 범위(~400 psia)보다 훨씬 높음",
+      "C": "LPSI 기동조건은 200 psia 이하로, 현재 1,750 psia에서는 기동 불가. 기동 조건을 정확히 모르는 학습자가 선택 가능",
+      "D": "격납건물 살수는 격납건물 압력 기반이며, ECCS와 동시 기동 가능하나 핵심 대응은 ECCS 주입"
+    },
+    "explanation": "HPSI 기동조건은 PZR 압력 ≤ 1,800 psia이며, 현재 1,750 psia이므로 HPSI가 자동 기동됩니다. LPSI는 200 psia 이하에서 기동하며, RHRS는 정상 정지 시 사용합니다.",
+    "difficulty": "medium",
+    "keywords": [
+      "ECCS",
+      "HPSI",
+      "자동기동",
+      "S-신호"
+    ],
+    "source_page": 3,
+    "safety_significance": {
+      "grade": "safety_critical",
+      "matched_keywords": [
+        "잔열제거계통",
+        "격납건물",
+        "ECCS",
+        "RHRS"
+      ],
+      "qa_criteria": {
+        "min_quality_score": 85,
+        "require_two_pass": true,
+        "require_sme_review": true,
+        "max_nonfunctional_distractors": 0,
+        "require_reference_verification": true,
+        "revalidation_interval_months": 6
+      }
+    },
+    "estimated_item_analysis": {
+      "estimated_difficulty_index": 0.6,
+      "difficulty_category": "appropriate",
+      "bloom_level": "Application"
+    }
+  },
+  {
+    "question_id": "Q004",
+    "bloom_level": "Analysis",
+    "learning_objective": "LOCA 시 운전원 조치 절차를 순서대로 기술할 수 있다",
+    "scenario": "Large Break LOCA 발생 후 15분 경과. ECCS가 정상 작동 중이며, RWST 수위가 급격히 감소하고 있다. 현재 RWST 수위 25%(재순환 전환 설정값: 20%).",
+    "question_text": "운전원이 이 시점에서 가장 우선적으로 수행해야 할 조치는?",
+    "question_type": "multiple_choice",
+    "options": {
+      "A": "ECCS 펌프를 정지하여 RWST 소진을 지연시킨다",
+      "B": "재순환 전환 절차를 준비하고 RWST 수위를 계속 감시한다",
+      "C": "즉시 재순환 모드로 전환한다",
+      "D": "보조급수계통을 기동하여 SG를 통한 냉각을 강화한다"
+    },
+    "correct_answer": "B",
+    "distractor_rationale": {
+      "A": "ECCS 정지는 노심 냉각을 중단시켜 극히 위험. 그러나 RWST 보존이라는 논리에 혼동 가능",
+      "C": "설정값(20%)에 아직 도달하지 않았으므로 조기 전환은 부적절. 적극적 조치로 보여 선택 가능",
+      "D": "AFW는 2차측 냉각이며, LOCA 대응의 핵심이 아님. 냉각 관련이라 혼동 가능"
+    },
+    "explanation": "RWST 수위가 설정값(20%)에 접근하고 있으므로, 재순환 전환 절차를 미리 준비하면서 수위를 계속 감시하는 것이 올바른 대응입니다. 설정값 도달 전 조기 전환이나 ECCS 정지는 부적절합니다.",
+    "difficulty": "hard",
+    "keywords": [
+      "LOCA",
+      "재순환",
+      "RWST",
+      "운전원 조치"
+    ],
+    "source_page": 4,
+    "safety_significance": {
+      "grade": "safety_critical",
+      "matched_keywords": [
+        "보조급수계통",
+        "LOCA",
+        "ECCS"
+      ],
+      "qa_criteria": {
+        "min_quality_score": 85,
+        "require_two_pass": true,
+        "require_sme_review": true,
+        "max_nonfunctional_distractors": 0,
+        "require_reference_verification": true,
+        "revalidation_interval_months": 6
+      }
+    },
+    "estimated_item_analysis": {
+      "estimated_difficulty_index": 0.75,
+      "difficulty_category": "difficult",
+      "bloom_level": "Analysis"
+    }
+  }
+]

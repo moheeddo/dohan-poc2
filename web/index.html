@@ -1,0 +1,3447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHNP 교육AI플랫폼 - Upstage/EY 협업 포털</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="header">
+    <div class="header-top">
+        <div class="header-logo">
+            <div>
+                <h1>KHNP Education AI Platform</h1>
+                <div class="subtitle">한국수력원자력 인재개발원 | AI 기반 교육컨텐츠 생성 시스템 PoC</div>
+            </div>
+        </div>
+        <div class="header-badge">
+            <span class="dot"></span>
+            PoC 진행중 | Upstage + EY 협업
+        </div>
+    </div>
+    <nav class="nav-tabs">
+        <a class="nav-tab active" data-tab="overview">프로젝트 개요</a>
+        <a class="nav-tab" data-tab="model-justification" style="color:#ffe600;">Solar 선정 근거</a>
+        <a class="nav-tab" data-tab="rag-strategy">PoC RAG 전략</a>
+        <a class="nav-tab" data-tab="methodology" style="color:#00a651;">방법론 & QA</a>
+        <a class="nav-tab" data-tab="architecture">시스템 아키텍처</a>
+        <a class="nav-tab" data-tab="upstage">Upstage 협의사항</a>
+        <a class="nav-tab" data-tab="ey">EY 협의사항</a>
+        <a class="nav-tab" data-tab="sat">SAT 연계</a>
+        <a class="nav-tab" data-tab="generator" style="color:#10b981;">생성하기</a>
+        <a class="nav-tab" data-tab="sme-review" style="color:#ef4444;">SME 검토</a>
+        <a class="nav-tab" data-tab="dashboard-live" style="color:#3b82f6;">대시보드</a>
+        <a class="nav-tab" data-tab="prompt-mgmt" style="color:#8b5cf6;">프롬프트</a>
+        <a class="nav-tab" data-tab="llm-router" style="color:#ec4899;">LLM 라우터</a>
+        <a class="nav-tab" data-tab="roadmap">로드맵</a>
+        <a class="nav-tab" data-tab="notes">회의록/기록</a>
+    </nav>
+</header>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main class="main-content">
+
+    <!-- ===== 프로젝트 개요 ===== -->
+    <section id="overview" class="section active">
+        <div class="section-header">
+            <h2>프로젝트 개요</h2>
+            <p>SAT 기반 직무교육 체계를 AI로 고도화하여, 세계 최고 수준의 교육컨텐츠 환류 시스템을 구축합니다.</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon system">&#9889;</div>
+                    <div>
+                        <div class="card-title">프로젝트 목표</div>
+                        <div class="card-subtitle">Project Vision</div>
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
+                    <strong>강의안(슬라이드)</strong>을 Upstage Document AI로 정밀 파싱하고,
+                    <strong>도메인 지식(규정/절차서/사고사례)</strong>을 RAG로 증강하여,
+                    <strong>고품질 강의 스크립트</strong>와 <strong>SAT 기반 문제은행</strong>을 자동 생성합니다.
+                </p>
+                <div style="margin-top: 16px; padding: 16px; background: var(--khnp-light); border-radius: 8px;">
+                    <strong style="color: var(--khnp-primary);">핵심 차별점:</strong>
+                    <ul style="margin-top: 8px; padding-left: 20px; font-size: 0.88rem; color: var(--text-secondary);">
+                        <li>원자력 도메인 특화 (설비도면, P&ID, 계통도 해석)</li>
+                        <li>IAEA SAT 표준 완벽 연계</li>
+                        <li>온프레미스 배포 (데이터 주권, 원자력 보안규정 준수)</li>
+                        <li>교육-평가-환류 전주기 자동화</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon system">&#128202;</div>
+                    <div>
+                        <div class="card-title">기대 효과</div>
+                        <div class="card-subtitle">Expected Impact</div>
+                    </div>
+                </div>
+                <table class="status-table" style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>항목</th>
+                            <th>AS-IS</th>
+                            <th>TO-BE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>강의 스크립트</td>
+                            <td>강사별 수일</td>
+                            <td><strong>AI 30분 + 검토</strong></td>
+                        </tr>
+                        <tr>
+                            <td>문제은행</td>
+                            <td>과목당 수주</td>
+                            <td><strong>AI 1시간 + 검증</strong></td>
+                        </tr>
+                        <tr>
+                            <td>교육 품질</td>
+                            <td>강사 의존</td>
+                            <td><strong>표준화 스크립트</strong></td>
+                        </tr>
+                        <tr>
+                            <td>SAT 정합성</td>
+                            <td>수동 검증</td>
+                            <td><strong>자동 매핑</strong></td>
+                        </tr>
+                        <tr>
+                            <td>지식 환류</td>
+                            <td>연 1회</td>
+                            <td><strong>실시간 반영</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#9733;</div>
+                    <div>
+                        <div class="card-title">Upstage 역할</div>
+                        <div class="card-subtitle">Document AI + Solar LLM</div>
+                    </div>
+                </div>
+                <ul style="padding-left: 20px; font-size: 0.88rem; color: var(--text-secondary); line-height: 2;">
+                    <li>Document Parse (Standard/Enhanced) - 강의안 파싱</li>
+                    <li>Solar VLM - 복잡 시각자료 해석</li>
+                    <li>Solar Pro LLM - 스크립트/문제 생성 엔진</li>
+                    <li>Embedding API - RAG 벡터 임베딩</li>
+                    <li>온프레미스 Docker 배포 지원</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon ey">&#9830;</div>
+                    <div>
+                        <div class="card-title">EY 역할</div>
+                        <div class="card-subtitle">AI 전략 수립 컨설팅</div>
+                    </div>
+                </div>
+                <ul style="padding-left: 20px; font-size: 0.88rem; color: var(--text-secondary); line-height: 2;">
+                    <li>AI 전략 수립 및 PoC 범위 적정성 검토</li>
+                    <li>원자력 산업 AI 규제/컴플라이언스 가이드</li>
+                    <li>ROI 분석 프레임워크 설계</li>
+                    <li>확산 전략 (인재개발원 &rarr; 본사/발전소)</li>
+                    <li>변화관리 전략 수립</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Solar 모델 선정 정당성 ===== -->
+    <section id="model-justification" class="section">
+        <div class="section-header">
+            <h2>Solar 모델 선정 정당성</h2>
+            <p>본사 HyperCLOVA X 대비 Upstage Solar 선정 근거 | 독파모 1차 평가 결과 반영</p>
+        </div>
+
+        <!-- 핵심 요약 배너 -->
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 24px 32px; border-radius: var(--radius); margin-bottom: 28px; box-shadow: var(--shadow-lg);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Executive Summary: 왜 HyperCLOVA X가 아니라 Solar인가?</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 16px;">
+                <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px;">
+                    <div style="font-size: 0.78rem; opacity: 0.9; margin-bottom: 4px;">근거 1: 기술 독자성</div>
+                    <div style="font-size: 0.95rem; font-weight: 700;">네이버 = 독파모 탈락<br>Solar = 독파모 통과</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px;">
+                    <div style="font-size: 0.78rem; opacity: 0.9; margin-bottom: 4px;">근거 2: Document AI</div>
+                    <div style="font-size: 0.95rem; font-weight: 700;">네이버 = Document AI 없음<br>Solar = 세계 최고 수준</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px;">
+                    <div style="font-size: 0.78rem; opacity: 0.9; margin-bottom: 4px;">근거 3: 배포 자유도</div>
+                    <div style="font-size: 0.95rem; font-weight: 700;">네이버 = NCloud 종속<br>Solar = Docker 독립 배포</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 독파모 사태 정리 -->
+        <div class="card" style="border-left: 4px solid #dc2626; margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fee2e2; color: #dc2626;">!</div>
+                <div>
+                    <div class="card-title">독파모(독자 AI 파운데이션 모델) 1차 평가 결과 (2026.01.15)</div>
+                    <div class="card-subtitle">과학기술정보통신부 국가 AI 정예팀 선발</div>
+                </div>
+            </div>
+            <table class="status-table">
+                <thead>
+                    <tr><th>기업</th><th>결과</th><th>사유</th><th>시사점</th></tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f0fdf4;">
+                        <td><strong>Upstage</strong></td>
+                        <td><span class="status-badge status-done">통과</span></td>
+                        <td>1000억 파라미터로 대규모 모델 수준 성능, 효율성 최고 평가</td>
+                        <td style="color: var(--khnp-accent); font-weight: 600;">정부 인정 독자 AI 기술력</td>
+                    </tr>
+                    <tr style="background: #f0fdf4;">
+                        <td>SKT</td>
+                        <td><span class="status-badge status-done">통과</span></td>
+                        <td>A.X 모델 독자 개발</td>
+                        <td>-</td>
+                    </tr>
+                    <tr style="background: #f0fdf4;">
+                        <td>LG AI연구원</td>
+                        <td><span class="status-badge status-done">통과</span></td>
+                        <td>EXAONE 독자 개발</td>
+                        <td>-</td>
+                    </tr>
+                    <tr style="background: #fef2f2;">
+                        <td><strong>네이버클라우드</strong></td>
+                        <td><span class="status-badge" style="background:#fecaca; color:#991b1b;">탈락</span></td>
+                        <td><strong>중국 Qwen 모델 인코더/가중치 활용</strong> &rarr; 독자성 미충족</td>
+                        <td style="color: #dc2626; font-weight: 600;">중국 기술 의존 리스크</td>
+                    </tr>
+                    <tr style="background: #fef2f2;">
+                        <td>NC AI</td>
+                        <td><span class="status-badge" style="background:#fecaca; color:#991b1b;">탈락</span></td>
+                        <td>독자성 기준 미충족</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 16px; padding: 14px; background: #fef2f2; border-radius: 8px; font-size: 0.88rem;">
+                <strong style="color: #dc2626;">과기정통부 독자성 기준:</strong>
+                "완전한 우리 기술로 개발하거나, 라이선스 제약이 없는 오픈소스를 활용해 독자적으로 고도화할 수 있어야 하며, 외부의 통제나 간섭으로부터 자유로워야 한다"
+            </div>
+        </div>
+
+        <!-- 3자 비교표 -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-icon system">&#9878;</div>
+                <div>
+                    <div class="card-title">3자 상세 비교: Solar vs HyperCLOVA X vs NAVER VLM</div>
+                    <div class="card-subtitle">원자력 교육 AI 플랫폼 관점 평가</div>
+                </div>
+            </div>
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>평가 항목</th>
+                        <th style="background: var(--upstage-color);">Upstage Solar</th>
+                        <th style="background: #16a34a;">NAVER HyperCLOVA X</th>
+                        <th>판정</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>기술 독자성</strong></td>
+                        <td style="background:#f0fdf4;">독파모 1차 통과<br>100% 독자 기술<br>오픈소스 Solar Open 100B 공개</td>
+                        <td style="background:#fef2f2;">독파모 탈락<br>중국 Qwen 모델 가중치 활용<br>독자성 논란</td>
+                        <td><strong style="color: var(--upstage-color);">Solar</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Document AI<br>(강의안 파싱)</strong></td>
+                        <td style="background:#f0fdf4;">Document Parse 전문 제품<br>Standard/Enhanced/Auto 모드<br>OCR 95%+, VLM 기반 차트/도면 해석<br><strong>이 프로젝트의 핵심 기능</strong></td>
+                        <td style="background:#fef2f2;">전용 Document AI 제품 없음<br>CLOVA OCR은 단순 텍스트 추출 수준<br>강의안 구조 파싱 불가</td>
+                        <td><strong style="color: var(--upstage-color);">Solar 압도</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>온프레미스 배포</strong></td>
+                        <td style="background:#f0fdf4;">Docker 이미지 직접 제공<br>docker run 즉시 구동<br>A100 80GB 단일 GPU 운영<br><strong>인프라 독립적</strong></td>
+                        <td style="background:#fff7ed;">Neurocloud 전용 서비스<br>네이버클라우드 H/W+S/W 패키지<br>NCloud 인프라 종속<br><strong>벤더 락인 리스크</strong></td>
+                        <td><strong style="color: var(--upstage-color);">Solar</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>한국어 성능</strong></td>
+                        <td>Ko-Arena-Hard-Auto에서 GPT-4급<br>스탠퍼드 Frontier 모델 유일한 한국 모델</td>
+                        <td>KMMLU 벤치마크 GPT-4 상회<br>한국어 데이터 GPT-4 대비 6,500배</td>
+                        <td><strong>동등</strong><br>(용도별 차이)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU 효율성</strong></td>
+                        <td style="background:#f0fdf4;">22B(Pro)/31B(Pro2) 파라미터<br>단일 GPU 80GB에서 운영<br>Intelligence vs Cost 1위</td>
+                        <td style="background:#fff7ed;">파라미터 비공개<br>Neurocloud 전용 H/W 필요<br>비용 구조 불투명</td>
+                        <td><strong style="color: var(--upstage-color);">Solar</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>보안/규제 리스크</strong></td>
+                        <td style="background:#f0fdf4;">중국 기술 무관<br>독파모 독자성 검증 완료<br>원자력 산업 보안 적합</td>
+                        <td style="background:#fef2f2;">중국 Qwen 기술 의존 확인<br>정부 독자성 심사 탈락<br><strong>원자력 보안 심사 시 리스크</strong></td>
+                        <td><strong style="color: var(--upstage-color);">Solar 압도</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding/RAG</strong></td>
+                        <td style="background:#f0fdf4;">전용 Embedding API 제공<br>LangChain 공식 통합</td>
+                        <td>CLOVA Studio 내 Embedding<br>NCloud 내부에서만 사용</td>
+                        <td><strong style="color: var(--upstage-color);">Solar</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 원자력 산업 특수성 -->
+        <div class="card-grid">
+            <div class="card" style="border-left: 4px solid var(--khnp-primary);">
+                <div class="card-header">
+                    <div class="card-icon system">&#9762;</div>
+                    <div>
+                        <div class="card-title">원자력 산업 특수 요구사항 매칭</div>
+                        <div class="card-subtitle">Nuclear Industry Requirements</div>
+                    </div>
+                </div>
+                <ol class="question-list">
+                    <li class="question-item">
+                        <span class="question-number">1</span>
+                        <div>
+                            <div class="question-text"><strong>기술 주권 (Technology Sovereignty)</strong><br>원자력 핵심 기술은 국산/독자 기술 사용이 원칙. 중국 기술 의존 모델은 규제/감사 시 리스크. Solar는 정부(과기정통부) 독자성 검증을 통과한 유일한 소규모 파라미터 모델.</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">2</span>
+                        <div>
+                            <div class="question-text"><strong>내부망 독립 운영 (Air-Gapped Operation)</strong><br>원자력 시설 내부망은 외부 인터넷 차단 환경. NCloud 종속 = 운영 불가. Solar Docker = 완전 독립 운영 가능.</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">3</span>
+                        <div>
+                            <div class="question-text"><strong>문서 파싱 전문성 (Document Intelligence)</strong><br>원자력 교육자료는 설비도면, P&ID, 계통도 등 복잡한 시각자료 다수. HyperCLOVA X는 이를 파싱할 전문 기능이 없음. Upstage Document Parse Enhanced는 이를 위해 설계된 전문 제품.</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">4</span>
+                        <div>
+                            <div class="question-text"><strong>벤더 독립성 (Vendor Independence)</strong><br>네이버 Neurocloud = H/W+S/W 패키지 종속. KHNP 기존 IT 인프라(GPU 서버)에 Docker만 올리면 되는 Solar가 TCO 유리.</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--upstage-color);">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#127942;</div>
+                    <div>
+                        <div class="card-title">의사결정 요약: Solar 선정 논리</div>
+                        <div class="card-subtitle">Decision Rationale for Stakeholders</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 2;">
+                    <p><strong>1. "본사가 쓰는 HyperCLOVA X 안 되나요?"에 대한 답변:</strong></p>
+                    <div style="padding: 12px; background: #f8fafc; border-radius: 8px; margin: 8px 0 16px;">
+                        HyperCLOVA X는 <strong>범용 챗봇/검색</strong>에 최적화된 모델입니다.
+                        우리 프로젝트는 <strong>강의안 파싱 + 구조화 + 생성</strong>이 핵심이며,
+                        이를 위해서는 <strong>Document AI 전문 기능</strong>이 필수입니다.
+                        네이버에는 이 기능이 없고, Upstage에만 있습니다.
+                    </div>
+
+                    <p><strong>2. "네이버가 더 큰 회사 아닌가?"에 대한 답변:</strong></p>
+                    <div style="padding: 12px; background: #fef2f2; border-radius: 8px; margin: 8px 0 16px;">
+                        네이버 HyperCLOVA X는 <strong>정부 독파모 심사에서 중국 기술 의존으로 탈락</strong>했습니다(2026.01).
+                        원자력 산업은 기술 주권이 핵심 가치이며,
+                        <strong>KINS/원안위 보안 심사 시 중국 기술 의존 모델 사용은 리스크</strong>입니다.
+                        Upstage Solar는 독파모 통과 = <strong>정부 검증 완료</strong>된 독자 기술입니다.
+                    </div>
+
+                    <p><strong>3. "비용은?"에 대한 답변:</strong></p>
+                    <div style="padding: 12px; background: #f0fdf4; border-radius: 8px; margin: 8px 0;">
+                        Solar Pro = <strong>A100 80GB 1장</strong>으로 구동 (기존 GPU 서버 활용 가능).<br>
+                        네이버 Neurocloud = <strong>전용 H/W+S/W 패키지 도입</strong> 필요 (수억원 규모 추정).<br>
+                        Solar는 <strong>Docker 이미지 라이선스 비용만</strong> 발생 &rarr; TCO 압도적 우위.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 출처 -->
+        <div style="margin-top: 24px; padding: 16px; background: var(--bg-white); border-radius: var(--radius); border: 1px solid var(--border); font-size: 0.82rem; color: var(--text-secondary);">
+            <strong>출처:</strong><br>
+            [1] "국대 AI SKT/LG/업스테이지 통과... '중국산 논란' 네이버클라우드 탈락" - 머니S (2026.01.15)<br>
+            [2] "중국산 '라이선스'에 발목...독자AI 네이버 탈락 이유 보니" - 머니투데이 (2026.01.15)<br>
+            [3] "네이버, 국가대표 AI에 '중국 기술' 활용 인정... 논란 왜 터졌나" - 인사이트<br>
+            [4] Solar Pro 2: Stanford Frontier Language Model Intelligence 등재 - Upstage<br>
+            [5] HyperCLOVA X: Neurocloud 전용 온프레미스 = NCloud 하이브리드 서비스 - 네이버클라우드
+        </div>
+    </section>
+
+    <!-- ===== PoC RAG 전략 ===== -->
+    <section id="rag-strategy" class="section">
+        <div class="section-header">
+            <h2>PoC 단계 RAG 전략</h2>
+            <p>풀스케일 RAG 구축 없이 "RAG 효과"를 입증하는 실용적 접근법</p>
+        </div>
+
+        <!-- 핵심 전략 배너 -->
+        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 24px 32px; border-radius: var(--radius); margin-bottom: 28px; box-shadow: var(--shadow-lg);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">PoC 핵심 판단</h3>
+            <p style="font-size: 0.95rem; opacity: 0.95; line-height: 1.8;">
+                PoC 단계에서 대규모 RAG 인프라(벡터DB + 수만건 문서 임베딩)를 구축하는 것은 과도합니다.<br>
+                대신 <strong>"Golden Context 방식"</strong>으로 RAG와 동등한 효과를 데모하고,<br>
+                <strong>A/B 비교</strong>를 통해 "본격 RAG 구축 시 더 좋아진다"는 투자 정당성을 확보합니다.
+            </p>
+        </div>
+
+        <!-- PoC RAG 전략 비교 -->
+        <div class="card-grid">
+            <div class="card" style="border: 2px solid var(--khnp-accent);">
+                <div class="card-header">
+                    <div class="card-icon sat">&#9733;</div>
+                    <div>
+                        <div class="card-title">채택: Golden Context + Curated Prompt</div>
+                        <div class="card-subtitle">PoC에 최적화된 경량 전략</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8;">
+                    <div style="padding: 16px; background: #f0fdf4; border-radius: 8px; margin-bottom: 16px;">
+                        <strong style="color: var(--khnp-accent);">방식:</strong>
+                        강의안 업로드 시 <strong>관련 참고자료(절차서/규정/매뉴얼)를 함께 첨부</strong>.
+                        별도 벡터DB 없이, 업로드된 문서를 모두 Document Parse로 파싱한 후
+                        LLM 컨텍스트에 직접 주입.
+                    </div>
+
+                    <strong>구성 요소:</strong>
+                    <ul style="padding-left: 20px; margin-top: 8px; line-height: 2.2;">
+                        <li><strong>Golden Context</strong>: 강사가 이미 보유한 참고자료 2~5건을 함께 업로드</li>
+                        <li><strong>Curated System Prompt</strong>: SAT 원칙, Bloom's Taxonomy, 원자력 핵심 용어 100~200개, 모범 스크립트/문항 예시를 프롬프트에 내장</li>
+                        <li><strong>Few-shot Examples</strong>: SME에게 "좋은 스크립트/문항" 예시 5건만 확보</li>
+                    </ul>
+
+                    <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <div style="text-align: center; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 1.4rem; font-weight: 700; color: var(--khnp-accent);">0원</div>
+                            <div style="font-size: 0.78rem;">RAG 인프라 비용</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 1.4rem; font-weight: 700; color: var(--khnp-accent);">0일</div>
+                            <div style="font-size: 0.78rem;">벡터DB 구축 시간</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 1.4rem; font-weight: 700; color: var(--khnp-accent);">90%</div>
+                            <div style="font-size: 0.78rem;">RAG 대비 효과</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="opacity: 0.7;">
+                <div class="card-header">
+                    <div class="card-icon system">&#128260;</div>
+                    <div>
+                        <div class="card-title">보류: 풀스케일 RAG</div>
+                        <div class="card-subtitle">Phase 2 이후 구축</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.8;">
+                    <div style="padding: 16px; background: #fef3c7; border-radius: 8px; margin-bottom: 16px;">
+                        <strong style="color: #92400e;">보류 사유:</strong>
+                        PoC 12주 내에 벡터DB 구축 + 수만건 문서 임베딩은 비현실적.
+                        RAG 인프라 자체가 목적이 아니라, 생성 품질 검증이 목적.
+                    </div>
+
+                    <strong>Phase 2에서 구축할 RAG:</strong>
+                    <ul style="padding-left: 20px; margin-top: 8px; line-height: 2.2;">
+                        <li>ChromaDB/Milvus 영구 벡터 저장소</li>
+                        <li>전체 교육자료/규정/절차서 임베딩</li>
+                        <li>Hybrid Search (Dense + Sparse)</li>
+                        <li>자동 문서 갱신 파이프라인</li>
+                        <li>메타데이터 필터링 (과목/역량단위/난이도)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- A/B 비교 데모 전략 -->
+        <div class="card" style="margin-top: 24px; border: 2px solid var(--khnp-primary);">
+            <div class="card-header">
+                <div class="card-icon system">&#128202;</div>
+                <div>
+                    <div class="card-title">A/B 비교 데모 전략 - PoC의 킬러 장면</div>
+                    <div class="card-subtitle">RAG 투자 정당성을 한 방에 보여주는 시나리오</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: stretch; margin-top: 8px;">
+                <!-- A 조건 -->
+                <div style="padding: 20px; background: #fef2f2; border-radius: 12px; border: 2px solid #fca5a5;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <span style="display: inline-block; background: #dc2626; color: white; padding: 4px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;">A 조건: 강의안만</span>
+                    </div>
+                    <div style="font-size: 0.88rem; line-height: 1.8; color: var(--text-secondary);">
+                        <div style="font-family: monospace; background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                            Input: 강의안 PDF 1건<br>
+                            Context: 없음<br>
+                            Prompt: 기본 생성
+                        </div>
+                        <strong>결과 예상:</strong><br>
+                        - 일반적인 설명 수준<br>
+                        - 원자력 전문 용어 부정확 가능<br>
+                        - 실무 사례 부재<br>
+                        - 문항 정답 오류 가능
+                    </div>
+                </div>
+
+                <!-- VS -->
+                <div style="display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: var(--khnp-primary);">
+                    VS
+                </div>
+
+                <!-- B 조건 -->
+                <div style="padding: 20px; background: #f0fdf4; border-radius: 12px; border: 2px solid #86efac;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <span style="display: inline-block; background: var(--khnp-accent); color: white; padding: 4px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;">B 조건: 강의안 + 참고자료</span>
+                    </div>
+                    <div style="font-size: 0.88rem; line-height: 1.8; color: var(--text-secondary);">
+                        <div style="font-family: monospace; background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                            Input: 강의안 PDF 1건<br>
+                            Context: 절차서 2건 + 규정 1건<br>
+                            Prompt: SAT/Bloom 내장
+                        </div>
+                        <strong>결과 예상:</strong><br>
+                        - 전문 용어 정확한 설명<br>
+                        - 관련 규정 인용 포함<br>
+                        - 실무 맥락 반영<br>
+                        - 문항 정답 검증 가능
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; padding: 16px; background: var(--khnp-light); border-radius: 8px; text-align: center; font-size: 0.95rem;">
+                <strong style="color: var(--khnp-primary);">피칭 포인트:</strong>
+                "PoC에서 참고자료 3건만 넣어도 이 정도 차이가 납니다.
+                <strong>본격 RAG로 수천 건의 지식을 연결하면</strong>, 이보다 훨씬 더 좋아집니다."
+            </div>
+        </div>
+
+        <!-- Curated Prompt 구성 상세 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon upstage">&#128221;</div>
+                <div>
+                    <div class="card-title">Curated System Prompt 구성 체크리스트</div>
+                    <div class="card-subtitle">SME에게 사전 확보해야 할 자료 목록</div>
+                </div>
+            </div>
+            <table class="status-table">
+                <thead>
+                    <tr><th>항목</th><th>내용</th><th>분량</th><th>확보 방법</th><th>상태</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SAT 원칙 가이드</strong></td>
+                        <td>SAT 5단계 정의, 학습목표 작성법, 평가 연계 원칙</td>
+                        <td>~2,000자</td>
+                        <td>인재개발원 내부 문서</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bloom's Taxonomy 가이드</strong></td>
+                        <td>수준별 문항 유형, 행동 동사, 난이도 기준</td>
+                        <td>~1,500자</td>
+                        <td>교수설계 담당자</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>원자력 핵심 용어 사전</strong></td>
+                        <td>PWR/BWR 계통, 안전계통, 운전용어 등</td>
+                        <td>100~200개 용어</td>
+                        <td>기존 교재/용어집</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>모범 스크립트 예시</strong></td>
+                        <td>잘 작성된 강의 스크립트 (다양한 과목)</td>
+                        <td>3~5건</td>
+                        <td>우수 강사 자료</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>모범 문항 예시</strong></td>
+                        <td>수준별 잘 만든 문항 + 해설</td>
+                        <td>수준별 2문항 (총 8건)</td>
+                        <td>기존 문제은행</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>문항 작성 기준</strong></td>
+                        <td>KHNP 내부 문항 출제 가이드라인</td>
+                        <td>~1,000자</td>
+                        <td>교육평가 담당자</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Upstage/EY 피칭 전략 -->
+        <div class="card-grid" style="margin-top: 24px;">
+            <div class="card" style="border-left: 4px solid var(--upstage-color);">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128172;</div>
+                    <div>
+                        <div class="card-title">Upstage에게 이렇게 말한다</div>
+                        <div class="card-subtitle">Technology Partner Pitch</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: #f5f3ff; border-radius: 8px; font-size: 0.9rem; line-height: 1.8; font-style: italic; color: var(--text-primary);">
+                    "PoC에서는 <strong>Document Parse + Solar Pro의 기본 성능</strong>을 검증하고,
+                    참고자료 동시 투입 방식으로 <strong>RAG 효과의 proof point</strong>를 확보합니다.
+                    풀스케일 RAG는 PoC 결과를 기반으로 <strong>Phase 2에서 Upstage Embedding API + 벡터DB로 구축</strong>합니다.
+                    따라서 PoC에서는 <strong>Document Parse 성능과 Solar Pro 생성 품질</strong>이 가장 중요합니다."
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--ey-color);">
+                <div class="card-header">
+                    <div class="card-icon ey">&#128172;</div>
+                    <div>
+                        <div class="card-title">EY에게 이렇게 말한다</div>
+                        <div class="card-subtitle">Strategy Consultant Pitch</div>
+                    </div>
+                </div>
+                <div style="padding: 16px; background: #fefce8; border-radius: 8px; font-size: 0.9rem; line-height: 1.8; font-style: italic; color: var(--text-primary);">
+                    "PoC에서 <strong>A/B 비교 데모</strong>를 통해 RAG 효과를 정량적으로 입증합니다.
+                    이 결과가 <strong>Phase 2 RAG 인프라 투자의 ROI 근거</strong>가 됩니다.
+                    EY 보고서에 'PoC 결과 기반 RAG 확장 시 <strong>예상 효과 N배 향상</strong>' 시나리오를 포함해주세요.
+                    <strong>단계적 투자 전략</strong>으로 리스크를 최소화하면서 성과를 극대화하는 접근입니다."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 방법론 & QA 파이프라인 ===== -->
+    <section id="methodology" class="section">
+        <div class="section-header">
+            <h2>방법론 & QA 파이프라인</h2>
+            <p>VLM 기반 강의스크립트/문제은행 생성의 구체적 방법론, 품질 검증 체계, 교육선순환 설계</p>
+        </div>
+
+        <!-- E2E 파이프라인 상세 -->
+        <div class="architecture-box">
+            <h3 style="margin-bottom: 16px; color: var(--khnp-primary);">End-to-End 파이프라인 (11단계) <span style="background:#8b5cf6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4</span></h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                <div style="background: linear-gradient(135deg, #6c5ce7, #a855f7); color: white; padding: 16px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.2rem; font-weight: 800;">Step 1-2</div>
+                    <div style="font-size: 0.82rem; margin-top: 6px; opacity: 0.9;">Document Parse<br>+ VLM 시각자료 분석</div>
+                    <div style="font-size: 0.7rem; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">강의안 PDF &rarr; 구조화 데이터<br>도면/P&ID/차트 해석</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #0ea5e9, #06b6d4); color: white; padding: 16px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.2rem; font-weight: 800;">Step 3</div>
+                    <div style="font-size: 0.82rem; margin-top: 6px; opacity: 0.9;">Golden Context<br>+ Curated Prompt</div>
+                    <div style="font-size: 0.7rem; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">참고자료 파싱 주입<br>SAT/Bloom/용어 내장</div>
+                </div>
+                <div style="background: linear-gradient(135deg, var(--khnp-accent), #22c55e); color: white; padding: 16px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.2rem; font-weight: 800;">Step 4-5</div>
+                    <div style="font-size: 0.82rem; margin-top: 6px; opacity: 0.9;">Solar Pro LLM<br>스크립트 + 문제 생성</div>
+                    <div style="font-size: 0.7rem; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">5단계 스크립트 + 2-Pass 문항<br>Few-shot 앵커링</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 16px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.2rem; font-weight: 800;">Step 6-11</div>
+                    <div style="font-size: 0.82rem; margin-top: 6px; opacity: 0.9;">안전태깅 + QA + 버전관리<br>+ 스크립트 품질평가</div>
+                    <div style="font-size: 0.7rem; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px;">Graded Approach + IRT 보정<br>자동 폐기 + QTI 내보내기</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VLM 강의안 분석 상세 -->
+        <div class="card-grid">
+            <div class="card" style="border-left: 4px solid var(--upstage-color);">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128065;</div>
+                    <div>
+                        <div class="card-title">VLM 시각자료 심층 분석</div>
+                        <div class="card-subtitle">원자력 도면/P&ID/계통도 전문 해석</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>왜 VLM이 핵심인가?</strong></p>
+                    <p>원자력 강의안의 30~50%는 시각자료(설비도면, P&ID, 계통도, 운전 파라미터 차트)입니다.
+                    텍스트만 파싱하면 강의 내용의 절반을 놓칩니다.</p>
+
+                    <div style="margin-top: 12px; padding: 12px; background: #f5f3ff; border-radius: 8px;">
+                        <strong>Document Parse Enhanced + Solar VLM 2단계 분석:</strong>
+                        <ol style="padding-left: 20px; margin-top: 8px; line-height: 2;">
+                            <li><strong>1단계 (Document Parse Enhanced)</strong>: 이미지/차트를 감지하고, VLM으로 구조화된 설명(자연어 + 데이터) 생성</li>
+                            <li><strong>2단계 (Solar Pro 심층 분석)</strong>: 1단계 결과를 원자력 도메인 맥락에서 재해석하여 교육용 설명 생성</li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 8px;">
+                        <strong style="color: #dc2626;">Upstage 확인 필요:</strong>
+                        Document Parse Enhanced가 원자력 P&ID/계통도를 얼마나 정확하게 구조화하는지 샘플 테스트 필요.
+                        정확도가 부족하면 2단계 Solar Pro 분석의 품질도 저하됨.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--khnp-accent);">
+                <div class="card-header">
+                    <div class="card-icon sat">&#128221;</div>
+                    <div>
+                        <div class="card-title">강의 스크립트 생성 방법론</div>
+                        <div class="card-subtitle">SAT 교수설계 + VLM + Golden Context</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>슬라이드별 생성 구조:</strong></p>
+                    <table class="status-table" style="margin-top: 8px;">
+                        <thead><tr><th>구간</th><th>내용</th><th>시간</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>도입</strong></td><td>이전 내용 연결, 학습목표 제시, 동기부여</td><td>~30초</td></tr>
+                            <tr><td><strong>전개(텍스트)</strong></td><td>핵심 개념 설명, 전문 용어 풀이</td><td>~2분</td></tr>
+                            <tr><td><strong>전개(시각)</strong></td><td>VLM 분석 기반 도면/차트 설명</td><td>~1분</td></tr>
+                            <tr><td><strong>전개(맥락)</strong></td><td>Golden Context에서 가져온 규정/사례 인용</td><td>~1분</td></tr>
+                            <tr><td><strong>정리</strong></td><td>핵심 요약, 다음 내용 예고</td><td>~30초</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 12px; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                        <strong>품질 향상 핵심:</strong>
+                        <ul style="padding-left: 16px; margin-top: 4px;">
+                            <li>Few-shot: SME 우수 스크립트 3~5건을 예시로 제공</li>
+                            <li>이전 슬라이드 요약을 다음 슬라이드 생성 시 전달 (흐름 연결)</li>
+                            <li>VLM 분석 결과를 "시각자료 설명" 구간에 자동 삽입</li>
+                            <li><strong>[v2 구현완료]</strong> Curated System Prompt (SAT/Bloom/용어사전) 주입 지원</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 12px; padding: 12px; background: #ede9fe; border-radius: 8px;">
+                        <strong style="color: #6c5ce7;">v2 업데이트: VLM 시각자료 5단계 통합 스크립트</strong>
+                        <p style="margin-top: 6px; font-size: 0.85rem;">
+                            기존 3단계(도입/전개/정리)에서 <strong>5단계</strong>로 확장:<br>
+                            도입 &rarr; 전개(핵심개념) &rarr; <span style="color:#6c5ce7; font-weight:700;">전개(시각자료)</span> &rarr; 전개(맥락보충) &rarr; 정리
+                        </p>
+                        <ul style="padding-left: 16px; margin-top: 6px; font-size: 0.83rem;">
+                            <li>VLM이 분석한 도면/차트의 <strong>교육 포인트, 안전 사항, 관련 계통</strong>이 스크립트에 자동 반영</li>
+                            <li>시각자료가 없는 슬라이드는 자동으로 해당 구간 생략</li>
+                            <li><code>visual_references</code> 필드로 참조 시각자료 추적 가능</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 문항 품질 검증 (QA) -->
+        <div class="card" style="margin-top: 24px; border: 2px solid #dc2626;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fee2e2; color: #dc2626;">&#9888;</div>
+                <div>
+                    <div class="card-title">AI 문항 품질 검증 (QA) 파이프라인 - 가장 중요</div>
+                    <div class="card-subtitle">연구 근거 기반 검증 체계</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="padding: 16px; background: #fef2f2; border-radius: 8px; margin-bottom: 16px;">
+                    <strong style="color: #dc2626;">연구 결과 (BMC Medical Education 2025):</strong><br>
+                    AI 생성 문항의 <strong>비기능적 오답(nonfunctional distractor) 비율 33.75%</strong> vs 인간 출제 13.75%.<br>
+                    &rarr; <strong>오답 매력도 검증이 AI 문항 QA의 최우선 과제</strong>
+                </div>
+
+                <table class="status-table">
+                    <thead><tr><th>검증 단계</th><th>검증 내용</th><th>방법</th><th>통과 기준</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. 지문 명확성</strong></td>
+                            <td>모호한 표현, 이중해석 가능성</td>
+                            <td>Solar Pro LLM 자동 검증</td>
+                            <td>모호성 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. 정답 정확성</strong></td>
+                            <td>정답이 틀리거나 복수 정답 가능</td>
+                            <td>Golden Context 기반 fact-check</td>
+                            <td>참고자료에서 정답 확인</td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td><strong>3. 오답 매력도</strong></td>
+                            <td>각 오답을 선택할 합리적 이유 존재?</td>
+                            <td>LLM이 각 오답의 "선택 이유" 생성 시도</td>
+                            <td>비기능적 오답 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. 난이도 적정성</strong></td>
+                            <td>Bloom 수준 대비 난이도 매칭</td>
+                            <td>Item Analysis 시뮬레이션</td>
+                            <td>난이도 지수 0.3~0.7</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. SAT 정합성</strong></td>
+                            <td>학습목표와 직접 연계</td>
+                            <td>학습목표 키워드 매칭</td>
+                            <td>미연계 문항 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6. Bloom 분포</strong></td>
+                            <td>수준별 배분 준수</td>
+                            <td>자동 카운팅</td>
+                            <td>각 수준 &plusmn;10%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="padding: 16px; background: #f0fdf4; border-radius: 8px;">
+                        <strong style="color: var(--khnp-accent);">자동 QA 결과 예시</strong>
+                        <div style="font-family: monospace; font-size: 0.8rem; margin-top: 8px; background: white; padding: 10px; border-radius: 4px;">
+                            총 20문항 검증 결과:<br>
+                            - Pass: 14 (70%)<br>
+                            - Needs Revision: 4 (20%)<br>
+                            - Reject: 2 (10%)<br>
+                            - 평균 품질점수: 78.5/100<br>
+                            - 최빈 이슈: 오답 매력도 (6건)
+                        </div>
+                    </div>
+                    <div style="padding: 16px; background: #fef3c7; border-radius: 8px;">
+                        <strong style="color: #92400e;">SME 최종 검토 워크플로우</strong>
+                        <ol style="padding-left: 16px; font-size: 0.85rem; margin-top: 8px; line-height: 2;">
+                            <li>AI가 문항 생성 + 자동 QA</li>
+                            <li>QA Pass 문항 &rarr; SME 최종 확인</li>
+                            <li>Needs Revision 문항 &rarr; AI 자동 수정 후 SME 확인</li>
+                            <li>Reject 문항 &rarr; 재생성 또는 삭제</li>
+                            <li>SME 승인 &rarr; 문제은행 등록</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2-Pass 문항 생성 (NEW) -->
+        <div class="card" style="margin-top: 24px; border: 2px solid #6c5ce7;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #ede9fe; color: #6c5ce7;">&#9889;</div>
+                <div>
+                    <div class="card-title">2-Pass 문항 생성 엔진 <span style="background:#6c5ce7; color:white; font-size:0.7rem; padding:2px 8px; border-radius:4px; margin-left:8px;">v2 구현완료</span></div>
+                    <div class="card-subtitle">AI 오답 매력도 문제의 근본 해결책</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="padding: 16px; background: #ede9fe; border-radius: 8px; margin-bottom: 16px;">
+                    <strong style="color: #6c5ce7;">핵심 아이디어:</strong> AI 오답의 33.75%가 비기능적인 문제를 <strong>생성 시점</strong>에서 해결.
+                    1차 생성에서 "오답 선택 이유"를 강제로 기술하게 하고, 2차 검증에서 약한 오답을 자동 교체.
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="padding: 16px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                        <strong style="color: #0ea5e9;">Pass 1: 생성 + 오답 근거</strong>
+                        <ul style="padding-left: 16px; margin-top: 8px; font-size: 0.83rem; line-height: 2;">
+                            <li>각 오답에 <code>distractor_rationale</code> 필드 필수</li>
+                            <li>"학습 부족자가 이 오답을 선택할 수 있는 구체적 이유"를 기술</li>
+                            <li>모든 보기에 합리적 선택 이유가 있어야 통과</li>
+                            <li>Few-shot 예시 포함 시 비기능적 오답 50% &rarr; 16% 감소 (연구결과)</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 16px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626;">
+                        <strong style="color: #dc2626;">Pass 2: 오답 정제(Refine)</strong>
+                        <ul style="padding-left: 16px; margin-top: 8px; font-size: 0.83rem; line-height: 2;">
+                            <li>전용 LLM 호출로 각 오답의 기능성 재검증</li>
+                            <li>"학습자 30%가 선택할 수 있는가?" 테스트</li>
+                            <li>약한 오답 감지 시 대체 오답 + 새로운 근거 생성</li>
+                            <li>최종 <code>distractor_quality_score</code> 부여 (1~5점)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                    <strong style="color: var(--khnp-accent);">기대 효과:</strong>
+                    비기능적 오답 비율 33.75% &rarr; <strong>목표 10% 이하</strong> (인간 출제 수준 13.75% 달성 목표)
+                </div>
+            </div>
+        </div>
+
+        <!-- 시나리오형 문항 (NEW) -->
+        <div class="card" style="margin-top: 24px; border: 2px solid #f59e0b;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#127919;</div>
+                <div>
+                    <div class="card-title">시나리오 기반 문항 생성 <span style="background:#f59e0b; color:white; font-size:0.7rem; padding:2px 8px; border-radius:4px; margin-left:8px;">v2 구현완료</span></div>
+                    <div class="card-subtitle">IAEA 역량평가 트렌드 반영 - 상황 기반 의사결정형</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="padding: 16px; background: #fef3c7; border-radius: 8px; margin-bottom: 16px;">
+                    <strong style="color: #92400e;">원자력 교육 트렌드:</strong> 단순 암기형(Knowledge) &rarr; <strong>상황 기반 의사결정형(Application/Analysis)</strong>으로 전환 중.
+                    IAEA는 운전원의 인지적 기술(cognitive skills)을 시나리오 기반으로 평가하도록 권고.
+                </div>
+
+                <table class="status-table">
+                    <thead><tr><th>시나리오 유형</th><th>설명</th><th>문항 예시</th><th>Bloom 수준</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>정상운전</strong></td>
+                            <td>일상 운전 절차 기반 상황</td>
+                            <td>"1차 냉각재 펌프 기동 전 확인사항은?"</td>
+                            <td>Application</td>
+                        </tr>
+                        <tr>
+                            <td><strong>비정상운전</strong></td>
+                            <td>예기치 않은 파라미터 변동 대응</td>
+                            <td>"증기발생기 수위가 급격히 하강할 때 최우선 조치는?"</td>
+                            <td>Application</td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td><strong>비상운전</strong></td>
+                            <td>사고 시나리오 대응 판단</td>
+                            <td>"LOCA 발생 시 ECCS 자동작동 확인 후 운전원의 다음 조치는?"</td>
+                            <td>Analysis</td>
+                        </tr>
+                        <tr>
+                            <td><strong>정비/점검</strong></td>
+                            <td>설비 점검/정비 절차 기반</td>
+                            <td>"밸브 정비 후 기능시험 절차에서 누락 시 발생 가능한 문제는?"</td>
+                            <td>Analysis</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="padding: 12px; background: #f0f9ff; border-radius: 8px;">
+                        <strong>시나리오 세트 구조:</strong>
+                        <ul style="padding-left: 16px; margin-top: 6px; font-size: 0.83rem;">
+                            <li>1개 시나리오 당 2~3개 연계 문항</li>
+                            <li>상황 제시 &rarr; 판단 &rarr; 후속 조치 순서</li>
+                            <li>실제 발전소 운영 맥락 반영</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
+                        <strong>생성 전략:</strong>
+                        <ul style="padding-left: 16px; margin-top: 6px; font-size: 0.83rem;">
+                            <li>VLM이 해석한 P&ID/계통도 기반 시나리오 자동 구성</li>
+                            <li>Golden Context의 절차서/규정 맥락 활용</li>
+                            <li>시나리오별 난이도 자동 조절</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 안전 중요도 태깅 + Few-shot 관리 (NEW v3) -->
+        <div class="card-grid" style="margin-top: 24px;">
+            <div class="card" style="border: 2px solid #dc2626;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #fee2e2; color: #dc2626;">&#9888;</div>
+                    <div>
+                        <div class="card-title">안전 중요도 태깅 <span style="background:#dc2626; color:white; font-size:0.7rem; padding:2px 8px; border-radius:4px; margin-left:8px;">v3 구현완료</span></div>
+                        <div class="card-subtitle">IAEA TECDOC-2082 Graded Approach</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p>"평가의 엄격도는 안전 중요도에 비례해야 한다" — IAEA TECDOC-2082</p>
+                    <table class="status-table" style="margin-top: 8px;">
+                        <thead><tr><th>등급</th><th>대상</th><th>QA 기준</th></tr></thead>
+                        <tbody>
+                            <tr style="background: #fef2f2;">
+                                <td><strong style="color:#dc2626;">Safety Critical</strong></td>
+                                <td>ECCS, 격납건물, RPS, 비상운전, 방사선방호</td>
+                                <td>품질 85+, 2-Pass 필수, SME 검토 필수, 6개월 재검증</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color:#f59e0b;">Safety Related</strong></td>
+                                <td>CVCS, CCW, 비정상운전, 정비절차, 안전문화</td>
+                                <td>품질 75+, 2-Pass 필수, SME 검토 필수, 12개월 재검증</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color:#6b7280;">General</strong></td>
+                                <td>일반 운전지식, 관리업무, 기초이론</td>
+                                <td>품질 65+, 1-Pass 가능, SME 선택적, 24개월 재검증</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 8px; padding: 8px; background: #fef2f2; border-radius: 6px; font-size: 0.82rem;">
+                        키워드 기반 자동 태깅 + LLM 정밀 태깅 이중 시스템.<br>
+                        원자력 안전계통/사고유형/규정 키워드 사전 내장.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border: 2px solid var(--khnp-accent);">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #d1fae5; color: var(--khnp-accent);">&#128214;</div>
+                    <div>
+                        <div class="card-title">Few-shot 예시 관리 <span style="background:var(--khnp-accent); color:white; font-size:0.7rem; padding:2px 8px; border-radius:4px; margin-left:8px;">v3 구현완료</span></div>
+                        <div class="card-subtitle">SME 모범 문항으로 품질 앵커링</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p>연구: Few-shot 예시 제공 시 비기능적 오답 <strong>50% &rarr; 16%</strong> 감소</p>
+                    <ul style="padding-left: 16px; margin-top: 8px; font-size: 0.83rem; line-height: 2;">
+                        <li>SME 검수 모범 문항/스크립트/시나리오 저장소</li>
+                        <li>Bloom 수준별, 안전등급별, 주제태그별 검색</li>
+                        <li>생성 시 자동으로 가장 관련 높은 3~5건 선택</li>
+                        <li>사용 이력 추적 + 품질 점수 기반 정렬</li>
+                        <li>시드 데이터: LOCA/SGTR/EDG 모범 문항 3건 기본 탑재</li>
+                    </ul>
+                    <div style="margin-top: 8px; padding: 8px; background: #d1fae5; border-radius: 6px; font-size: 0.82rem;">
+                        <strong>SME Checklist:</strong> 모범 문항 최소 10건 확보 &rarr; Few-shot 효과 극대화
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 원자력 교육 트렌드 (NEW) -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #0ea5e9;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #e0f2fe; color: #0284c7;">&#128218;</div>
+                <div>
+                    <div class="card-title">원자력 직무교육 트렌드 & 우리 시스템 연계</div>
+                    <div class="card-subtitle">IAEA/NRC 최신 동향 기반</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table">
+                    <thead><tr><th>글로벌 트렌드</th><th>내용</th><th>우리 시스템 연계</th><th>상태</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CBT 디지털 전환</strong></td>
+                            <td>종이 기반 &rarr; 컴퓨터 기반 훈련 및 평가</td>
+                            <td>AI 생성 문제은행이 CBT 플랫폼에 자동 연동</td>
+                            <td><span class="status-badge" style="background:#d1fae5; color:#065f46;">PoC 대상</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>적응형 평가 (Adaptive Testing)</strong></td>
+                            <td>IRT 기반으로 학습자 수준에 맞는 문항 자동 선별</td>
+                            <td>Item Analysis 데이터 축적 후 난이도 파라미터 기반 적응형 출제</td>
+                            <td><span class="status-badge" style="background:#fef3c7; color:#92400e;">Phase 2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>시뮬레이터 연계 훈련</strong></td>
+                            <td>IAEA 권고: 시뮬레이터 기반 역량 평가 강화</td>
+                            <td>AI 시나리오형 문항 &rarr; 시뮬레이터 시나리오 연계 (장기)</td>
+                            <td><span class="status-badge" style="background:#e0e7ff; color:#3730a3;">Phase 3</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>역량 기반 교육 (CBC)</strong></td>
+                            <td>직무 역량 단위로 교육과정 설계/평가</td>
+                            <td>SAT 학습목표 &harr; Bloom 수준 &harr; 문항 자동 매핑</td>
+                            <td><span class="status-badge" style="background:#d1fae5; color:#065f46;">구현완료</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>마이크로러닝</strong></td>
+                            <td>짧은 단위(5~10분)의 모듈형 학습</td>
+                            <td>슬라이드별 독립 스크립트 생성 &rarr; 마이크로 콘텐츠화 가능</td>
+                            <td><span class="status-badge" style="background:#d1fae5; color:#065f46;">기본지원</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI 지식관리 (KM)</strong></td>
+                            <td>경험 많은 인력 퇴직 대비 암묵지 디지털화</td>
+                            <td>SME 스크립트 수정 이력 &rarr; 교육 노하우 자동 축적</td>
+                            <td><span class="status-badge" style="background:#fef3c7; color:#92400e;">Phase 2</span></td>
+                        </tr>
+                        <tr style="background: #fef3c7;">
+                            <td><strong>AI 개인화 평가</strong></td>
+                            <td>Westinghouse Quiz-T-Bot: AI가 성과 데이터 분석 후 맞춤 문항 출제, 평균 5% 성적 향상 실증</td>
+                            <td>Item Analysis + 학습 이력 기반 개인별 취약 영역 집중 출제</td>
+                            <td><span class="status-badge" style="background:#fef3c7; color:#92400e;">Phase 2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>간격 반복 (Spaced Repetition)</strong></td>
+                            <td>학습 데이터 기반 최적 복습 간격으로 문항 재출제, 장기 기억 강화</td>
+                            <td>문항별 정답률 이력 &rarr; 최적 재출제 스케줄 자동 생성</td>
+                            <td><span class="status-badge" style="background:#e0e7ff; color:#3730a3;">Phase 3</span></td>
+                        </tr>
+                        <tr style="background: #ede9fe;">
+                            <td><strong>OECD NEA AIxpertise</strong></td>
+                            <td>2026 Q1 발족 다국적 공동 프로젝트: 원자력 AI 데이터, 벤치마크, 교육 3개 축</td>
+                            <td>글로벌 AI 교육 표준 벤치마킹 &rarr; 우리 시스템 품질 기준 설정 참고</td>
+                            <td><span class="status-badge" style="background:#e0e7ff; color:#3730a3;">모니터링</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>안전 등급별 차등 평가 (Graded Approach)</strong></td>
+                            <td>IAEA TECDOC-2082(2025): 안전 중요도에 따라 교육/평가 엄격도 차등 적용</td>
+                            <td>문항에 안전 중요도 태그 &rarr; 안전 핵심 영역은 강화 검증</td>
+                            <td><span class="status-badge" style="background:#fef3c7; color:#92400e;">Phase 2</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 16px; padding: 16px; background: #f0f9ff; border-radius: 8px;">
+                    <strong style="color: #0284c7;">IAEA/NRC 핵심 참고문서:</strong>
+                    <ul style="padding-left: 16px; margin-top: 6px; font-size: 0.83rem;">
+                        <li><strong>IAEA TECDOC-2082 (2025)</strong>: Use of a Graded Approach in the Application of SAT — 안전 중요도 기반 차등 교육 설계</li>
+                        <li><strong>IAEA TECDOC-1893 (2019)</strong>: Methodology to Evaluate the Effectiveness of Training — 자체 평가 방법론, 품질 기준</li>
+                        <li><strong>IAEA NE Series NP-T-2.8 (2021)</strong>: SAT Processes, Methodology and Practices — SAT 전주기 가이드</li>
+                        <li><strong>IAEA TECDOC-1836 (2018)</strong>: PC-Based Simulators for Education and Training — PC 시뮬레이터 활용 교육</li>
+                        <li><strong>NRC NUREG-1220</strong>: Training Review Criteria and Procedures</li>
+                        <li><strong>NRC AI Project Plan (2024, ML24194A116)</strong>: AI 규제 프레임워크 검토 (500+ 규제지침 분석)</li>
+                        <li><strong>IAEA-TECDOC-1411</strong>: Knowledge Management for Nuclear Industry Operating Organizations</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 12px; padding: 16px; background: #ede9fe; border-radius: 8px;">
+                    <strong style="color: #6c5ce7;">글로벌 벤치마크:</strong>
+                    <ul style="padding-left: 16px; margin-top: 6px; font-size: 0.83rem; line-height: 2;">
+                        <li><strong>EDF (프랑스)</strong>: CORYS와 전체 원전 시뮬레이터 현대화(COCASE 계약), 클라우드 기반 EPR 시뮬레이터 배포</li>
+                        <li><strong>Westinghouse (미국)</strong>: PLANT 디지털 학습 플랫폼 + Quiz-T-Bot AI 개인화 평가 (실증 5% 향상)</li>
+                        <li><strong>OECD NEA</strong>: AIxpertise 다국적 공동 프로젝트 — 데이터, 벤치마크, 교육 3개 축 (2026 Q1 발족)</li>
+                        <li><strong>운전 시뮬레이터 시장</strong>: 2030년 USD 219억 예상 (CAGR 11.2%, 2024-2030)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 교육선순환 체계 -->
+        <div class="card" style="margin-top: 24px; border: 2px solid var(--khnp-primary);">
+            <div class="card-header">
+                <div class="card-icon system">&#128260;</div>
+                <div>
+                    <div class="card-title">교육 선순환 체계 설계</div>
+                    <div class="card-subtitle">SAT Evaluation 환류 기반 지속 개선 모델</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 20px 0;">
+                    <div style="background: var(--khnp-primary); color: white; padding: 14px 20px; border-radius: 10px; text-align: center; min-width: 140px;">
+                        <strong>1. 교재 투입</strong><br><span style="font-size: 0.78rem;">강의안 PDF 업로드</span>
+                    </div>
+                    <span style="font-size: 1.5rem; color: var(--khnp-primary);">&rarr;</span>
+                    <div style="background: var(--upstage-color); color: white; padding: 14px 20px; border-radius: 10px; text-align: center; min-width: 140px;">
+                        <strong>2. AI 생성</strong><br><span style="font-size: 0.78rem;">스크립트 + 문제</span>
+                    </div>
+                    <span style="font-size: 1.5rem; color: var(--khnp-primary);">&rarr;</span>
+                    <div style="background: #dc2626; color: white; padding: 14px 20px; border-radius: 10px; text-align: center; min-width: 140px;">
+                        <strong>3. QA 검증</strong><br><span style="font-size: 0.78rem;">자동 + SME</span>
+                    </div>
+                    <span style="font-size: 1.5rem; color: var(--khnp-primary);">&rarr;</span>
+                    <div style="background: var(--khnp-accent); color: white; padding: 14px 20px; border-radius: 10px; text-align: center; min-width: 140px;">
+                        <strong>4. 교육 실행</strong><br><span style="font-size: 0.78rem;">강의 + 평가</span>
+                    </div>
+                    <span style="font-size: 1.5rem; color: var(--khnp-primary);">&rarr;</span>
+                    <div style="background: #f59e0b; color: white; padding: 14px 20px; border-radius: 10px; text-align: center; min-width: 140px;">
+                        <strong>5. 데이터 환류</strong><br><span style="font-size: 0.78rem;">Item Analysis</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--khnp-primary); margin: 8px 0;">&darr; 환류 &darr;</div>
+
+                <div style="padding: 16px; background: var(--khnp-light); border-radius: 8px;">
+                    <strong style="color: var(--khnp-primary);">환류 데이터가 품질을 올리는 구조:</strong>
+                    <table class="status-table" style="margin-top: 12px;">
+                        <thead><tr><th>환류 데이터</th><th>활용 방법</th><th>기대 효과</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td>시험 응답 데이터<br>(정답률, 선택 분포)</td>
+                                <td>Item Analysis: 난이도/변별도 실측<br>비기능적 오답 자동 감지 &rarr; 교체</td>
+                                <td>문제은행 품질 지속 향상<br>2회차부터 품질 급상승</td>
+                            </tr>
+                            <tr>
+                                <td>SME 수정 이력<br>(AI 초안 &rarr; 최종본 diff)</td>
+                                <td>프롬프트 개선 학습 데이터로 활용<br>"SME가 자주 수정하는 패턴" 분석</td>
+                                <td>AI 생성 품질 자동 개선<br>SME 검토 시간 점진적 감소</td>
+                            </tr>
+                            <tr>
+                                <td>교육생 만족도 피드백</td>
+                                <td>스크립트 스타일/깊이 조절 참고</td>
+                                <td>수준별 맞춤 스크립트</td>
+                            </tr>
+                            <tr>
+                                <td>규정/절차서 변경</td>
+                                <td>Golden Context 자동 갱신<br>영향 받는 문항 자동 플래깅</td>
+                                <td>항상 최신 교육 컨텐츠</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 16px; padding: 16px; background: #f0fdf4; border-radius: 8px;">
+                    <strong style="color: var(--khnp-accent);">핵심 인사이트: "AI는 1회차에서 80점, 환류 데이터로 2회차부터 95점"</strong>
+                    <p style="margin-top: 8px;">
+                        AI가 처음 생성한 문항은 인간 수준에 근접하지만 완벽하지 않습니다 (오답 매력도 이슈).
+                        그러나 <strong>실제 시험 데이터가 환류</strong>되면 어떤 오답이 기능하지 않는지 객관적으로 파악되고,
+                        <strong>자동으로 교체/개선</strong>됩니다. 이것이 AI 교육 시스템의 진정한 가치입니다.
+                    </p>
+                </div>
+
+                <div style="margin-top: 16px; padding: 16px; background: #ede9fe; border-radius: 8px;">
+                    <strong style="color: #6c5ce7;">IAEA SAT 환류 4단계 평가 (Kirkpatrick Model):</strong>
+                    <table class="status-table" style="margin-top: 8px;">
+                        <thead><tr><th>수준</th><th>평가 내용</th><th>우리 시스템 연계</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Level 1 (반응)</strong></td>
+                                <td>교육생 만족도 설문</td>
+                                <td>스크립트 스타일/깊이 조절 피드백</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 2 (학습)</strong></td>
+                                <td>성취도 평가 — 문제은행 핵심 영역</td>
+                                <td>AI 문제은행 + Item Analysis 자동화</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 3 (전이)</strong></td>
+                                <td>현장 적용 관찰 (OJT)</td>
+                                <td>시나리오형 문항이 현장 의사결정 역량 측정</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Level 4 (결과)</strong></td>
+                                <td>발전소 성과지표 연계 (인적오류율, 무사고일수)</td>
+                                <td>교육 효과 &harr; 발전소 KPI 상관분석 (장기)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- v4: SME 검토 워크플로우 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #8b5cf6;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #ede9fe; color: #7c3aed;">&#128101;</div>
+                <div>
+                    <div class="card-title">SME 검토 워크플로우 <span style="background:#8b5cf6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></div>
+                    <div class="card-subtitle">AI 초안 &rarr; SME 수정 &rarr; Diff 학습 &rarr; 프롬프트 자동 개선</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px;">
+                    <div style="background: #f3e8ff; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: 700; color: #7c3aed;">1. AI 생성</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">2-Pass + Few-shot<br>문항 초안 생성</div>
+                    </div>
+                    <div style="background: #fef3c7; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: 700; color: #d97706;">2. SME 배정</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">안전등급별<br>전문가 배정</div>
+                    </div>
+                    <div style="background: #dbeafe; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: 700; color: #2563eb;">3. 검토/수정</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">승인/수정/반려<br>수정 사유 기록</div>
+                    </div>
+                    <div style="background: #d1fae5; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: 700; color: #059669;">4. Diff 분석</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">수정 패턴 자동 분류<br>9가지 유형 감지</div>
+                    </div>
+                    <div style="background: #fce7f3; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-weight: 700; color: #db2777;">5. 프롬프트 개선</div>
+                        <div style="font-size: 0.78rem; margin-top: 4px;">인사이트 추출<br>Few-shot 후보 추천</div>
+                    </div>
+                </div>
+
+                <div style="padding: 12px; background: #f5f3ff; border-radius: 8px;">
+                    <strong>수정 유형 자동 분류 (9가지):</strong>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; font-size: 0.82rem;">
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#9888; 기술적 오류</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#128203; 오답지 품질</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#128221; 문항 명확성</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#9762; 안전 정확성</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#128218; 용어 부정확</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#127891; Bloom 부적합</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#127917; 시나리오 현실성</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#128214; 해설 깊이</div>
+                        <div style="padding: 6px; background: white; border-radius: 4px;">&#128220; 규정 불일치</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 8px;">
+                    <strong>안전등급별 검토 기준 차별화:</strong>
+                    <table class="status-table" style="margin-top: 8px; font-size: 0.82rem;">
+                        <thead><tr><th>등급</th><th>SME 검토</th><th>2-Pass</th><th>비기능적 오답 허용</th><th>재검증 주기</th></tr></thead>
+                        <tbody>
+                            <tr><td style="color:#dc2626;font-weight:700;">Safety Critical</td><td>필수 (전문가)</td><td>필수</td><td>0건</td><td>6개월</td></tr>
+                            <tr><td style="color:#f59e0b;font-weight:700;">Safety Related</td><td>필수</td><td>필수</td><td>최대 1건</td><td>12개월</td></tr>
+                            <tr><td style="color:#22c55e;font-weight:700;">General</td><td>선택</td><td>선택</td><td>최대 1건</td><td>24개월</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- v4: 문항 버전 관리 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #0ea5e9;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #e0f2fe; color: #0284c7;">&#128196;</div>
+                <div>
+                    <div class="card-title">문항 라이프사이클 관리 <span style="background:#0ea5e9;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></div>
+                    <div class="card-subtitle">생성 &rarr; 검토 &rarr; 출제 &rarr; IRT교정 &rarr; 재검증/폐기 전 이력 추적</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="padding: 4px 12px; background: #e0e7ff; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Draft</span>
+                    <span style="color: var(--text-secondary);">&rarr;</span>
+                    <span style="padding: 4px 12px; background: #fef3c7; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">SME Review</span>
+                    <span style="color: var(--text-secondary);">&rarr;</span>
+                    <span style="padding: 4px 12px; background: #d1fae5; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Approved</span>
+                    <span style="color: var(--text-secondary);">&rarr;</span>
+                    <span style="padding: 4px 12px; background: #bfdbfe; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Active</span>
+                    <span style="color: var(--text-secondary);">&rarr;</span>
+                    <span style="padding: 4px 12px; background: #e9d5ff; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Calibrated</span>
+                    <span style="color: var(--text-secondary);">&rarr;</span>
+                    <span style="padding: 4px 12px; background: #fecaca; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Retired</span>
+                </div>
+
+                <div style="padding: 12px; background: #f0f9ff; border-radius: 8px;">
+                    <strong>핵심 기능:</strong>
+                    <ul style="padding-left: 16px; margin-top: 4px;">
+                        <li><strong>불변 버전 관리</strong>: 모든 수정은 새 버전으로 기록 (Git-like), 원본 보존</li>
+                        <li><strong>IRT 파라미터 추적</strong>: 난이도/변별도 교정 이력 및 신뢰도 수준 관리</li>
+                        <li><strong>재검증 자동 알림</strong>: 안전등급별 주기(6/12/24개월) 도래 시 자동 리마인드</li>
+                        <li><strong>폐기/대체 추적</strong>: 문항 폐기 사유 기록, 대체 문항과의 연결관계 유지</li>
+                        <li><strong>감사 추적</strong>: 누가, 언제, 왜 변경했는지 완전 추적 (규제 대응)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- v4: 교육 피드백 루프 API -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #f97316;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fff7ed; color: #ea580c;">&#128260;</div>
+                <div>
+                    <div class="card-title">교육선순환 데이터 수집 API <span style="background:#f97316;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></div>
+                    <div class="card-subtitle">Kirkpatrick 4단계 평가 데이터 수집 &rarr; 컨텐츠 자동 개선</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem;">
+                    <thead><tr><th>API 엔드포인트</th><th>용도</th><th>수집 데이터</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>POST /feedback/exam-response</code></td><td>시험 응시 결과</td><td>정답여부, 선택답, 소요시간</td></tr>
+                        <tr><td><code>POST /feedback/exam-responses/batch</code></td><td>배치 응시 결과</td><td>일괄 수집 (CBT 연동)</td></tr>
+                        <tr><td><code>POST /feedback/trainee-satisfaction</code></td><td>교육생 만족도</td><td>만족도(5점), 난이도 인식, 자유기술</td></tr>
+                        <tr><td><code>GET /feedback/exam-stats/{id}</code></td><td>문항별 통계</td><td>정답률, 선택지 분포, IRT 준비도</td></tr>
+                        <tr><td><code>GET /feedback/satisfaction-summary</code></td><td>만족도 종합</td><td>평균 만족도, 난이도 분포</td></tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 12px; padding: 12px; background: #fff7ed; border-radius: 8px;">
+                    <strong>데이터 활용 흐름:</strong>
+                    <div style="font-size: 0.82rem; margin-top: 6px;">
+                        응시 결과 200건+ 축적 &rarr; IRT 파라미터 교정 &rarr; 문항 난이도 실측 반영 &rarr;
+                        적응형 평가 기반 마련 / 반복 오답 문항 자동 폐기 후보 추출 /
+                        교육생 만족도 낮은 스크립트 자동 리마인드
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- v4: Hybrid 안전 태깅 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #dc2626;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef2f2; color: #dc2626;">&#9762;</div>
+                <div>
+                    <div class="card-title">Hybrid 안전 태깅 전략 <span style="background:#dc2626;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></div>
+                    <div class="card-subtitle">키워드 1차(전체) + LLM 2차(safety_critical만) = 비용 70% 절감</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                        <strong>1차: 키워드 매칭 (전체 문항)</strong>
+                        <ul style="padding-left: 16px; margin-top: 4px; font-size: 0.82rem;">
+                            <li>60+ 원자력 안전 키워드 사전</li>
+                            <li>systems / topics / regulations 3개 카테고리</li>
+                            <li>2개 이상 critical 키워드 매칭 &rarr; safety_critical 판정</li>
+                            <li>처리시간: &lt;1ms/문항, 비용: 0원</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 12px; background: #fef2f2; border-radius: 8px;">
+                        <strong>2차: LLM 정밀 태깅 (critical만)</strong>
+                        <ul style="padding-left: 16px; margin-top: 4px; font-size: 0.82rem;">
+                            <li>Solar Pro가 맥락 기반 안전 중요도 판단</li>
+                            <li>키워드 오탐 보정 (맥락상 general인데 critical로 잡힌 경우)</li>
+                            <li>관련 안전기능 구체적 식별</li>
+                            <li>API 호출 ~70% 절감 (전체 대비)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- v5: QTI 표준 내보내기 + 적응형 시험 엔진 -->
+        <div class="card-grid" style="margin-top: 24px;">
+            <div class="card" style="border-left: 4px solid #6366f1;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #eef2ff; color: #4f46e5;">&#128230;</div>
+                    <div>
+                        <div class="card-title">QTI 2.1 표준 내보내기 <span style="background:#6366f1;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4 신규</span></div>
+                        <div class="card-subtitle">CBT 시스템 연동을 위한 표준 형식 지원</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>지원 형식:</strong></p>
+                    <ul style="padding-left: 16px;">
+                        <li><strong>QTI 2.1 XML</strong>: IMS Global 표준, LMS/CBT 호환</li>
+                        <li><strong>JSON</strong>: 내부 시스템 연동 (khnp-qbank-v4 스키마)</li>
+                        <li><strong>CSV</strong>: 간이 내보내기, LMS 일괄 업로드</li>
+                    </ul>
+                    <div style="margin-top: 8px; padding: 8px; background: #eef2ff; border-radius: 6px; font-size: 0.82rem;">
+                        <strong>포함 메타데이터:</strong> Bloom 수준, 안전등급, 시나리오, 해설, 오답근거, 난이도 추정치
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #ec4899;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #fdf2f8; color: #db2777;">&#127919;</div>
+                    <div>
+                        <div class="card-title">적응형 난이도 엔진 <span style="background:#ec4899;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4 신규</span></div>
+                        <div class="card-subtitle">IRT 2PL + 안전등급 연계 + Spaced Repetition</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>5단계 선별 알고리즘:</strong></p>
+                    <ol style="padding-left: 20px; font-size: 0.82rem;">
+                        <li>안전 핵심 문항 필수 확보 (최소 5문항)</li>
+                        <li>안전 관련 문항 확보 (최소 5문항)</li>
+                        <li>취약 주제 문항 배치 (Spaced Repetition)</li>
+                        <li>이전 오답 재출제 (최근 3회)</li>
+                        <li>Bloom 분포 + 정보함수 최대화 채우기</li>
+                    </ol>
+                    <div style="margin-top: 8px; padding: 8px; background: #fdf2f8; border-radius: 6px; font-size: 0.82rem;">
+                        <strong>EAP 능력 추정:</strong> 응시 결과마다 교육생 능력치(&theta;) 실시간 업데이트 &rarr; 다음 시험 난이도 자동 조절
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- v5: 스크립트 품질 자동 평가 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #14b8a6;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #f0fdfa; color: #0d9488;">&#9989;</div>
+                <div>
+                    <div class="card-title">스크립트 품질 자동 평가 <span style="background:#14b8a6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4 신규</span></div>
+                    <div class="card-subtitle">4가지 메트릭으로 자동 품질 점수 산출</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem;">
+                    <thead><tr><th>메트릭</th><th>가중치</th><th>측정 내용</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>완전성</strong></td><td>20%</td><td>모든 슬라이드에 스크립트 생성 여부</td></tr>
+                        <tr><td><strong>구조 준수</strong></td><td>30%</td><td>5단계 구조(도입/전개3/정리) 포함 여부</td></tr>
+                        <tr><td><strong>시각자료 활용</strong></td><td>30%</td><td>VLM 데이터 슬라이드에 시각 설명 포함 여부</td></tr>
+                        <tr><td><strong>분량 적정성</strong></td><td>20%</td><td>슬라이드당 200~800자 적정 범위</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 8px; padding: 8px; background: #f0fdfa; border-radius: 6px; font-size: 0.82rem;">
+                    80점 이상: 우수 | 60~80점: 보통 (시각자료/구조 개선) | 60점 미만: 개선 필요
+                </div>
+            </div>
+        </div>
+
+        <!-- v6: 원자력 용어사전 + 통합 대시보드 -->
+        <div class="card-grid" style="margin-top: 24px;">
+            <div class="card" style="border-left: 4px solid #059669;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #ecfdf5; color: #059669;">&#128218;</div>
+                    <div>
+                        <div class="card-title">원자력 전문 용어사전 <span style="background:#059669;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v5 신규</span></div>
+                        <div class="card-subtitle">한/영/약어 3중 매핑 + 계통별 분류 + 안전등급 연계</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>현재 수록: 20+ 핵심 용어</strong> (RCS, ECCS, 전원, 계측, 사고, 규제)</p>
+                    <ul style="padding-left: 16px; font-size: 0.82rem;">
+                        <li><strong>Curated Prompt 주입</strong>: LLM이 정확한 기술 용어 사용</li>
+                        <li><strong>VLM 컨텍스트</strong>: 도면 분석 시 설비 식별 보조</li>
+                        <li><strong>QA 용어 일관성</strong>: 문항 내 용어 통일 검증</li>
+                        <li><strong>SME 검증</strong>: 용어별 전문가 검증 상태 추적</li>
+                    </ul>
+                    <div style="margin-top: 8px; padding: 8px; background: #ecfdf5; border-radius: 6px; font-size: 0.82rem;">
+                        API: <code>/glossary/search</code>, <code>/glossary/prompt-text</code>, <code>/glossary/statistics</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #7c3aed;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: #f5f3ff; color: #7c3aed;">&#128202;</div>
+                    <div>
+                        <div class="card-title">통합 대시보드 API <span style="background:#7c3aed;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v5 신규</span></div>
+                        <div class="card-subtitle">전체 시스템 현황을 단일 API로 집계</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>GET /api/v1/dashboard</strong> 호출 시 반환:</p>
+                    <ul style="padding-left: 16px; font-size: 0.82rem;">
+                        <li>문항은행 통계 (라이프사이클별, 안전등급별)</li>
+                        <li>SME 검토 현황 (대기/완료/수정률/인사이트)</li>
+                        <li>교육 피드백 (응시 수, IRT 준비 문항 수)</li>
+                        <li>파싱 캐시 현황 (파일 수, 슬라이드 수)</li>
+                        <li>용어사전 통계 (용어 수, 검증률)</li>
+                        <li>14개 모듈 × 25개 API 엔드포인트 상태</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 구현 현황 요약 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid var(--khnp-primary);">
+            <div class="card-header">
+                <div class="card-icon" style="background: #e0f2fe; color: var(--khnp-primary);">&#128640;</div>
+                <div>
+                    <div class="card-title">PoC 구현 현황 (v10)</div>
+                    <div class="card-subtitle">20개 모듈, 40개 API, 11단계 파이프라인, 52개 E2E 테스트</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem;">
+                    <thead><tr><th>카테고리</th><th>모듈</th><th>상태</th><th>주요 기능</th></tr></thead>
+                    <tbody>
+                        <tr><td rowspan="2"><strong>문서처리</strong></td><td>parser</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>Upstage Document Parse (Standard/Enhanced/Auto)</td></tr>
+                        <tr><td>vlm_analyzer</td><td style="color:#22c55e;">&#9679; v4 강화</td><td>VLM 시각자료 분석 + 용어사전 연계</td></tr>
+                        <tr><td><strong>스크립트</strong></td><td>generator</td><td style="color:#22c55e;">&#9679; v2 구현</td><td>5단계 구조 + VLM 통합 + Curated Prompt</td></tr>
+                        <tr><td rowspan="8"><strong>문제은행</strong></td><td>generator</td><td style="color:#22c55e;">&#9679; v2 구현</td><td>2-Pass + 시나리오 + Few-shot</td></tr>
+                        <tr><td>quality_validator</td><td style="color:#22c55e;">&#9679; v2 구현</td><td>QA 파이프라인 + IRT 교정</td></tr>
+                        <tr><td>safety_tagger</td><td style="color:#22c55e;">&#9679; v3 Hybrid</td><td>키워드 1차 + LLM 2차 태깅</td></tr>
+                        <tr><td>few_shot_manager</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>SME 모범 문항 관리</td></tr>
+                        <tr><td>sme_review</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>검토 워크플로우 + Diff 학습</td></tr>
+                        <tr><td>version_manager</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>라이프사이클 + 재검증 관리</td></tr>
+                        <tr><td>qti_exporter</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>QTI 2.1 / JSON / CSV 내보내기</td></tr>
+                        <tr><td>adaptive_engine</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>IRT 2PL + 안전등급 연계 선별</td></tr>
+                        <tr><td><strong>도메인</strong></td><td>nuclear_glossary</td><td style="color:#22c55e;">&#9679; 구현완료</td><td>20+ 핵심 용어, 계통별 분류</td></tr>
+                        <tr><td rowspan="2"><strong>프롬프트</strong></td><td>template_manager</td><td style="color:#22c55e;">&#9679; v6 신규</td><td>YAML 기반 프롬프트 외부 관리 + 핫리로드 + 오버라이드</td></tr>
+                        <tr><td>templates.yaml</td><td style="color:#22c55e;">&#9679; v6 신규</td><td>6개 프롬프트 (스크립트/VLM/문항/오답/시나리오/QA)</td></tr>
+                        <tr><td rowspan="2"><strong>LLM 라우팅</strong></td><td>llm_router</td><td style="color:#22c55e;">&#9679; v8 신규</td><td>AtomicGPT+Solar 하이브리드 라우터, 정책 기반 자동 분배</td></tr>
+                        <tr><td>router.py</td><td style="color:#22c55e;">&#9679; v8 신규</td><td>7개 라우팅 정책, fallback, 크로스체크, 신뢰도 추정</td></tr>
+                        <tr><td><strong>파이프라인</strong></td><td>pipeline</td><td style="color:#22c55e;">&#9679; v3 (11단계)</td><td>E2E 오케스트레이터</td></tr>
+                        <tr><td><strong>데모</strong></td><td>run_sample_pipeline</td><td style="color:#22c55e;">&#9679; v8 신규</td><td>5개 슬라이드 Mock E2E 데모 (API 없이 실행)</td></tr>
+                        <tr><td><strong>A/B 테스트</strong></td><td>ab_testing</td><td style="color:#22c55e;">&#9679; v10 신규</td><td>실험 생성/변형 할당/결과 기록/승자 판정</td></tr>
+                        <tr><td rowspan="3"><strong>배포</strong></td><td>Dockerfile</td><td style="color:#22c55e;">&#9679; v10 신규</td><td>Python 3.13 + FastAPI 컨테이너</td></tr>
+                        <tr><td>docker-compose</td><td style="color:#22c55e;">&#9679; v10 강화</td><td>Solar+AtomicGPT+ChromaDB+Nginx+모니터링</td></tr>
+                        <tr><td>deploy/</td><td style="color:#22c55e;">&#9679; v10 신규</td><td>Nginx 설정, Prometheus 설정</td></tr>
+                        <tr><td><strong>테스트</strong></td><td>test_e2e_pipeline</td><td style="color:#22c55e;">&#9679; v10 (52개)</td><td>12개 모듈 × Mock E2E + 라우터 + A/B 테스트</td></tr>
+                        <tr><td><strong>API</strong></td><td>FastAPI</td><td style="color:#22c55e;">&#9679; 40 endpoints</td><td>생성/검토/피드백/대시보드/프롬프트/라우터/환류/A/B</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- v6: 프롬프트 템플릿 외부화 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#128221;</div>
+                <div>
+                    <div class="card-title">v6: 프롬프트 템플릿 외부화 (YAML)</div>
+                    <div class="card-subtitle">코드 변경 없이 LLM 프롬프트 튜닝 가능</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>문제</strong>: 6개 LLM/VLM 프롬프트가 Python 코드에 하드코딩 → 프롬프트 튜닝마다 코드 수정+배포 필요</p>
+                <p><strong>해결</strong>: YAML 외부 설정 파일로 분리 + 핫리로드 + 런타임 오버라이드 지원</p>
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>프롬프트 키</th><th>용도</th><th>temperature</th><th>max_tokens</th></tr></thead>
+                    <tbody>
+                        <tr><td>script_generation</td><td>강의 스크립트 생성</td><td>0.7</td><td>4,096</td></tr>
+                        <tr><td>vlm_analysis</td><td>VLM 시각자료 분석</td><td>0.3</td><td>2,048</td></tr>
+                        <tr><td>question_generation</td><td>문항 생성 (1차 Pass)</td><td>0.3</td><td>8,192</td></tr>
+                        <tr><td>distractor_refinement</td><td>오답 매력도 개선 (2차 Pass)</td><td>0.2</td><td>2,048</td></tr>
+                        <tr><td>scenario_generation</td><td>시나리오형 문항</td><td>0.4</td><td>8,192</td></tr>
+                        <tr><td>quality_validation</td><td>문항 QA 검증</td><td>0.2</td><td>2,048</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;"><strong>API</strong>: <code>GET /api/v1/prompts/list</code> | <code>GET /api/v1/prompts/{key}</code> | <code>POST /api/v1/prompts/override</code> | <code>DELETE /api/v1/prompts/override/{key}</code></p>
+                <p><strong>A/B 테스트</strong>: 런타임 오버라이드로 프롬프트 변형 적용 → 생성 품질 비교 가능</p>
+            </div>
+        </div>
+
+        <!-- v6: E2E 테스트 스위트 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #d1fae5; color: #065f46;">&#9989;</div>
+                <div>
+                    <div class="card-title">v6: E2E 통합 테스트 스위트 (38 테스트)</div>
+                    <div class="card-subtitle">전체 모듈 Mock 검증 + 파이프라인 E2E</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>테스트 클래스</th><th>테스트 수</th><th>검증 대상</th></tr></thead>
+                    <tbody>
+                        <tr><td>TestSafetyTagger</td><td>3</td><td>안전 태깅 (단건/배치/critical 감지)</td></tr>
+                        <tr><td>TestItemAnalysis</td><td>5</td><td>난이도 추정, IRT 교정, 시험 후 분석</td></tr>
+                        <tr><td>TestVersionManager</td><td>4</td><td>문항 생성, 상태 변경, 버전 추가, 통계</td></tr>
+                        <tr><td>TestSMEReview</td><td>3</td><td>검토 등록, 대기 목록, 수정 제출</td></tr>
+                        <tr><td>TestQTIExporter</td><td>3</td><td>QTI XML, JSON, CSV 내보내기</td></tr>
+                        <tr><td>TestAdaptiveEngine</td><td>3</td><td>IRT 확률, 시험 설정, 교육생 프로필</td></tr>
+                        <tr><td>TestNuclearGlossary</td><td>7</td><td>검색, 약어, 프롬프트 텍스트, VLM 컨텍스트</td></tr>
+                        <tr><td>TestPromptTemplateManager</td><td>7</td><td>로드, 조회, 설정, 오버라이드, 버전</td></tr>
+                        <tr><td>TestE2EPipeline</td><td>3</td><td>11단계 E2E, 메타데이터, 직렬화</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;"><strong>실행</strong>: <code>python3 -m pytest tests/test_e2e_pipeline.py -v</code> → <span style="color:#22c55e; font-weight:bold;">38 passed in 0.23s</span></p>
+            </div>
+        </div>
+
+        <!-- v6: 원자력 교육 AI 트렌드 (2025-2026) -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #8b5cf6;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #ede9fe; color: #7c3aed;">&#127758;</div>
+                <div>
+                    <div class="card-title">v6: 원자력 교육 AI 글로벌 트렌드 (2025-2026)</div>
+                    <div class="card-subtitle">OECD NEA, NRC, IAEA, KAERI 최신 동향</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>영역</th><th>핵심 발견</th><th>시사점</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>OECD NEA</strong></td><td>AIxpertise 공동 프로젝트 (Q1 2026~2028): AI 교육+벤치마킹+데이터 3축</td><td>국제 표준 AI 교육 프레임워크에 우리 시스템 정렬 가능</td></tr>
+                        <tr><td><strong>NRC</strong></td><td>AI 전략계획 FY2023-2027 발표, 규제 AI 프레임워크 구축 중</td><td>교육/평가 AI 규제 선점 기회 (아직 specific 정책 없음)</td></tr>
+                        <tr><td><strong>IAEA</strong></td><td>SAT + AI 통합 가이드, AI 첫 Collaborating Centre 지정</td><td>SAT 기반 AI 교육 시스템은 IAEA 방향성과 완전 일치</td></tr>
+                        <tr><td><strong>CBT/적응형</strong></td><td>Accelerant PLANT: 적응형 학습 플랫폼 (ACAD 21-001 준수)</td><td>IRT 문항풀 → CAT 적응형 시험 파이프라인 검증됨</td></tr>
+                        <tr><td><strong>KAERI</strong></td><td>AtomicGPT (8B/70B) — 원자력 특화 LLM, Llama 대비 5-24% 우수</td><td>Solar+AtomicGPT 하이브리드 가능성 (도메인 정확도 향상)</td></tr>
+                        <tr><td><strong>한수원</strong></td><td>2026 표준 강의안 개발자 채용, H-AIMD 배치, e-learning 고도화</td><td>인재개발원 교육 현대화 시점과 본 PoC 완전 부합</td></tr>
+                        <tr><td><strong>Upstage</strong></td><td>독파모 합격, Solar Pro 2 (GPT-4.1 상회), 국가 AI 240억원 사업</td><td>Solar 기반 온프레미스 전략의 기술적 우위 지속 확인</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- v10: Docker 배포 패키지 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #6366f1;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #e0e7ff; color: #4f46e5;">&#128230;</div>
+                <div>
+                    <div class="card-title">v10: Docker Compose 온프레미스 배포 패키지</div>
+                    <div class="card-subtitle">Solar Pro + AtomicGPT + FastAPI + Nginx + 모니터링 원클릭 배포</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>서비스</th><th>이미지</th><th>포트</th><th>GPU</th><th>비고</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Solar Pro LLM</strong></td><td>upstage/solar:pro-preview</td><td>8000</td><td>A100 80GB</td><td>모델 캐시 볼륨</td></tr>
+                        <tr><td><strong>AtomicGPT</strong></td><td>kaeri/atomicgpt:70b</td><td>8001</td><td>A100 80GB</td><td>--profile with-atomic</td></tr>
+                        <tr><td><strong>ChromaDB</strong></td><td>chromadb/chroma:0.5.23</td><td>8002</td><td>-</td><td>벡터 DB</td></tr>
+                        <tr><td><strong>FastAPI</strong></td><td>빌드 (Dockerfile)</td><td>8080</td><td>-</td><td>프롬프트 YAML 핫리로드</td></tr>
+                        <tr><td><strong>Nginx</strong></td><td>nginx:1.27-alpine</td><td>80/443</td><td>-</td><td>리버스 프록시 + 정적 파일</td></tr>
+                        <tr><td><strong>Prometheus</strong></td><td>prom/prometheus:v2.54</td><td>9090</td><td>-</td><td>--profile monitoring</td></tr>
+                        <tr><td><strong>Grafana</strong></td><td>grafana/grafana:11.4</td><td>3000</td><td>-</td><td>--profile monitoring</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;"><strong>실행</strong>: <code>cp .env.example .env && docker compose up -d</code></p>
+                <p><strong>모니터링</strong>: <code>docker compose --profile monitoring up -d</code></p>
+                <p><strong>AtomicGPT 추가</strong>: <code>docker compose --profile with-atomic up -d</code></p>
+            </div>
+        </div>
+
+        <!-- v10: 프롬프트 A/B 테스트 프레임워크 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #f97316;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fff7ed; color: #ea580c;">&#9878;</div>
+                <div>
+                    <div class="card-title">v10: 프롬프트 A/B 테스트 프레임워크</div>
+                    <div class="card-subtitle">프롬프트 변형 비교 → 데이터 기반 최적 프롬프트 선택</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>흐름</strong>: 실험 생성 → 변형 균등 할당 → 결과 기록 → 통계 비교 → 승자 자동 판정</p>
+                <p><strong>메트릭</strong>: QA 통과율, 평균 품질 점수, 오답 매력도, 비기능적 오답 수, 생성 시간, SME 승인율, 실제 난이도/변별도</p>
+                <p><strong>자동 완료</strong>: 모든 변형이 최소 샘플(기본 30개)에 도달하면 자동 완료 + 승자 판정</p>
+                <p><strong>API</strong>: <code>POST /ab-test/create</code> | <code>GET /ab-test/list</code> | <code>POST /ab-test/{id}/assign</code> | <code>POST /ab-test/{id}/record</code> | <code>GET /ab-test/{id}</code></p>
+            </div>
+        </div>
+
+        <!-- v9: AI 콘텐츠 생성 UI -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #10b981;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #d1fae5; color: #065f46;">&#128196;</div>
+                <div>
+                    <div class="card-title">v9: PPT 업로드 → 스크립트/문항 생성 인터랙티브 UI</div>
+                    <div class="card-subtitle">드래그 앤 드롭 업로드 → 자동 파싱 → 옵션 설정 → 생성 → 결과 뷰어 → 다운로드</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>3단계 플로우</strong>: &#10102; 파일 업로드(드래그/클릭, 자동 파싱) → &#10103; 옵션(학습목표/수준/문항수/2-Pass) → &#10104; 결과(스크립트/문항/품질/JSON 탭 + 다운로드)</p>
+                <p><strong>지원 액션</strong>: 스크립트만 / 문항만 / 전체 파이프라인 3가지 모드</p>
+                <p><strong>내보내기</strong>: JSON / CSV / QTI 2.1 다운로드</p>
+            </div>
+        </div>
+
+        <!-- v9: 교육 환류 루프 자동화 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #f59e0b;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#9851;</div>
+                <div>
+                    <div class="card-title">v9: 교육 환류 루프 자동화 (Feedback Loop)</div>
+                    <div class="card-subtitle">시험 데이터 → IRT 교정 → 프롬프트 자동 조정 트리거</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>3단계 성숙 모델</strong>:</p>
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>Phase</th><th>조건</th><th>활동</th><th>KPI</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Phase 1</strong></td><td>데이터 수집 중</td><td>응시 결과 + 만족도 축적</td><td>응답 수, 피드백 수</td></tr>
+                        <tr><td><strong>Phase 2</strong></td><td>문항당 50+ 응답</td><td>CTT 기반 난이도/변별도 분석</td><td>평균 난이도, 변별도 적합률</td></tr>
+                        <tr><td><strong>Phase 3</strong></td><td>문항당 200+ 응답</td><td>IRT 2PL 파라미터 추정 → 적응형 시험</td><td>CAT 효율(문항 수 감소), 측정 정밀도</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;"><strong>자동 트리거</strong>:</p>
+                <ul style="padding-left: 20px; font-size: 0.85rem;">
+                    <li>만족도 3.5점 미만 → 스크립트 프롬프트 개선 권장</li>
+                    <li>교육생 30%+ "너무 어려움" → 난이도 분포 하향 조정</li>
+                    <li>교육생 40%+ "너무 쉬움" → Application/Analysis 비중 상향</li>
+                    <li>SME 반려율 20%+ → 문항 생성 프롬프트/Few-shot 보강</li>
+                </ul>
+                <p style="margin-top:8px;"><strong>API</strong>: <code>GET /api/v1/feedback/loop-status</code> | <code>POST /api/v1/feedback/trigger-calibration</code></p>
+            </div>
+        </div>
+
+        <!-- v8: LLM 하이브리드 라우터 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #ec4899;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fce7f3; color: #be185d;">&#9881;</div>
+                <div>
+                    <div class="card-title">v8: LLM 하이브리드 라우터 (AtomicGPT + Solar Pro)</div>
+                    <div class="card-subtitle">태스크별 최적 모델 자동 라우팅 + 안전등급 크로스체크</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>아키텍처</strong>: 원자력 도메인 태스크는 AtomicGPT(KAERI 8B/70B), 범용 태스크는 Solar Pro로 자동 분배</p>
+                <table class="status-table" style="font-size: 0.82rem; margin-top:8px;">
+                    <thead><tr><th>태스크</th><th>Primary</th><th>Fallback</th><th>크로스체크</th><th>근거</th></tr></thead>
+                    <tbody>
+                        <tr><td>문항 생성</td><td style="color:#be185d;"><strong>AtomicGPT</strong></td><td>Solar Pro</td><td>-</td><td>도메인 지식 정확도가 핵심</td></tr>
+                        <tr><td>오답 개선</td><td style="color:#be185d;"><strong>AtomicGPT</strong></td><td>Solar Pro</td><td>-</td><td>오답 매력도는 도메인 의존</td></tr>
+                        <tr><td>시나리오 생성</td><td style="color:#be185d;"><strong>AtomicGPT</strong></td><td>Solar Pro</td><td>-</td><td>원전 시나리오는 도메인 필수</td></tr>
+                        <tr><td>스크립트 생성</td><td style="color:#3b82f6;"><strong>Solar Pro</strong></td><td>AtomicGPT</td><td>-</td><td>구조화 능력이 중요</td></tr>
+                        <tr><td>VLM 분석</td><td style="color:#3b82f6;"><strong>Solar Pro</strong></td><td>Solar Pro</td><td>-</td><td>AtomicGPT VLM 미지원</td></tr>
+                        <tr><td>품질 검증</td><td style="color:#3b82f6;"><strong>Solar Pro</strong></td><td>AtomicGPT</td><td>-</td><td>범용 추론 능력 활용</td></tr>
+                        <tr><td style="color:#ef4444; font-weight:bold;">안전등급 검토</td><td style="color:#be185d;"><strong>AtomicGPT</strong></td><td>Solar Pro</td><td style="color:#ef4444;"><strong>필수</strong></td><td>양쪽 모두 검증 (동의율 &lt;50%면 SME 알림)</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;"><strong>핵심 기능</strong>: 신뢰도 추정 (JSON 구조+필드+길이), Fallback 체인, 라우팅 통계 대시보드</p>
+                <p><strong>현재 상태</strong>: Solar Pro 활성 / AtomicGPT 대기 (API 키 설정 시 자동 활성화)</p>
+            </div>
+        </div>
+
+        <!-- v8: 프롬프트 temperature/max_tokens 자동 적용 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #dbeafe; color: #2563eb;">&#9879;</div>
+                <div>
+                    <div class="card-title">v8: 프롬프트 파라미터 YAML 완전 연동</div>
+                    <div class="card-subtitle">temperature, max_tokens도 YAML에서 자동 적용</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>이전</strong>: system_prompt만 YAML에서 로드, temperature/max_tokens는 각 모듈에 하드코딩</p>
+                <p><strong>이후</strong>: 4개 모듈(script_gen, vlm, question_gen, qa_validator)의 모든 LLM 호출이 YAML 설정값 자동 참조</p>
+                <p><strong>효과</strong>: YAML 파일 하나만 수정하면 모든 LLM 호출 파라미터가 즉시 반영 (서버 재시작 불필요)</p>
+            </div>
+        </div>
+
+        <!-- v8: E2E 데모 스크립트 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #d1fae5; color: #065f46;">&#9654;</div>
+                <div>
+                    <div class="card-title">v8: E2E 데모 스크립트 (API 없이 실행)</div>
+                    <div class="card-subtitle">5개 원자력 슬라이드 × 11단계 파이프라인 완전 시연</div>
+                </div>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>실행</strong>: <code>python3 demo/run_sample_pipeline.py</code></p>
+                <p><strong>내용</strong>: RCS/PZR/ECCS/LOCA/정리 5개 슬라이드, 4개 학습목표, 3개 VLM Mock, 4개 문항(Bloom 4단계)</p>
+                <p><strong>출력</strong>: JSON(스크립트/문항/QA) + QTI XML + 인간 가독 요약 → <code>demo/output/</code></p>
+                <p><strong>결과</strong>: 스크립트 품질 78.5점, 평균 난이도 0.53, 용어사전 23개, 6개 프롬프트 버전 표시</p>
+            </div>
+        </div>
+
+        <!-- 현재 개선점 및 의문 -->
+        <div class="card" style="margin-top: 24px; border-left: 4px solid #f59e0b;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">?</div>
+                <div>
+                    <div class="card-title">현재 열린 질문 & 개선 과제</div>
+                    <div class="card-subtitle">계속 고민해야 할 사항들</div>
+                </div>
+            </div>
+            <ol class="question-list">
+                <li class="question-item">
+                    <span class="question-number">1</span>
+                    <div>
+                        <div class="question-text"><strong>VLM P&ID 정확도</strong>: Upstage Document Parse Enhanced가 원자력 P&ID를 구조적으로 파싱할 수 있는가? 배관 흐름, 밸브 상태, 제어 로직까지 해석 가능한가? 아니면 "이미지 설명" 수준에 그치는가?</div>
+                        <span class="question-tag tag-critical">Upstage 확인필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">2</span>
+                    <div>
+                        <div class="question-text"><strong>Solar Pro 컨텍스트 길이</strong>: Golden Context로 참고자료 3~5건을 주입하면 토큰이 얼마나 되는가? Solar Pro의 컨텍스트 윈도우(추정 32K~128K) 내에서 충분한가? 긴 참고자료는 청킹이 필요한가?</div>
+                        <span class="question-tag tag-important">기술검증 필요</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">3</span>
+                    <div>
+                        <div class="question-text"><strong><s>문항 오답 매력도 개선</s></strong> &rarr; <strong style="color:#22c55e;">해결: 2-Pass 생성 엔진 구현 완료</strong>. 1차에서 distractor_rationale 강제, 2차에서 약한 오답 자동 교체. Few-shot 적용 시 비기능적 오답 50%&rarr;16% 감소.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">4</span>
+                    <div>
+                        <div class="question-text"><strong><s>실무 시나리오형 문항</s></strong> &rarr; <strong style="color:#22c55e;">해결: 시나리오 기반 문항 생성 구현 완료</strong>. 정상/비정상/비상/정비 4가지 운전 시나리오 유형, 시나리오당 2~3개 연계 문항 자동 생성.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">5</span>
+                    <div>
+                        <div class="question-text"><strong>다국어/다기종 확장성</strong>: 한수원은 UAE 바라카 원전 등 해외사업도 수행. Solar Pro의 영어/아랍어 강의자료 파싱 및 생성 품질은? 글로벌 확장 가능성?</div>
+                        <span class="question-tag tag-normal">확장과제</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">6</span>
+                    <div>
+                        <div class="question-text"><strong>시뮬레이터 연계</strong>: IAEA는 시뮬레이터 기반 훈련을 강조. AI 생성 시나리오를 시뮬레이터 훈련 시나리오와 연계할 수 있는가? (중장기 과제)</div>
+                        <span class="question-tag tag-normal">미래과제</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">7</span>
+                    <div>
+                        <div class="question-text"><strong>IRT 파라미터 추정</strong>: Item Response Theory 기반 적응형 평가를 위해서는 최소 200~300명의 응답 데이터가 필요. 인재개발원 교육과정당 연간 수강인원으로 충분한 데이터가 확보되는가? 소규모 교육과정은 어떻게?</div>
+                        <span class="question-tag tag-important">Phase 2 검토</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">8</span>
+                    <div>
+                        <div class="question-text"><strong><s>SME 수정 이력 학습</s></strong> &rarr; <strong style="color:#22c55e;">해결: SME 검토 워크플로우 구현 완료</strong>. 9가지 수정 유형 자동 분류, Diff 분석 &rarr; 프롬프트 개선 인사이트 자동 추출, Few-shot 후보 자동 추천.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">9</span>
+                    <div>
+                        <div class="question-text"><strong>2-Pass 비용 효율</strong>: 2-Pass 생성은 LLM 호출이 2배. 온프레미스 Solar Pro에서 20문항 기준 추가 소요시간과 GPU 비용은? 1-Pass+QA vs 2-Pass 중 어느 전략이 최적?</div>
+                        <span class="question-tag tag-normal">최적화 과제</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">10</span>
+                    <div>
+                        <div class="question-text"><strong><s>안전 태깅 정확도</s></strong> &rarr; <strong style="color:#22c55e;">해결: Hybrid 안전 태깅 구현 완료</strong>. 키워드 1차(전체) + LLM 2차(critical만) 전략으로 API 호출 ~70% 절감하면서 정확도 향상. LLM 오버라이드 추적으로 키워드 사전 지속 개선 가능.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">11</span>
+                    <div>
+                        <div class="question-text"><strong>Few-shot 예시 최소 수량</strong>: SME 모범 문항을 최소 몇 건 확보해야 Few-shot 효과가 유의미한가? Bloom 수준별로 각 3건이면 총 12건 필요. SME 리소스 확보 계획은?</div>
+                        <span class="question-tag tag-important">SME 협조필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">12</span>
+                    <div>
+                        <div class="question-text"><strong>간격 반복(Spaced Repetition) 알고리즘</strong>: SM-2 vs Leitner vs 자체 모델? 원자력 직무교육 특성상 안전 핵심 항목은 짧은 간격, 일반 항목은 긴 간격이 적절. 안전등급 연계 가변 간격 알고리즘 설계 필요.</div>
+                        <span class="question-tag tag-normal">Phase 3 설계</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">13</span>
+                    <div>
+                        <div class="question-text"><strong>SME 검토 워크플로우 UI</strong>: 현재 API만 구현됨. SME가 실제로 사용할 검토/수정 웹 인터페이스(문항 원본 &harr; 수정본 비교 뷰, 수정 유형 선택, 승인/반려 버튼) 설계가 필요. 기존 CBT 시스템과의 연동 방안도 검토.</div>
+                        <span class="question-tag tag-important">UI 설계 필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">14</span>
+                    <div>
+                        <div class="question-text"><strong>문항 폐기 정책 자동화</strong>: IRT 변별도 &lt;0.2 또는 정답률 &gt;95%/&lt;20%인 문항의 자동 폐기 후보 추출 기준 정립. Safety-critical 문항은 폐기 전 SME 재확인 필수. 폐기 대체 문항 자동 생성 트리거 연계?</div>
+                        <span class="question-tag tag-important">정책 설계</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">15</span>
+                    <div>
+                        <div class="question-text"><strong>프롬프트 개선 자동 반영 범위</strong>: SME 수정 패턴 분석에서 얻은 인사이트를 시스템 프롬프트에 자동 반영할 것인가, SME 승인 후 반영할 것인가? 자동 반영 시 품질 하락 위험, 수동 반영 시 반복 효율 저하. Hybrid 접근(general 자동, safety_critical 수동)?</div>
+                        <span class="question-tag tag-important">거버넌스 설계</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">16</span>
+                    <div>
+                        <div class="question-text"><strong>QTI 2.1 vs 3.0 선택</strong>: IMS QTI 3.0이 2022년 발표되었으나 CBT 시스템 호환성이 아직 낮음. 한수원 CBT(인재개발원 LMS)가 어떤 버전을 지원하는지 확인 필요. QTI 3.0의 Portable Custom Interaction은 시나리오형 문항에 유리.</div>
+                        <span class="question-tag tag-normal">기술검증 필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">17</span>
+                    <div>
+                        <div class="question-text"><strong>적응형 시험의 법적 근거</strong>: 원자력 면허시험은 고정 문항 세트가 법적 요건. 적응형 시험은 직무교육/자체평가에만 적용 가능한가? NRC의 Computer Adaptive Testing 허용 범위 및 IAEA 가이드라인 확인 필요.</div>
+                        <span class="question-tag tag-important">규제 확인</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">18</span>
+                    <div>
+                        <div class="question-text"><strong>스크립트 품질과 실제 교육효과 상관성</strong>: 자동 품질 점수가 높은 스크립트가 실제 교육생 학습 효과(Kirkpatrick Level 2)와 상관이 있는지 검증 필요. 파일럿 교육에서 A/B 테스트(AI스크립트 vs 교수자 스크립트) 설계?</div>
+                        <span class="question-tag tag-normal">검증 설계</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">19</span>
+                    <div>
+                        <div class="question-text"><strong>용어사전 SME 검증 프로세스</strong>: 현재 20+ 시드 용어는 일반적 정의 기반. 한수원 인재개발원 자체 교재/교범에서 사용하는 정의와 차이가 있을 수 있음. SME 검증 우선순위(safety_critical 용어 먼저)와 검증 워크플로우 설계 필요.</div>
+                        <span class="question-tag tag-important">SME 협조필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">20</span>
+                    <div>
+                        <div class="question-text"><strong>VLM 용어사전 컨텍스트 효과 측정</strong>: 용어사전 주입 전후로 VLM 도면 분석 정확도가 얼마나 향상되는지 정량 평가 필요. P&ID 10장에 대해 전문가 평가(구성요소 식별율, 용어 정확도)로 비교 실험 설계.</div>
+                        <span class="question-tag tag-normal">효과 검증</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">21</span>
+                    <div>
+                        <div class="question-text"><strong><s>KAERI AtomicGPT 연계 가능성</s></strong> &rarr; <strong style="color:#22c55e;">해결: LLM 하이브리드 라우터 구현 완료 (v8)</strong>. 7개 태스크별 라우팅 정책 + 안전등급 크로스체크 + Fallback 체인. AtomicGPT API 키 설정 시 자동 활성화.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">22</span>
+                    <div>
+                        <div class="question-text"><strong><s>프롬프트 A/B 테스트 프레임워크</s></strong> &rarr; <strong style="color:#22c55e;">해결: A/B 테스트 프레임워크 구현 완료 (v10)</strong>. 7개 메트릭(QA 점수/오답 매력도/SME 승인율/난이도/변별도/생성시간/비기능적 오답), 균등 할당, 자동 완료(N=30), 승자 자동 판정, 5개 API.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">23</span>
+                    <div>
+                        <div class="question-text"><strong>실제 PPT 업로드 테스트</strong>: 현재 Mock 데이터로 전체 파이프라인 검증 완료. 다음 단계는 실제 원자력 교육 PPT 파일로 Upstage Document Parse API 호출 → 실데이터 기반 스크립트/문항 품질 평가. API 키 + 샘플 PPT 1~2건 필요.</div>
+                        <span class="question-tag tag-critical">Upstage 확인필요</span>
+                    </div>
+                </li>
+                <li class="question-item" style="opacity: 0.6;">
+                    <span class="question-number" style="background: #22c55e; color: white;">24</span>
+                    <div>
+                        <div class="question-text"><strong><s>웹 UI 파일 업로드 + 생성 결과 표시</s></strong> &rarr; <strong style="color:#22c55e;">해결: "생성하기" 탭 구현 완료 (v9)</strong>. 3단계 플로우(업로드→옵션→결과), 드래그앤드롭, 스크립트/문항/품질/JSON 탭, JSON/CSV/QTI 다운로드.</div>
+                        <span class="question-tag" style="background:#d1fae5; color:#065f46;">구현완료</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">25</span>
+                    <div>
+                        <div class="question-text"><strong>교육 효과 환류 루프 정량화</strong>: 생성된 문항의 실제 시험 결과(난이도/변별도)를 수집 → IRT 파라미터 자동 교정 → 프롬프트 자동 조정. 이 환류 루프의 최소 가동 조건(데이터량, 주기)과 KPI(교육 성과 개선율)를 정의해야 함.</div>
+                        <span class="question-tag tag-important">Phase 2 설계</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">26</span>
+                    <div>
+                        <div class="question-text"><strong>멀티모달 VLM 직접 호출</strong>: 현재는 Document Parse Enhanced가 추출한 이미지 "설명 텍스트"를 Solar Pro에 전달. 차세대 방식은 이미지 바이트를 VLM에 직접 전달하여 도면/P&ID를 시각적으로 이해시키는 것. Upstage Solar VLM 모델 지원 여부 + API 형식 확인 필요.</div>
+                        <span class="question-tag tag-critical">Upstage 확인필요</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">27</span>
+                    <div>
+                        <div class="question-text"><strong>온프레미스 배포 패키지</strong>: Docker Compose로 Solar Pro + FastAPI + 웹 포털 + DB를 한 번에 배포하는 패키지 필요. GPU 서버 요구사항(A100 80GB), 모델 다운로드 자동화, 헬스체크, 모니터링(Prometheus/Grafana) 포함.</div>
+                        <span class="question-tag tag-important">인프라 설계</span>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ===== 시스템 아키텍처 ===== -->
+    <section id="architecture" class="section">
+        <div class="section-header">
+            <h2>시스템 아키텍처</h2>
+            <p>Upstage Document AI + Solar LLM + RAG 파이프라인 기반 온프레미스 아키텍처</p>
+        </div>
+
+        <div class="architecture-box">
+            <h3 style="margin-bottom: 20px; color: var(--khnp-primary);">End-to-End 파이프라인</h3>
+            <div class="arch-flow">
+                <div class="arch-node upstage-node">
+                    <h4>1. Document Parse</h4>
+                    <p>Upstage Document AI<br>슬라이드 &rarr; 구조화 데이터</p>
+                </div>
+                <div class="arch-arrow">&rarr;</div>
+                <div class="arch-node rag-node">
+                    <h4>2. RAG Engine</h4>
+                    <p>지식 검색 증강<br>규정/절차서/사례 연계</p>
+                </div>
+                <div class="arch-arrow">&rarr;</div>
+                <div class="arch-node gen-node">
+                    <h4>3. Generation</h4>
+                    <p>Solar Pro LLM<br>스크립트 + 문제은행</p>
+                </div>
+                <div class="arch-arrow">&rarr;</div>
+                <div class="arch-node">
+                    <h4>4. SAT Integration</h4>
+                    <p>학습목표 매핑<br>품질 검증/환류</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128196;</div>
+                    <div>
+                        <div class="card-title">Document Processing</div>
+                        <div class="card-subtitle">Upstage Document Parse API</div>
+                    </div>
+                </div>
+                <table class="status-table" style="margin-top: 0;">
+                    <thead><tr><th>기능</th><th>모드</th><th>용도</th></tr></thead>
+                    <tbody>
+                        <tr><td>레이아웃 분석</td><td>Standard</td><td>텍스트/표/수식 추출</td></tr>
+                        <tr><td>VLM 분석</td><td>Enhanced</td><td>도면/차트/P&ID 해석</td></tr>
+                        <tr><td>자동 라우팅</td><td>Auto</td><td>페이지별 최적 모드 선택</td></tr>
+                        <tr><td>OCR</td><td>95%+</td><td>스캔 문서 지원</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon system">&#128421;</div>
+                    <div>
+                        <div class="card-title">온프레미스 인프라</div>
+                        <div class="card-subtitle">Docker Compose Stack</div>
+                    </div>
+                </div>
+                <div style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.82rem; background: var(--khnp-dark); color: #a0d8ef; padding: 16px; border-radius: 8px; line-height: 1.8;">
+                    <div>&#9632; solar-llm &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :8000  <span style="color: #6c5ce7;">[GPU]</span></div>
+                    <div>&#9632; document-parse &nbsp;&nbsp; :8001  <span style="color: #6c5ce7;">[GPU]</span></div>
+                    <div>&#9632; chromadb &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :8002  <span style="color: #0ea5e9;">[CPU]</span></div>
+                    <div>&#9632; app-backend &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :8080  <span style="color: #22c55e;">[FastAPI]</span></div>
+                    <div>&#9632; nginx &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :443 &nbsp;<span style="color: #f59e0b;">[SSL]</span></div>
+                    <div style="margin-top: 8px; color: #666;">GPU: NVIDIA A100 80GB | RAM: 256GB+</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Upstage 협의사항 ===== -->
+    <section id="upstage" class="section">
+        <div class="section-header">
+            <h2>Upstage 협의사항</h2>
+            <p>Document AI / Solar LLM 온프레미스 구축을 위한 핵심 질문 및 협의 사항</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128274;</div>
+                    <div>
+                        <div class="card-title">온프레미스 배포</div>
+                        <div class="card-subtitle">On-Premise Deployment</div>
+                    </div>
+                </div>
+                <ol class="question-list">
+                    <li class="question-item">
+                        <span class="question-number">1</span>
+                        <div>
+                            <div class="question-text">Document Parse API의 온프레미스 배포 옵션은? Docker 이미지 / Kubernetes Helm Chart 제공 여부</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">2</span>
+                        <div>
+                            <div class="question-text">Solar Pro LLM의 온프레미스 라이선싱 모델과 가격 체계는? (Docker: upstage/solar:pro-preview 확인)</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">3</span>
+                        <div>
+                            <div class="question-text">Air-gapped(인터넷 차단) 내부망 환경에서의 완전 독립 운영이 가능한가? 라이선스 인증 방식은?</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">4</span>
+                        <div>
+                            <div class="question-text">Embedding 모델도 온프레미스로 제공되는가? 별도 Docker 이미지 여부</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">5</span>
+                        <div>
+                            <div class="question-text">최소 GPU 사양: A100 80GB 1장으로 Document Parse + Solar Pro 동시 구동 가능한가?</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128295;</div>
+                    <div>
+                        <div class="card-title">기술 역량</div>
+                        <div class="card-subtitle">Technical Capabilities</div>
+                    </div>
+                </div>
+                <ol class="question-list">
+                    <li class="question-item">
+                        <span class="question-number">6</span>
+                        <div>
+                            <div class="question-text">Document Parse Enhanced 모드의 원자력 도면/P&ID/계통도 인식 정확도 수준은? 벤치마크 결과?</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">7</span>
+                        <div>
+                            <div class="question-text">Solar Pro의 한국어 전문 용어(원자력 분야) 처리 성능은? 도메인 Fine-tuning이 가능한가?</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">8</span>
+                        <div>
+                            <div class="question-text">PPTX 파일 직접 파싱 지원 여부 (PDF 변환 없이)</div>
+                            <span class="question-tag tag-normal">NORMAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">9</span>
+                        <div>
+                            <div class="question-text">LangChain / LlamaIndex 등 RAG 프레임워크와의 공식 통합 가이드 제공 여부</div>
+                            <span class="question-tag tag-normal">NORMAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">10</span>
+                        <div>
+                            <div class="question-text">Document Parse 처리 속도: 100페이지 PDF 기준 예상 소요 시간 (Standard vs Enhanced)</div>
+                            <span class="question-tag tag-normal">NORMAL</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon upstage">&#128176;</div>
+                <div>
+                    <div class="card-title">사업 및 지원</div>
+                    <div class="card-subtitle">Business & Support</div>
+                </div>
+            </div>
+            <ol class="question-list">
+                <li class="question-item">
+                    <span class="question-number">11</span>
+                    <div>
+                        <div class="question-text">PoC 기간 중 기술지원 범위와 SLA: 전담 엔지니어 배정 가능 여부</div>
+                        <span class="question-tag tag-important">IMPORTANT</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">12</span>
+                    <div>
+                        <div class="question-text">PoC 라이선스 비용 및 프로덕션 전환 시 가격 체계</div>
+                        <span class="question-tag tag-critical">CRITICAL</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">13</span>
+                    <div>
+                        <div class="question-text">공공기관/원자력 분야 레퍼런스 사례 (유사 프로젝트 수행 경험)</div>
+                        <span class="question-tag tag-normal">NORMAL</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">14</span>
+                    <div>
+                        <div class="question-text">Solar Open 100B (오픈소스) vs Solar Pro (상용) 성능 비교 및 PoC 추천 모델</div>
+                        <span class="question-tag tag-important">IMPORTANT</span>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Upstage 미팅 노트 -->
+        <div class="meeting-notes" style="margin-top: 24px;">
+            <h3>Upstage 미팅/소통 기록</h3>
+            <div id="upstage-notes-list"></div>
+            <textarea class="note-input" id="upstage-note-input" placeholder="미팅 내용, 답변 받은 사항, 후속 액션 등을 기록하세요..."></textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addNote('upstage')">기록 저장</button>
+                <button class="btn btn-secondary" onclick="exportNotes('upstage')">내보내기</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== EY 협의사항 ===== -->
+    <section id="ey" class="section">
+        <div class="section-header">
+            <h2>EY 협의사항</h2>
+            <p>AI 전략 수립 컨설팅 관점의 핵심 질문 및 협의 사항</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon ey">&#128200;</div>
+                    <div>
+                        <div class="card-title">전략 및 ROI</div>
+                        <div class="card-subtitle">Strategy & ROI Analysis</div>
+                    </div>
+                </div>
+                <ol class="question-list">
+                    <li class="question-item">
+                        <span class="question-number">1</span>
+                        <div>
+                            <div class="question-text">AI 전략 관점에서 본 PoC 범위의 적정성: 강의 스크립트 + 문제은행 생성이 가장 높은 ROI를 낼 수 있는 시작점인가?</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">2</span>
+                        <div>
+                            <div class="question-text">ROI 분석 프레임워크: 교육컨텐츠 생성 자동화의 정량적 효과 측정 방법론 (시간절감, 품질향상, 비용절감)</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">3</span>
+                        <div>
+                            <div class="question-text">글로벌 원자력 교육 분야의 AI 적용 벤치마킹 사례 (EdF, Exelon, TEPCO 등)</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">4</span>
+                        <div>
+                            <div class="question-text">확산 전략: 인재개발원 PoC 성공 후 본사/발전소/그룹사 확산 로드맵</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon ey">&#9878;</div>
+                    <div>
+                        <div class="card-title">규제 및 컴플라이언스</div>
+                        <div class="card-subtitle">Regulation & Compliance</div>
+                    </div>
+                </div>
+                <ol class="question-list">
+                    <li class="question-item">
+                        <span class="question-number">5</span>
+                        <div>
+                            <div class="question-text">원자력 산업에서의 AI 활용에 대한 현행 규제 프레임워크 (KINS, 원안위, IAEA 가이드라인)</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">6</span>
+                        <div>
+                            <div class="question-text">AI 생성 교육컨텐츠의 법적 지위: AI가 생성한 문제로 인사 평가 시 법적 리스크는?</div>
+                            <span class="question-tag tag-critical">CRITICAL</span>
+                        </div>
+                    </li>
+                    <li class="question-item">
+                        <span class="question-number">7</span>
+                        <div>
+                            <div class="question-text">데이터 거버넌스: 원자력 교육자료의 AI 학습 데이터 활용 시 보안등급별 처리 기준</div>
+                            <span class="question-tag tag-important">IMPORTANT</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon ey">&#128101;</div>
+                <div>
+                    <div class="card-title">변화관리 및 조직</div>
+                    <div class="card-subtitle">Change Management</div>
+                </div>
+            </div>
+            <ol class="question-list">
+                <li class="question-item">
+                    <span class="question-number">8</span>
+                    <div>
+                        <div class="question-text">강사/교육담당자의 AI 도구 수용성 향상 전략: "AI가 강사를 대체" 우려 해소 방안</div>
+                        <span class="question-tag tag-important">IMPORTANT</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">9</span>
+                    <div>
+                        <div class="question-text">AI 생성 컨텐츠의 품질 보증(QA) 프로세스: SME 검증 워크플로우 설계</div>
+                        <span class="question-tag tag-important">IMPORTANT</span>
+                    </div>
+                </li>
+                <li class="question-item">
+                    <span class="question-number">10</span>
+                    <div>
+                        <div class="question-text">KPI 설정: PoC 성공 기준 정의 (정량: 시간절감률/정성: 전문가 평가)</div>
+                        <span class="question-tag tag-critical">CRITICAL</span>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- EY 미팅 노트 -->
+        <div class="meeting-notes" style="margin-top: 24px;">
+            <h3>EY 미팅/소통 기록</h3>
+            <div id="ey-notes-list"></div>
+            <textarea class="note-input" id="ey-note-input" placeholder="미팅 내용, 컨설팅 결과, 후속 액션 등을 기록하세요..."></textarea>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="addNote('ey')">기록 저장</button>
+                <button class="btn btn-secondary" onclick="exportNotes('ey')">내보내기</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SAT 연계 ===== -->
+    <section id="sat" class="section">
+        <div class="section-header">
+            <h2>SAT (Systematic Approach to Training) 연계</h2>
+            <p>IAEA 권고 SAT 5단계와 AI 시스템의 매핑</p>
+        </div>
+
+        <div class="sat-phases">
+            <div class="sat-phase" onclick="showSATDetail('analysis')">
+                <div class="sat-phase-icon">&#128269;</div>
+                <div class="sat-phase-name">Analysis</div>
+                <div class="sat-phase-desc">직무분석</div>
+            </div>
+            <div class="sat-phase" onclick="showSATDetail('design')">
+                <div class="sat-phase-icon">&#128208;</div>
+                <div class="sat-phase-name">Design</div>
+                <div class="sat-phase-desc">교육설계</div>
+            </div>
+            <div class="sat-phase active" onclick="showSATDetail('development')">
+                <div class="sat-phase-icon">&#9881;</div>
+                <div class="sat-phase-name">Development</div>
+                <div class="sat-phase-desc">교재개발</div>
+            </div>
+            <div class="sat-phase" onclick="showSATDetail('implementation')">
+                <div class="sat-phase-icon">&#127891;</div>
+                <div class="sat-phase-name">Implementation</div>
+                <div class="sat-phase-desc">교육실행</div>
+            </div>
+            <div class="sat-phase" onclick="showSATDetail('evaluation')">
+                <div class="sat-phase-icon">&#128202;</div>
+                <div class="sat-phase-name">Evaluation</div>
+                <div class="sat-phase-desc">평가환류</div>
+            </div>
+        </div>
+
+        <div class="card" id="sat-detail">
+            <div class="card-header">
+                <div class="card-icon sat">&#9881;</div>
+                <div>
+                    <div class="card-title" id="sat-detail-title">Development - 교재개발 (PoC 핵심 영역)</div>
+                    <div class="card-subtitle" id="sat-detail-subtitle">AI 시스템이 가장 직접적으로 기여하는 SAT 단계</div>
+                </div>
+            </div>
+            <div id="sat-detail-content">
+                <table class="status-table">
+                    <thead>
+                        <tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>강의 스크립트 작성</td>
+                            <td>슬라이드 기반 초안 자동 생성</td>
+                            <td>검토/수정, 경험 보충</td>
+                        </tr>
+                        <tr>
+                            <td>평가문항 개발</td>
+                            <td>학습목표 기반 문항 자동 생성</td>
+                            <td>정답 검증, 난이도 조정</td>
+                        </tr>
+                        <tr>
+                            <td>보충자료 연계</td>
+                            <td>RAG로 관련 규정/사례 자동 검색</td>
+                            <td>적절성 판단, 추가 자료 지정</td>
+                        </tr>
+                        <tr>
+                            <td>시각자료 해석</td>
+                            <td>VLM으로 도면/차트 설명 생성</td>
+                            <td>기술적 정확성 확인</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon sat">&#128218;</div>
+                <div>
+                    <div class="card-title">Bloom's Taxonomy 기반 문항 설계</div>
+                    <div class="card-subtitle">SAT 평가체계와 연계된 수준별 문항 생성</div>
+                </div>
+            </div>
+            <table class="status-table">
+                <thead>
+                    <tr><th>Bloom 수준</th><th>문항 유형</th><th>비율</th><th>예시</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Knowledge</strong></td>
+                        <td>사실/용어/절차 확인</td>
+                        <td>30%</td>
+                        <td>"다음 중 주증기 안전밸브의 설정압력은?"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comprehension</strong></td>
+                        <td>개념 이해/비교</td>
+                        <td>30%</td>
+                        <td>"PWR과 BWR의 냉각재 순환 차이를 설명한 것으로 올바른 것은?"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Application</strong></td>
+                        <td>실무 상황 적용</td>
+                        <td>25%</td>
+                        <td>"냉각재 유출사고 시 가장 먼저 수행해야 할 조치는?"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Analysis</strong></td>
+                        <td>원인 분석/진단</td>
+                        <td>15%</td>
+                        <td>"다음 계기지시값 변화의 원인으로 가장 적절한 것은?"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 로드맵 ===== -->
+    <!-- ===== LLM 라우터 ===== -->
+    <section id="llm-router" class="section">
+        <div class="section-header">
+            <h2>LLM 하이브리드 라우터</h2>
+            <p>AtomicGPT(원자력 특화) + Solar Pro(범용) 태스크별 자동 라우팅</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fce7f3; color: #be185d;">&#9881;</div>
+                <div>
+                    <div class="card-title">라우팅 아키텍처</div>
+                    <div class="card-subtitle">정책 기반 자동 분배 + Fallback + 크로스체크</div>
+                </div>
+            </div>
+            <pre style="background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-size: 0.8rem; overflow-x: auto;">
+  ┌─────────────┐
+  │  Task Input  │
+  └──────┬──────┘
+         │  classify_task()
+  ┌──────▼──────┐
+  │  LLMRouter   │  ← 7개 라우팅 정책
+  │  (정책 기반)  │
+  └──┬───────┬──┘
+     │       │
+  ┌──▼──┐ ┌─▼────┐
+  │Atomic│ │Solar │  ← 1차 라우팅
+  │ GPT  │ │ Pro  │
+  └──┬──┘ └──┬───┘
+     │       │
+  ┌──▼───────▼──┐
+  │  품질 평가    │  ← confidence check
+  │  (threshold)  │
+  └──────┬──────┘
+         │  fallback if low
+  ┌──────▼──────┐
+  │  최종 응답    │
+  └─────────────┘</pre>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8; margin-top: 16px;">
+                <p><strong>신뢰도 추정</strong>: JSON 파싱 성공(+0.3) + 의미있는 키 존재(+0.3) + 내용 100자 이상(+0.4)</p>
+                <p><strong>크로스체크</strong>: safety_critical 문항은 양쪽 모델 모두 호출 → 동의율 50% 미만 시 SME 알림</p>
+                <p><strong>통계</strong>: 프로바이더별/태스크별 호출 수, fallback율, 크로스체크율, 평균 지연시간, 평균 신뢰도</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #dbeafe; color: #2563eb;">&#128202;</div>
+                <div>
+                    <div class="card-title">라우팅 통계 (실시간)</div>
+                    <div class="card-subtitle">API: GET /api/v1/router/statistics</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+                <div style="text-align:center; padding:16px; background:var(--background); border-radius:8px;">
+                    <div style="font-size:2rem; font-weight:700; color:#be185d;" id="router-total">0</div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">총 호출</div>
+                </div>
+                <div style="text-align:center; padding:16px; background:var(--background); border-radius:8px;">
+                    <div style="font-size:2rem; font-weight:700; color:#3b82f6;" id="router-solar">0</div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">Solar Pro</div>
+                </div>
+                <div style="text-align:center; padding:16px; background:var(--background); border-radius:8px;">
+                    <div style="font-size:2rem; font-weight:700; color:#ec4899;" id="router-atomic">0</div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">AtomicGPT</div>
+                </div>
+                <div style="text-align:center; padding:16px; background:var(--background); border-radius:8px;">
+                    <div style="font-size:2rem; font-weight:700; color:#f59e0b;" id="router-fallback">0%</div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">Fallback율</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="section">
+        <div class="section-header">
+            <h2>PoC 로드맵</h2>
+            <p>12주 PoC 일정 및 마일스톤</p>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 1 (Week 1-4)</div>
+                <div class="timeline-title">기반 구축</div>
+                <div class="timeline-desc">
+                    <ul style="padding-left: 16px; line-height: 2;">
+                        <li>Upstage Document Parse API 연동 (클라우드 API 우선 테스트)</li>
+                        <li>샘플 강의안 5건 파싱 파이프라인 구축</li>
+                        <li>기본 RAG 파이프라인 (ChromaDB + Upstage Embedding)</li>
+                        <li>Solar LLM Docker 배포 테스트</li>
+                        <li>개발환경 구성 및 CI/CD</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 2 (Week 5-8)</div>
+                <div class="timeline-title">핵심 기능 개발</div>
+                <div class="timeline-desc">
+                    <ul style="padding-left: 16px; line-height: 2;">
+                        <li>강의 스크립트 생성 엔진 개발 및 프롬프트 최적화</li>
+                        <li>문제은행 생성 엔진 개발 (Bloom's Taxonomy 연계)</li>
+                        <li>SAT 학습목표 자동 매핑 로직</li>
+                        <li>품질 평가 메트릭 설계 및 자동 검증</li>
+                        <li>RAG 지식베이스 구축 (규정/절차서/사례)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 3 (Week 9-12)</div>
+                <div class="timeline-title">통합 및 검증</div>
+                <div class="timeline-desc">
+                    <ul style="padding-left: 16px; line-height: 2;">
+                        <li>전체 파이프라인 통합 테스트</li>
+                        <li>SME(Subject Matter Expert) 검증 (5개 과목)</li>
+                        <li>온프레미스 배포 및 보안 검증</li>
+                        <li>성능 최적화 (처리 속도, 품질 개선)</li>
+                        <li>PoC 결과 보고서 및 확산 전략 도출</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 32px;">
+            <div class="card-header">
+                <div class="card-icon system">&#128203;</div>
+                <div>
+                    <div class="card-title">진행 상황 추적</div>
+                    <div class="card-subtitle">Progress Tracker</div>
+                </div>
+            </div>
+            <table class="status-table">
+                <thead>
+                    <tr><th>태스크</th><th>담당</th><th>상태</th><th>비고</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>프로젝트 아키텍처 설계</td>
+                        <td>KHNP</td>
+                        <td><span class="status-badge status-done">완료</span></td>
+                        <td>초안 완성</td>
+                    </tr>
+                    <tr>
+                        <td>Upstage 기술 미팅</td>
+                        <td>KHNP + Upstage</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                        <td>일정 조율 중</td>
+                    </tr>
+                    <tr>
+                        <td>EY AI 전략 킥오프</td>
+                        <td>KHNP + EY</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                        <td>일정 조율 중</td>
+                    </tr>
+                    <tr>
+                        <td>샘플 강의안 수집</td>
+                        <td>KHNP 인재개발원</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                        <td>5개 과목 선정</td>
+                    </tr>
+                    <tr>
+                        <td>GPU 서버 확보</td>
+                        <td>KHNP IT</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                        <td>A100 80GB 필요</td>
+                    </tr>
+                    <tr>
+                        <td>Upstage API Key 발급</td>
+                        <td>Upstage</td>
+                        <td><span class="status-badge status-pending">대기</span></td>
+                        <td>PoC용 크레딧</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== 회의록/기록 ===== -->
+    <section id="notes" class="section">
+        <div class="section-header">
+            <h2>회의록 및 기록</h2>
+            <p>Upstage/EY 미팅 기록 및 의사결정 로그</p>
+        </div>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon upstage">&#128221;</div>
+                    <div>
+                        <div class="card-title">전체 회의록</div>
+                        <div class="card-subtitle">Meeting Minutes</div>
+                    </div>
+                </div>
+                <textarea class="note-input" id="general-note-input" placeholder="날짜, 참석자, 주요 논의사항, 결정사항, 후속 액션을 기록하세요...
+
+예시:
+[2026-03-20] Upstage 기술 미팅
+참석: 도한(KHNP), 김OO(Upstage)
+논의:
+- Document Parse 온프레미스 배포 가능 확인
+- A100 80GB 1장으로 Solar Pro 구동 가능
+결정:
+- PoC용 API Key 발급 진행
+액션:
+- Upstage: Docker 이미지 제공 일정 확인"></textarea>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="addNote('general')">기록 저장</button>
+                    <button class="btn btn-secondary" onclick="exportAllNotes()">전체 내보내기</button>
+                </div>
+                <div id="general-notes-list" style="margin-top: 20px;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon system">&#128736;</div>
+                    <div>
+                        <div class="card-title">의사결정 로그</div>
+                        <div class="card-subtitle">Decision Log</div>
+                    </div>
+                </div>
+                <div id="decision-log">
+                    <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                        주요 의사결정 사항이 여기에 기록됩니다.
+                    </div>
+                </div>
+                <textarea class="note-input" id="decision-input" placeholder="의사결정 내용을 기록하세요...
+예: LLM 모델로 Solar Pro 선정 (사유: 한국어 성능, 단일 GPU 구동)"></textarea>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="addDecision()">결정사항 추가</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SME 검토 워크플로우 ===== -->
+    <!-- ===== 생성하기 (PPT 업로드 → 스크립트/문항 생성) ===== -->
+    <section id="generator" class="section">
+        <div class="section-header">
+            <h2>AI 콘텐츠 생성</h2>
+            <p>강의안(PPT/PDF)을 업로드하면 스크립트와 문제은행을 자동 생성합니다</p>
+        </div>
+
+        <!-- Step 1: 파일 업로드 -->
+        <div class="card" id="gen-step1">
+            <div class="card-header">
+                <div class="card-icon" style="background: #d1fae5; color: #065f46;">1</div>
+                <div>
+                    <div class="card-title">강의안 업로드</div>
+                    <div class="card-subtitle">PDF, PPTX 지원 (최대 50MB)</div>
+                </div>
+            </div>
+            <div style="margin-top: 16px;">
+                <div id="gen-dropzone" style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s;"
+                     ondragover="event.preventDefault(); this.style.borderColor='#10b981'; this.style.background='#f0fdf4';"
+                     ondragleave="this.style.borderColor='#cbd5e1'; this.style.background='transparent';"
+                     ondrop="handleFileDrop(event)"
+                     onclick="document.getElementById('gen-file-input').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">&#128196;</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div style="color: var(--text-tertiary); font-size: 0.8rem; margin-top: 4px;">PDF, PPTX</div>
+                </div>
+                <input type="file" id="gen-file-input" accept=".pdf,.pptx,.ppt" style="display:none;" onchange="handleFileSelect(this.files[0])">
+                <div id="gen-file-info" style="display:none; margin-top: 12px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 0.88rem;">
+                    <span id="gen-file-name" style="font-weight: 600;"></span>
+                    <span id="gen-file-size" style="color: var(--text-secondary); margin-left: 8px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: 생성 옵션 -->
+        <div class="card" id="gen-step2" style="margin-top: 16px; display: none;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #dbeafe; color: #2563eb;">2</div>
+                <div>
+                    <div class="card-title">생성 옵션</div>
+                    <div class="card-subtitle">학습목표, 대상 수준, 문항 수 설정</div>
+                </div>
+            </div>
+            <div style="margin-top: 16px; display: grid; gap: 16px;">
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">학습목표 (줄바꿈으로 구분)</label>
+                    <textarea id="gen-objectives" rows="3" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.88rem; font-family: inherit; resize: vertical;"
+                              placeholder="예: RCS 구성요소를 식별할 수 있다&#10;ECCS 자동 기동 조건을 설명할 수 있다"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">대상 수준</label>
+                        <select id="gen-level" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.88rem;">
+                            <option value="beginner">초급 (Beginner)</option>
+                            <option value="intermediate" selected>중급 (Intermediate)</option>
+                            <option value="advanced">고급 (Advanced)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">문항 수</label>
+                        <input type="number" id="gen-num-questions" value="20" min="5" max="50" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.88rem;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">2-Pass 엔진</label>
+                        <select id="gen-two-pass" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; font-size: 0.88rem;">
+                            <option value="true" selected>활성화 (오답 자동 개선)</option>
+                            <option value="false">비활성화 (1-Pass)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button id="gen-btn-script" onclick="runGeneration('script')" style="flex:1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                        &#9998; 스크립트 생성
+                    </button>
+                    <button id="gen-btn-questions" onclick="runGeneration('questions')" style="flex:1; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                        &#128218; 문제은행 생성
+                    </button>
+                    <button id="gen-btn-full" onclick="runGeneration('full-pipeline')" style="flex:1; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                        &#9889; 전체 파이프라인
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: 생성 진행/결과 -->
+        <div class="card" id="gen-step3" style="margin-top: 16px; display: none;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">3</div>
+                <div>
+                    <div class="card-title">생성 결과</div>
+                    <div class="card-subtitle" id="gen-status-text">처리 중...</div>
+                </div>
+            </div>
+            <!-- 진행 바 -->
+            <div id="gen-progress" style="margin-top: 16px;">
+                <div style="background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden;">
+                    <div id="gen-progress-bar" style="background: linear-gradient(90deg, #10b981, #3b82f6); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div id="gen-progress-text" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; text-align: center;"></div>
+            </div>
+            <!-- 결과 탭 -->
+            <div id="gen-results" style="display:none; margin-top: 16px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="gen-result-tab active" data-result="scripts" onclick="showResultTab('scripts')" style="padding: 6px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 0.85rem;">강의 스크립트</button>
+                    <button class="gen-result-tab" data-result="questions" onclick="showResultTab('questions')" style="padding: 6px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 0.85rem;">문제은행</button>
+                    <button class="gen-result-tab" data-result="quality" onclick="showResultTab('quality')" style="padding: 6px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 0.85rem;">품질 리포트</button>
+                    <button class="gen-result-tab" data-result="raw" onclick="showResultTab('raw')" style="padding: 6px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; cursor: pointer; font-size: 0.85rem;">JSON</button>
+                </div>
+                <!-- 스크립트 결과 -->
+                <div id="result-scripts" class="gen-result-panel">
+                    <div id="result-scripts-list" style="font-size: 0.88rem; line-height: 1.8;"></div>
+                </div>
+                <!-- 문항 결과 -->
+                <div id="result-questions" class="gen-result-panel" style="display:none;">
+                    <div id="result-questions-list" style="font-size: 0.88rem; line-height: 1.8;"></div>
+                </div>
+                <!-- 품질 리포트 -->
+                <div id="result-quality" class="gen-result-panel" style="display:none;">
+                    <div id="result-quality-content" style="font-size: 0.88rem; line-height: 1.8;"></div>
+                </div>
+                <!-- Raw JSON -->
+                <div id="result-raw" class="gen-result-panel" style="display:none;">
+                    <pre id="result-raw-content" style="background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-size: 0.78rem; max-height: 500px; overflow-y: auto;"></pre>
+                </div>
+                <!-- 다운로드 -->
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button onclick="downloadResult('json')" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; font-size: 0.85rem;">JSON 다운로드</button>
+                    <button onclick="downloadResult('qti')" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; font-size: 0.85rem;">QTI 내보내기</button>
+                    <button onclick="downloadResult('csv')" style="padding: 8px 16px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; font-size: 0.85rem;">CSV 내보내기</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sme-review" class="section">
+        <div class="section-header">
+            <h2>SME 문항 검토</h2>
+            <p>AI 생성 문항의 전문가 검토 — 원본/수정본 비교, 승인/반려, 개선 인사이트</p>
+        </div>
+
+        <!-- 검토 대기 목록 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#128203;</div>
+                <div>
+                    <div class="card-title">검토 대기 문항</div>
+                    <div class="card-subtitle" id="sme-pending-count">로딩 중...</div>
+                </div>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <button class="btn btn-primary" onclick="loadPendingReviews()">검토 대기 목록 새로고침</button>
+                <button class="btn" onclick="loadSMEInsights()" style="margin-left:8px;">개선 인사이트 조회</button>
+            </div>
+            <div id="sme-pending-list" style="max-height: 400px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- 문항 검토 Diff 뷰 -->
+        <div class="card" style="margin-top: 24px;" id="sme-review-panel" style="display:none;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #ede9fe; color: #7c3aed;">&#128269;</div>
+                <div>
+                    <div class="card-title">문항 검토 상세</div>
+                    <div class="card-subtitle" id="sme-review-qid">문항을 선택하세요</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <!-- 원본 -->
+                <div style="background: #fef2f2; border-radius: 8px; padding: 16px;">
+                    <h4 style="color: #dc2626; margin-bottom: 8px;">AI 원본</h4>
+                    <div id="sme-original" style="font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap;"></div>
+                </div>
+                <!-- 수정본 -->
+                <div style="background: #f0fdf4; border-radius: 8px; padding: 16px;">
+                    <h4 style="color: #16a34a; margin-bottom: 8px;">SME 수정본</h4>
+                    <textarea id="sme-revised" style="width:100%; min-height:200px; font-size:0.85rem; border:1px solid #d1d5db; border-radius:4px; padding:8px; font-family:inherit;"></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center;">
+                <select id="sme-review-status" style="padding:8px; border-radius:4px; border:1px solid #d1d5db;">
+                    <option value="approved">승인 (Approved)</option>
+                    <option value="needs_revision">수정요청 (Needs Revision)</option>
+                    <option value="rejected">반려 (Rejected)</option>
+                </select>
+                <input type="text" id="sme-review-comment" placeholder="검토 의견..." style="flex:1; padding:8px; border-radius:4px; border:1px solid #d1d5db;">
+                <button class="btn btn-primary" onclick="submitSMEReview()">검토 제출</button>
+            </div>
+        </div>
+
+        <!-- SME 개선 인사이트 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #dbeafe; color: #2563eb;">&#128161;</div>
+                <div>
+                    <div class="card-title">프롬프트 개선 인사이트</div>
+                    <div class="card-subtitle">SME 수정 패턴 분석 → 자동 프롬프트 개선 추천</div>
+                </div>
+            </div>
+            <div id="sme-insights" style="font-size: 0.88rem; color: var(--text-secondary);"></div>
+        </div>
+    </section>
+
+    <!-- ===== 라이브 대시보드 ===== -->
+    <section id="dashboard-live" class="section">
+        <div class="section-header">
+            <h2>통합 대시보드</h2>
+            <p>시스템 전체 현황을 실시간으로 확인합니다</p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="loadDashboard()">대시보드 새로고침</button>
+            <span id="dashboard-timestamp" style="margin-left: 12px; font-size: 0.85rem; color: var(--text-secondary);"></span>
+        </div>
+
+        <!-- 핵심 지표 카드 -->
+        <div class="card-grid" id="dashboard-kpi" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="card" style="text-align:center; padding:20px;">
+                <div style="font-size:2rem; font-weight:700; color:var(--khnp-primary);" id="kpi-modules">-</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">총 모듈</div>
+            </div>
+            <div class="card" style="text-align:center; padding:20px;">
+                <div style="font-size:2rem; font-weight:700; color:#22c55e;" id="kpi-apis">-</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">API 엔드포인트</div>
+            </div>
+            <div class="card" style="text-align:center; padding:20px;">
+                <div style="font-size:2rem; font-weight:700; color:#f59e0b;" id="kpi-questions">-</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">문항 수</div>
+            </div>
+            <div class="card" style="text-align:center; padding:20px;">
+                <div style="font-size:2rem; font-weight:700; color:#8b5cf6;" id="kpi-glossary">-</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary);">용어사전</div>
+            </div>
+        </div>
+
+        <!-- 모듈 상태 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #dbeafe; color: #2563eb;">&#9881;</div>
+                <div>
+                    <div class="card-title">컴포넌트 상태</div>
+                    <div class="card-subtitle">각 모듈 초기화 상태</div>
+                </div>
+            </div>
+            <div id="dashboard-components" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;"></div>
+        </div>
+
+        <!-- 피드백 통계 -->
+        <div class="card" style="margin-top: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#128200;</div>
+                <div>
+                    <div class="card-title">교육 피드백 통계</div>
+                    <div class="card-subtitle">시험 응답 및 만족도 현황</div>
+                </div>
+            </div>
+            <div id="dashboard-feedback" style="font-size: 0.88rem; color: var(--text-secondary);"></div>
+        </div>
+    </section>
+
+    <!-- ===== 프롬프트 관리 ===== -->
+    <section id="prompt-mgmt" class="section">
+        <div class="section-header">
+            <h2>프롬프트 템플릿 관리</h2>
+            <p>YAML 외부 설정 기반 LLM 프롬프트 조회/편집/A/B 테스트</p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <button class="btn btn-primary" onclick="loadPromptList()">템플릿 목록 새로고침</button>
+        </div>
+
+        <!-- 템플릿 목록 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon" style="background: #ede9fe; color: #7c3aed;">&#128221;</div>
+                <div>
+                    <div class="card-title">프롬프트 템플릿</div>
+                    <div class="card-subtitle">클릭하여 상세 보기 / 오버라이드 설정</div>
+                </div>
+            </div>
+            <div id="prompt-list" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;"></div>
+        </div>
+
+        <!-- 프롬프트 편집기 -->
+        <div class="card" style="margin-top: 24px;" id="prompt-editor-panel">
+            <div class="card-header">
+                <div class="card-icon" style="background: #fef3c7; color: #d97706;">&#9998;</div>
+                <div>
+                    <div class="card-title">프롬프트 편집기</div>
+                    <div class="card-subtitle" id="prompt-editor-key">템플릿을 선택하세요</div>
+                </div>
+            </div>
+            <div style="margin-bottom:8px; display:flex; gap:8px;">
+                <span id="prompt-editor-version" style="font-size:0.82rem; padding:4px 8px; background:#e0f2fe; border-radius:4px;"></span>
+                <span id="prompt-editor-temp" style="font-size:0.82rem; padding:4px 8px; background:#fef3c7; border-radius:4px;"></span>
+                <span id="prompt-editor-tokens" style="font-size:0.82rem; padding:4px 8px; background:#f0fdf4; border-radius:4px;"></span>
+            </div>
+            <textarea id="prompt-editor-content" style="width:100%; min-height:300px; font-size:0.82rem; font-family:'Pretendard',monospace; border:1px solid #d1d5db; border-radius:4px; padding:12px; line-height:1.6;" placeholder="프롬프트 내용이 여기에 표시됩니다..."></textarea>
+            <div style="margin-top:12px; display:flex; gap:8px;">
+                <button class="btn btn-primary" onclick="applyPromptOverride()">오버라이드 적용 (A/B 테스트)</button>
+                <button class="btn" onclick="clearPromptOverride()">오버라이드 해제</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="static/js/app.js"></script>
+<script>
+// ============================================================
+// SME Review Functions
+// ============================================================
+const API_BASE = window.location.origin + '/api/v1';
+
+async function apiCall(path, options = {}) {
+    try {
+        const resp = await fetch(API_BASE + path, {
+            headers: {'Content-Type': 'application/json'},
+            ...options,
+        });
+        if (!resp.ok) throw new Error(`API Error: ${resp.status}`);
+        return await resp.json();
+    } catch (e) {
+        console.warn('API call failed:', path, e.message);
+        return null;
+    }
+}
+
+async function loadPendingReviews() {
+    const data = await apiCall('/sme/pending');
+    const el = document.getElementById('sme-pending-list');
+    const countEl = document.getElementById('sme-pending-count');
+    if (!data || !Array.isArray(data)) {
+        el.innerHTML = '<p style="color:#9ca3af;">API 연결 필요 (서버 실행: uvicorn src.api.main:app)</p>';
+        countEl.textContent = 'API 미연결';
+        return;
+    }
+    countEl.textContent = `${data.length}건 대기 중`;
+    if (data.length === 0) {
+        el.innerHTML = '<p style="color:#9ca3af;">검토 대기 중인 문항이 없습니다.</p>';
+        return;
+    }
+    el.innerHTML = data.map((r, i) => `
+        <div style="padding:12px; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:8px; cursor:pointer; transition: background 0.2s;"
+             onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'"
+             onclick="selectReviewItem(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong>${r.question_id || r.review_id || 'Q-'}</strong>
+                    <span style="font-size:0.8rem; color:#6b7280; margin-left:8px;">${r.safety_grade || 'general'}</span>
+                </div>
+                <span style="font-size:0.75rem; padding:2px 8px; border-radius:4px; background:#fef3c7; color:#92400e;">PENDING</span>
+            </div>
+            <div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">
+                검토자: ${r.reviewer_name || '-'} | 등록: ${(r.created_at || '').slice(0, 10)}
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectReviewItem(review) {
+    document.getElementById('sme-review-panel').style.display = 'block';
+    document.getElementById('sme-review-qid').textContent = review.review_id || review.question_id;
+    const orig = review.original_question || {};
+    document.getElementById('sme-original').textContent = JSON.stringify(orig, null, 2);
+    document.getElementById('sme-revised').value = JSON.stringify(orig, null, 2);
+    window._currentReviewId = review.review_id;
+}
+
+async function submitSMEReview() {
+    const reviewId = window._currentReviewId;
+    if (!reviewId) { alert('검토할 문항을 먼저 선택하세요.'); return; }
+    let revised;
+    try { revised = JSON.parse(document.getElementById('sme-revised').value); }
+    catch { alert('수정본 JSON 형식이 올바르지 않습니다.'); return; }
+    const status = document.getElementById('sme-review-status').value;
+    const comment = document.getElementById('sme-review-comment').value;
+    const result = await apiCall('/sme/submit-revision', {
+        method: 'POST',
+        body: JSON.stringify({ review_id: reviewId, status, revised_question: revised, overall_comment: comment }),
+    });
+    if (result) {
+        alert('검토가 제출되었습니다.');
+        loadPendingReviews();
+    }
+}
+
+async function loadSMEInsights() {
+    const data = await apiCall('/sme/insights');
+    const el = document.getElementById('sme-insights');
+    if (!data) { el.innerHTML = '<p style="color:#9ca3af;">API 연결 필요</p>'; return; }
+    if (typeof data === 'object' && data.insights) {
+        el.innerHTML = data.insights.map(i => `
+            <div style="padding:8px 12px; border-left:3px solid #3b82f6; margin-bottom:8px; background:#f0f9ff; border-radius:0 4px 4px 0;">
+                <strong>${i.category || ''}</strong>: ${i.recommendation || i.insight || JSON.stringify(i)}
+            </div>
+        `).join('');
+    } else {
+        el.innerHTML = `<pre style="font-size:0.82rem;">${JSON.stringify(data, null, 2)}</pre>`;
+    }
+}
+
+// ============================================================
+// Dashboard Functions
+// ============================================================
+async function loadDashboard() {
+    const data = await apiCall('/dashboard');
+    document.getElementById('dashboard-timestamp').textContent = '업데이트: ' + new Date().toLocaleTimeString();
+    if (!data) {
+        document.getElementById('kpi-modules').textContent = '-';
+        document.getElementById('kpi-apis').textContent = '-';
+        document.getElementById('kpi-questions').textContent = '-';
+        document.getElementById('kpi-glossary').textContent = '-';
+        document.getElementById('dashboard-components').innerHTML = '<p style="color:#9ca3af;">API 연결 필요 (서버 실행: uvicorn src.api.main:app --port 8080)</p>';
+        return;
+    }
+    // KPI
+    document.getElementById('kpi-modules').textContent = data.modules?.total || '-';
+    document.getElementById('kpi-apis').textContent = data.modules?.api_endpoints || '-';
+    document.getElementById('kpi-questions').textContent = data.question_bank?.total_questions || 0;
+    document.getElementById('kpi-glossary').textContent = data.glossary?.total_terms || '-';
+    // Components
+    const comp = data.components || {};
+    document.getElementById('dashboard-components').innerHTML = Object.entries(comp).map(([k, v]) => `
+        <div style="padding:8px 12px; border-radius:6px; background:${v === 'ready' ? '#f0fdf4' : '#fef2f2'}; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.82rem;">${k}</span>
+            <span style="font-size:0.75rem; color:${v === 'ready' ? '#16a34a' : '#dc2626'};">${v === 'ready' ? '● Ready' : '○ ' + v}</span>
+        </div>
+    `).join('');
+    // Feedback
+    const fb = data.feedback || {};
+    document.getElementById('dashboard-feedback').innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:8px;">
+            <div style="text-align:center; padding:12px; background:#f9fafb; border-radius:8px;">
+                <div style="font-size:1.5rem; font-weight:700;">${fb.total_exam_responses || 0}</div>
+                <div style="font-size:0.78rem; color:#6b7280;">시험 응답</div>
+            </div>
+            <div style="text-align:center; padding:12px; background:#f9fafb; border-radius:8px;">
+                <div style="font-size:1.5rem; font-weight:700;">${fb.total_trainee_feedback || 0}</div>
+                <div style="font-size:0.78rem; color:#6b7280;">교육생 피드백</div>
+            </div>
+            <div style="text-align:center; padding:12px; background:#f9fafb; border-radius:8px;">
+                <div style="font-size:1.5rem; font-weight:700;">${fb.irt_ready_questions || 0}</div>
+                <div style="font-size:0.78rem; color:#6b7280;">IRT 준비 문항</div>
+            </div>
+        </div>
+        <p style="margin-top:12px; font-size:0.82rem;">캐시: ${data.parsing_cache?.cached_files || 0}개 파일, ${data.parsing_cache?.total_cached_slides || 0}개 슬라이드</p>
+    `;
+}
+
+// ============================================================
+// Prompt Management Functions
+// ============================================================
+async function loadPromptList() {
+    const data = await apiCall('/prompts/list');
+    const el = document.getElementById('prompt-list');
+    if (!data || !data.templates) {
+        el.innerHTML = '<p style="color:#9ca3af;">API 연결 필요</p>';
+        return;
+    }
+    el.innerHTML = data.templates.map(t => `
+        <div style="padding:12px; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer; transition: all 0.2s;"
+             onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='#e5e7eb'"
+             onclick="loadPromptDetail('${t.key}')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:#7c3aed;">${t.key}</strong>
+                <span style="font-size:0.75rem; padding:2px 8px; background:${t.has_override ? '#fef3c7' : '#e0f2fe'}; border-radius:4px;">
+                    ${t.has_override ? 'OVERRIDE' : t.version || ''}
+                </span>
+            </div>
+            <div style="font-size:0.78rem; color:#6b7280; margin-top:4px;">
+                프롬프트 길이: ${t.prompt_length.toLocaleString()}자
+            </div>
+        </div>
+    `).join('');
+}
+
+async function loadPromptDetail(key) {
+    const data = await apiCall('/prompts/' + key);
+    if (!data) return;
+    document.getElementById('prompt-editor-key').textContent = key;
+    document.getElementById('prompt-editor-version').textContent = 'Version: ' + (data.version || '-');
+    document.getElementById('prompt-editor-temp').textContent = 'Temperature: ' + (data.temperature || '-');
+    document.getElementById('prompt-editor-tokens').textContent = 'Max Tokens: ' + (data.max_tokens || '-');
+    document.getElementById('prompt-editor-content').value = data.system_prompt || '';
+    window._currentPromptKey = key;
+}
+
+async function applyPromptOverride() {
+    const key = window._currentPromptKey;
+    if (!key) { alert('프롬프트를 먼저 선택하세요.'); return; }
+    const prompt = document.getElementById('prompt-editor-content').value;
+    const result = await apiCall('/prompts/override', {
+        method: 'POST',
+        body: JSON.stringify({ key, system_prompt: prompt }),
+    });
+    if (result) { alert(`오버라이드 적용됨: ${key}`); loadPromptList(); }
+}
+
+async function clearPromptOverride() {
+    const key = window._currentPromptKey;
+    if (!key) return;
+    await apiCall('/prompts/override/' + key, { method: 'DELETE' });
+    alert(`오버라이드 해제됨: ${key}`);
+    loadPromptList();
+    loadPromptDetail(key);
+}
+
+// ============================================================
+// 생성하기 (Generator) 기능
+// ============================================================
+let _generatorFileId = null;
+let _generatorResult = null;
+
+function handleFileDrop(event) {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+    event.target.style.borderColor = '#cbd5e1';
+    event.target.style.background = 'transparent';
+}
+
+async function handleFileSelect(file) {
+    if (!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['pdf', 'pptx', 'ppt'].includes(ext)) {
+        alert('PDF 또는 PPTX 파일만 지원합니다.');
+        return;
+    }
+
+    // 파일 정보 표시
+    document.getElementById('gen-file-info').style.display = 'block';
+    document.getElementById('gen-file-name').textContent = file.name;
+    document.getElementById('gen-file-size').textContent = `(${(file.size / 1024 / 1024).toFixed(1)}MB)`;
+
+    // 업로드
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+        const resp = await fetch(API_BASE + '/upload', {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+            _generatorFileId = data.file_id;
+            document.getElementById('gen-step2').style.display = 'block';
+
+            // 자동 파싱 시작
+            updateGenProgress(10, '문서 파싱 중 (Upstage Document Parse)...');
+            document.getElementById('gen-step3').style.display = 'block';
+            document.getElementById('gen-results').style.display = 'none';
+            document.getElementById('gen-progress').style.display = 'block';
+
+            const parseResp = await apiCall('/parse/' + _generatorFileId, { method: 'POST' });
+            if (parseResp) {
+                updateGenProgress(30, `파싱 완료: ${parseResp.slides_count}개 슬라이드, VLM 보강 ${parseResp.vlm_enriched_count}개`);
+                document.getElementById('gen-status-text').textContent =
+                    `파싱 완료 — ${parseResp.slides_count}개 슬라이드 준비됨`;
+                document.getElementById('gen-step3').style.display = 'none';
+            }
+        } else {
+            alert(`업로드 실패: ${data.detail || '알 수 없는 오류'}`);
+        }
+    } catch (err) {
+        alert(`업로드 중 오류: ${err.message}`);
+    }
+}
+
+function updateGenProgress(pct, text) {
+    document.getElementById('gen-progress-bar').style.width = pct + '%';
+    document.getElementById('gen-progress-text').textContent = text;
+}
+
+async function runGeneration(mode) {
+    if (!_generatorFileId) {
+        alert('먼저 파일을 업로드해주세요.');
+        return;
+    }
+
+    const objectives = document.getElementById('gen-objectives').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+    const level = document.getElementById('gen-level').value;
+    const numQ = parseInt(document.getElementById('gen-num-questions').value);
+    const twoPass = document.getElementById('gen-two-pass').value === 'true';
+
+    // UI 준비
+    document.getElementById('gen-step3').style.display = 'block';
+    document.getElementById('gen-results').style.display = 'none';
+    document.getElementById('gen-progress').style.display = 'block';
+
+    const modeNames = {
+        'script': '스크립트 생성',
+        'questions': '문제은행 생성',
+        'full-pipeline': '전체 파이프라인',
+    };
+    updateGenProgress(40, `${modeNames[mode]} 중...`);
+    document.getElementById('gen-status-text').textContent = '처리 중...';
+
+    // 버튼 비활성화
+    document.querySelectorAll('#gen-step2 button').forEach(b => b.disabled = true);
+
+    try {
+        const endpoint = mode === 'script' ? '/generate/script'
+            : mode === 'questions' ? '/generate/questions'
+            : '/generate/full-pipeline';
+
+        const body = {
+            file_id: _generatorFileId,
+            learning_objectives: objectives,
+            audience_level: level,
+            num_questions: numQ,
+            enable_two_pass: twoPass,
+        };
+
+        updateGenProgress(60, `서버 처리 중 (${modeNames[mode]})...`);
+
+        const result = await apiCall(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+
+        if (result) {
+            _generatorResult = result;
+            updateGenProgress(100, '생성 완료!');
+            document.getElementById('gen-status-text').textContent =
+                `완료 — 스크립트 ${result.scripts_count || 0}개, 문항 ${result.questions_count || 0}개`;
+            renderGenerationResults(result);
+        } else {
+            updateGenProgress(0, '생성 실패');
+            document.getElementById('gen-status-text').textContent = '오류 발생';
+        }
+    } catch (err) {
+        updateGenProgress(0, `오류: ${err.message}`);
+    } finally {
+        document.querySelectorAll('#gen-step2 button').forEach(b => b.disabled = false);
+    }
+}
+
+function renderGenerationResults(data) {
+    document.getElementById('gen-progress').style.display = 'none';
+    document.getElementById('gen-results').style.display = 'block';
+
+    // 스크립트
+    const scriptList = document.getElementById('result-scripts-list');
+    if (data.scripts && data.scripts.length > 0) {
+        scriptList.innerHTML = data.scripts.map((s, i) => {
+            const body = s.script || s;
+            return `<div style="padding:12px; margin-bottom:8px; background:#f8fafc; border-radius:8px; border-left:3px solid #10b981;">
+                <strong>[슬라이드 ${i + 1}]</strong> ${s.slide_title || body.title || ''}
+                <div style="margin-top:4px; color:var(--text-secondary);">${body.introduction || body.main_content || JSON.stringify(body).substring(0, 200)}...</div>
+            </div>`;
+        }).join('');
+    } else {
+        scriptList.innerHTML = '<div style="color:var(--text-secondary);">스크립트 없음 (문항만 생성됨)</div>';
+    }
+
+    // 문항
+    const qList = document.getElementById('result-questions-list');
+    if (data.questions && data.questions.length > 0) {
+        qList.innerHTML = data.questions.map((q, i) => {
+            const safety = q.safety_significance?.grade || '';
+            const safetyColor = safety === 'safety_critical' ? '#ef4444' : safety === 'safety_related' ? '#f59e0b' : '#6b7280';
+            return `<div style="padding:12px; margin-bottom:8px; background:#f8fafc; border-radius:8px; border-left:3px solid #3b82f6;">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>[${q.question_id || 'Q' + (i + 1)}]</strong>
+                    <div>
+                        <span style="background:#dbeafe; color:#2563eb; padding:2px 8px; border-radius:4px; font-size:0.75rem;">${q.bloom_level || ''}</span>
+                        ${safety ? `<span style="background:${safetyColor}20; color:${safetyColor}; padding:2px 8px; border-radius:4px; font-size:0.75rem; margin-left:4px;">${safety}</span>` : ''}
+                    </div>
+                </div>
+                <div style="margin-top:4px;">${q.question_text || ''}</div>
+                <div style="margin-top:4px; font-size:0.82rem; color:var(--text-secondary);">
+                    ${Object.entries(q.options || {}).map(([k, v]) => `<div>${k}. ${v}</div>`).join('')}
+                </div>
+                <div style="margin-top:4px; font-size:0.82rem; color:#10b981;">정답: ${q.correct_answer || ''}</div>
+            </div>`;
+        }).join('');
+    } else {
+        qList.innerHTML = '<div style="color:var(--text-secondary);">문항 없음 (스크립트만 생성됨)</div>';
+    }
+
+    // 품질 리포트
+    const qualContent = document.getElementById('result-quality-content');
+    if (data.quality_report) {
+        const qr = data.quality_report;
+        const stats = qr.statistics || {};
+        qualContent.innerHTML = `
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
+                <div style="text-align:center; padding:12px; background:#d1fae5; border-radius:8px;"><div style="font-size:1.5rem; font-weight:700;">${stats.total || 0}</div><div style="font-size:0.8rem;">총 문항</div></div>
+                <div style="text-align:center; padding:12px; background:#d1fae5; border-radius:8px;"><div style="font-size:1.5rem; font-weight:700; color:#10b981;">${stats.passed || 0}</div><div style="font-size:0.8rem;">통과</div></div>
+                <div style="text-align:center; padding:12px; background:#fef3c7; border-radius:8px;"><div style="font-size:1.5rem; font-weight:700; color:#d97706;">${stats.needs_revision || 0}</div><div style="font-size:0.8rem;">수정필요</div></div>
+                <div style="text-align:center; padding:12px; background:#fecaca; border-radius:8px;"><div style="font-size:1.5rem; font-weight:700; color:#ef4444;">${stats.rejected || 0}</div><div style="font-size:0.8rem;">부적합</div></div>
+            </div>
+            <p><strong>통과율:</strong> ${stats.pass_rate || 'N/A'} | <strong>평균 품질:</strong> ${stats.avg_quality_score || 'N/A'}</p>
+            ${(qr.recommendations || []).map(r => `<p style="color:#d97706;">&#9888; ${r}</p>`).join('')}
+        `;
+    } else if (data.metadata) {
+        qualContent.innerHTML = `
+            <p><strong>스크립트 품질:</strong> ${data.metadata.script_quality_score || 'N/A'}</p>
+            <p><strong>QA 통과율:</strong> ${data.metadata.qa_pass_rate || 'N/A'}</p>
+        `;
+    } else {
+        qualContent.innerHTML = '<div style="color:var(--text-secondary);">품질 리포트 없음</div>';
+    }
+
+    // Raw JSON
+    document.getElementById('result-raw-content').textContent = JSON.stringify(data, null, 2);
+
+    showResultTab('scripts');
+}
+
+function showResultTab(tab) {
+    document.querySelectorAll('.gen-result-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.gen-result-tab').forEach(t => {
+        t.classList.remove('active');
+        t.style.background = '#f8fafc';
+        t.style.fontWeight = 'normal';
+    });
+    document.getElementById('result-' + tab).style.display = 'block';
+    const activeBtn = document.querySelector(`.gen-result-tab[data-result="${tab}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.background = '#dbeafe';
+        activeBtn.style.fontWeight = '600';
+    }
+}
+
+function downloadResult(format) {
+    if (!_generatorResult) return;
+
+    let content, filename, type;
+    if (format === 'json') {
+        content = JSON.stringify(_generatorResult, null, 2);
+        filename = 'generation_result.json';
+        type = 'application/json';
+    } else if (format === 'csv') {
+        const qs = _generatorResult.questions || [];
+        const header = 'question_id,bloom_level,question_text,correct_answer,safety_grade\n';
+        const rows = qs.map(q =>
+            `"${q.question_id || ''}","${q.bloom_level || ''}","${(q.question_text || '').replace(/"/g, '""')}","${q.correct_answer || ''}","${q.safety_significance?.grade || ''}"`
+        ).join('\n');
+        content = header + rows;
+        filename = 'questions.csv';
+        type = 'text/csv';
+    } else {
+        // QTI는 API 호출
+        alert('QTI 내보내기: POST /api/v1/export/questions API를 사용하세요.');
+        return;
+    }
+
+    const blob = new Blob([content], { type: type + ';charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// 환류 루프 상태 로드
+// ============================================================
+async function loadFeedbackLoopStatus() {
+    const data = await apiCall('/feedback/loop-status');
+    if (!data) return;
+    // 대시보드에 표시할 수 있도록 전역 저장
+    window._feedbackLoopData = data;
+}
+</script>
+</body>
+</html>

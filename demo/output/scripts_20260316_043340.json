@@ -1,0 +1,111 @@
+[
+  {
+    "page_number": 1,
+    "slide_title": "원자로냉각재계통(RCS) 개요",
+    "estimated_minutes": 7,
+    "script": {
+      "introduction": "이번에는 원자로냉각재계통(RCS) 개요에 대해 알아보겠습니다.",
+      "main_content": "원자로냉각재계통(RCS: Reactor Coolant System)은 원자로에서 발생한 핵분열 에너지를 1차 냉각재(경수)를 통해 증기발생기로 전달하는 핵심 계통입니다.\n\n주요 구성요소:\n- 원자로용기(RPV): 핵연료 집합체 수납, 설계압력 2,500 psia\n- 가압기(PZR): 1차 계통 압력/온도 제어, 정상 운전압력 2,235 psia\n- 증기발생기(SG): 1차-2차 열교환, 4대 (2-Loop 기준)\n- 원자로냉각재펌프(RCP): 냉각재 강제순환, 4대\n- 배관: Hot Leg(고온관), Cold Leg(저온관)...",
+      "visual_explanation": "화면에 보이는 계통도를 함께 살펴보겠습니다. 원자로냉각재계통의 전체 배치를 보여주는 계통도. 원자로용기를 중심으로 4개의 루프(SG+RCP)가 연결되어 있고, 가압기는 Hot Leg에 연결되어 있습니다. 특히 냉각재 순환 경로 추적, 가압기 위치와 Hot Leg 연결 이유에 주목해 주세요.",
+      "contextual_supplement": "실무에서 원자로냉각재계통은(는) 운전원이 가장 자주 모니터링하는 파라미터 중 하나입니다. 특히 과도 상태에서의 변화 추이를 이해하는 것이 중요합니다.",
+      "summary": "오늘 배운 원자로냉각재계통의 핵심은 안전 기능과 설계 기준값입니다."
+    },
+    "teaching_notes": "학습자에게 원자로냉각재계통(RCS) 개요과 관련된 실제 운전 경험을 공유하면 효과적",
+    "key_terms": [
+      "원자로냉각재계통(RCS:",
+      "Reactor",
+      "Coolant",
+      "System)은",
+      "원자로용기(RPV):"
+    ],
+    "visual_references": [
+      "RCS 계통 배치도"
+    ]
+  },
+  {
+    "page_number": 2,
+    "slide_title": "가압기(PZR) 구조 및 기능",
+    "estimated_minutes": 7,
+    "script": {
+      "introduction": "지난 시간에 원자로냉각재계통(RCS) 개요 에 대해 배웠습니다. 이번에는 가압기(PZR) 구조 및 기능에 대해 알아보겠습니다.",
+      "main_content": "가압기는 RCS의 압력과 온도를 제어하는 핵심 설비입니다.\n\n주요 기능:\n1. 압력 제어: 전기 히터(가열) + 살수(냉각)로 포화 조건 유지\n2. 과도 상태 완충: 부하 변동 시 체적 변화 흡수 (서지 기능)\n3. 과압 방호: 안전밸브(SRV) 3대, 설정압력 2,485 psia\n\n운전 파라미터:\n- 정상 운전압력: 2,235 psia\n- 정상 수위: 60% (프로그램 수위)\n- 히터 용량: 1,800 kW (비례히터 + On/Off 히터)\n- 살수 유량: 최대 300 gpm...",
+      "visual_explanation": "화면에 보이는 도면를 함께 살펴보겠습니다. 가압기 내부를 보여주는 단면도. 상부 증기공간, 하부 수공간으로 구분되며, 하부에 전기히터, 상부에 살수 노즐과 안전밸브가 위치합니다. 특히 증기-수 공존 상태(포화 조건), 히터/살수 제어 로직에 주목해 주세요.",
+      "contextual_supplement": "실무에서 가압기은(는) 운전원이 가장 자주 모니터링하는 파라미터 중 하나입니다. 특히 과도 상태에서의 변화 추이를 이해하는 것이 중요합니다.",
+      "summary": "오늘 배운 가압기의 핵심은 안전 기능과 설계 기준값입니다."
+    },
+    "teaching_notes": "학습자에게 가압기(PZR) 구조 및 기능과 관련된 실제 운전 경험을 공유하면 효과적",
+    "key_terms": [
+      "RCS의",
+      "안전밸브(SRV)",
+      "On/Off"
+    ],
+    "visual_references": [
+      "가압기 내부 구조 단면도"
+    ]
+  },
+  {
+    "page_number": 3,
+    "slide_title": "비상노심냉각계통(ECCS) 개요",
+    "estimated_minutes": 5,
+    "script": {
+      "introduction": "지난 시간에 가압기(PZR) 구조 및 기능 에 대해 배웠습니다. 이번에는 비상노심냉각계통(ECCS) 개요에 대해 알아보겠습니다.",
+      "main_content": "ECCS(Emergency Core Cooling System)는 냉각재상실사고(LOCA) 시 노심을 냉각하여 핵연료 건전성을 유지하는 안전계통입니다.\n\nECCS 구성:\n- 안전주입계통(SIS): 고압주입(HPSI) + 저압주입(LPSI)\n  · HPSI 기동조건: PZR 압력 ≤ 1,800 psia\n  · LPSI 기동조건: PZR 압력 ≤ 200 psia\n- 안전주입탱크(SIT): 600 psia 질소 가압, 수동 주입\n- 재순환 모드: RWST 소진 후 격납건물 섬프에서 재순환\n\n설계 기준: 10CFR50.46 — 연료 피복관...",
+      "visual_explanation": "이 슬라이드에는 복잡한 시각자료가 없으므로 텍스트 중심으로 설명하겠습니다.",
+      "contextual_supplement": "실무에서 비상노심냉각계통은(는) 운전원이 가장 자주 모니터링하는 파라미터 중 하나입니다. 특히 과도 상태에서의 변화 추이를 이해하는 것이 중요합니다.",
+      "summary": "오늘 배운 비상노심냉각계통의 핵심은 안전 기능과 설계 기준값입니다."
+    },
+    "teaching_notes": "학습자에게 비상노심냉각계통(ECCS) 개요과 관련된 실제 운전 경험을 공유하면 효과적",
+    "key_terms": [
+      "ECCS(Emergency",
+      "Core",
+      "Cooling",
+      "System)는",
+      "냉각재상실사고(LOCA)"
+    ],
+    "visual_references": []
+  },
+  {
+    "page_number": 4,
+    "slide_title": "LOCA 사고 시나리오 및 ECCS 대응",
+    "estimated_minutes": 7,
+    "script": {
+      "introduction": "지난 시간에 비상노심냉각계통(ECCS) 개요 에 대해 배웠습니다. 이번에는 LOCA 사고 시나리오 및 ECCS 대응에 대해 알아보겠습니다.",
+      "main_content": "Large Break LOCA (대구경 배관 파단) 시나리오:\n\n1. 파단 발생 (Cold Leg 파단 가정)\n   → RCS 급감압, 격납건물 압력 상승\n2. 원자로 자동 정지 (PZR 저압력 트립 신호)\n3. ECCS 자동 기동\n   · S-신호 (Safety Injection Signal) 발생\n   · HPSI 펌프 기동 → 고압 주입 시작\n   · SIT 수동 주입 (RCS 압력 < 600 psia)\n4. 냉각 → 감압 → 장기 재순환 냉각 진입\n\n운전원 필수 조치:\n- E-0 (원자로 트립 또는 안전주입) 진입\n- 격납건...",
+      "visual_explanation": "화면에 보이는 그래프를 함께 살펴보겠습니다. Large Break LOCA 발생 후 시간에 따른 RCS 압력, 노심 온도, ECCS 주입 유량 변화를 보여주는 복합 그래프. 특히 사고 진행 단계별 특성, ECCS 주입 타이밍에 주목해 주세요.",
+      "contextual_supplement": "실무에서 LOCA 사고 시나리오 및 ECCS 대응은(는) 운전원이 가장 자주 모니터링하는 파라미터 중 하나입니다. 특히 과도 상태에서의 변화 추이를 이해하는 것이 중요합니다.",
+      "summary": "오늘 배운 LOCA 사고 시나리오 및 ECCS 대응의 핵심은 안전 기능과 설계 기준값입니다."
+    },
+    "teaching_notes": "학습자에게 LOCA 사고 시나리오 및 ECCS 대응과 관련된 실제 운전 경험을 공유하면 효과적",
+    "key_terms": [
+      "Large",
+      "Break",
+      "LOCA",
+      "(Cold",
+      "(PZR"
+    ],
+    "visual_references": [
+      "LOCA 사고 진행 타임라인"
+    ]
+  },
+  {
+    "page_number": 5,
+    "slide_title": "학습 정리 및 평가 안내",
+    "estimated_minutes": 5,
+    "script": {
+      "introduction": "지난 시간에 LOCA 사고 시나리오 및 ECCS 대응 에 대해 배웠습니다. 이번에는 학습 정리 및 평가 안내에 대해 알아보겠습니다.",
+      "main_content": "금일 학습 내용 요약:\n1. RCS 구성요소와 각각의 기능/설계 파라미터\n2. 가압기의 압력/수위 제어 원리\n3. ECCS 구성 및 자동 기동 조건\n4. LOCA 사고 시나리오와 ECCS 대응 절차\n\n학습목표 확인:\n- RCS 주요 구성요소를 식별하고 기능을 설명할 수 있다\n- 가압기의 압력/수위 제어 방법을 설명할 수 있다\n- ECCS 자동 기동 조건과 주입 단계를 설명할 수 있다\n- LOCA 시 운전원 조치 절차를 순서대로 기술할 수 있다\n\n다음 시간: 잔열제거계통(RHRS) 및 정지냉각 운전...",
+      "visual_explanation": "이 슬라이드에는 복잡한 시각자료가 없으므로 텍스트 중심으로 설명하겠습니다.",
+      "contextual_supplement": "실무에서 학습 정리 및 평가 안내은(는) 운전원이 가장 자주 모니터링하는 파라미터 중 하나입니다. 특히 과도 상태에서의 변화 추이를 이해하는 것이 중요합니다.",
+      "summary": "오늘 배운 학습 정리 및 평가 안내의 핵심은 안전 기능과 설계 기준값입니다."
+    },
+    "teaching_notes": "학습자에게 학습 정리 및 평가 안내과 관련된 실제 운전 경험을 공유하면 효과적",
+    "key_terms": [
+      "ECCS",
+      "LOCA",
+      "ECCS",
+      "ECCS",
+      "LOCA"
+    ],
+    "visual_references": []
+  }
+]

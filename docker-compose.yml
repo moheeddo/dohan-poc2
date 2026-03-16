@@ -1,0 +1,137 @@
+# KHNP Education AI Platform - Docker Compose (v10)
+# 온프레미스 배포: Solar Pro LLM + FastAPI + 웹 + 모니터링
+
+services:
+  # ===== Upstage Solar Pro LLM (온프레미스) =====
+  solar-llm:
+    image: upstage/solar:pro-preview
+    container_name: khnp-solar-llm
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - solar_model_cache:/root/.cache
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # 모델 로딩 대기
+
+  # ===== AtomicGPT (KAERI 원자력 특화 LLM, 선택적) =====
+  atomic-gpt:
+    image: kaeri/atomicgpt:70b  # 가칭 — 실제 이미지 확정 시 변경
+    container_name: khnp-atomic-gpt
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - atomic_model_cache:/root/.cache
+    restart: unless-stopped
+    profiles:
+      - with-atomic  # docker compose --profile with-atomic up 으로 활성화
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+  # ===== Vector Database (ChromaDB) =====
+  chromadb:
+    image: chromadb/chroma:0.5.23
+    container_name: khnp-chromadb
+    ports:
+      - "8002:8000"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+    restart: unless-stopped
+
+  # ===== Application Backend (FastAPI) =====
+  app-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: khnp-app-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./src/prompts/templates.yaml:/app/src/prompts/templates.yaml  # 프롬프트 핫리로드
+    environment:
+      - UPSTAGE_API_KEY=${UPSTAGE_API_KEY:-}
+      - UPSTAGE_BASE_URL=http://solar-llm:8000/v1
+      - ATOMIC_GPT_API_KEY=${ATOMIC_GPT_API_KEY:-}
+      - ATOMIC_GPT_BASE_URL=http://atomic-gpt:8000/v1
+      - CHROMADB_URL=http://chromadb:8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      chromadb:
+        condition: service_started
+    restart: unless-stopped
+
+  # ===== Nginx (웹 포털 + API 리버스 프록시) =====
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: khnp-nginx
+    ports:
+      - "${WEB_PORT:-80}:80"
+      - "${WEB_SSL_PORT:-443}:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - app-backend
+    restart: unless-stopped
+
+  # ===== Prometheus (메트릭 수집) =====
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: khnp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # ===== Grafana (대시보드) =====
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: khnp-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-khnp2026}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+volumes:
+  solar_model_cache:
+  atomic_model_cache:
+  chromadb_data:
+  prometheus_data:
+  grafana_data:

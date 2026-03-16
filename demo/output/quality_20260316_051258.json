@@ -1,0 +1,14 @@
+{
+  "statistics": {
+    "total": 4,
+    "passed": 4,
+    "pass_rate": "100.0%",
+    "avg_quality_score": 85.0,
+    "bloom_coverage": {
+      "Knowledge": 1,
+      "Comprehension": 1,
+      "Application": 1,
+      "Analysis": 1
+    }
+  }
+}

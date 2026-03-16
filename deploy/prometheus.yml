@@ -1,0 +1,17 @@
+# KHNP Education AI Platform - Prometheus Configuration
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: 'khnp-app'
+    static_configs:
+      - targets: ['app-backend:8080']
+    metrics_path: /health
+    scrape_interval: 15s
+
+  - job_name: 'solar-llm'
+    static_configs:
+      - targets: ['solar-llm:8000']
+    metrics_path: /health
+    scrape_interval: 30s
