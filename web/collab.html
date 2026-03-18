@@ -4453,7 +4453,7 @@ postComment = async function(page) {
 // ============================================================
 // Mark last visit timestamp per section (for NEW badge)
 // ============================================================
-const _origSwitchPage = switchPage;
+const _origSPVisit = switchPage;
 switchPage = function(page) {
     // Save current section's visit timestamp before switching
     if (_currentPage) {
@@ -4461,7 +4461,7 @@ switchPage = function(page) {
         _lastVisitTimestamp[section] = Date.now() / 1000;
         localStorage.setItem('poc2_lastVisit', JSON.stringify(_lastVisitTimestamp));
     }
-    _origSwitchPage(page);
+    _origSPVisit(page);
 };
 
 // Also mark on discussion tab switch
@@ -4779,9 +4779,9 @@ function updateNotifBadge() {
 updateNotifBadge();
 
 // Hook into polling: detect mentions and replies for current user
-const _origAddToCache = addCommentToCache;
+const _origAddToCacheNotif = addCommentToCache;
 addCommentToCache = function(comment) {
-    _origAddToCache(comment);
+    _origAddToCacheNotif(comment);
     if (!_user) return;
     const content = comment.content || '';
     // Check for mention
