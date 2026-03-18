@@ -25,6 +25,8 @@
         [data-theme="dark"] {
             --bg: #0f172a;
             --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --active-bg: #1e3a5f;
             --text: #e2e8f0;
             --text-secondary: #94a3b8;
             --border: #334155;
@@ -54,8 +56,8 @@
         [data-theme="dark"] .sidebar { background: #0f172a; border-color: var(--border); }
         [data-theme="dark"] .nav-item:hover { background: #1e293b; }
         [data-theme="dark"] .nav-item.active { background: #1e293b; color: var(--accent); }
-        [data-theme="dark"] .comment-item:hover { background: #1e293b; }
-        [data-theme="dark"] .reply-item { background: var(--bg-card); }
+        [data-theme="dark"] .comment-item:hover { background: var(--bg-hover); }
+        [data-theme="dark"] .reply-item { background: #253349; }
         [data-theme="dark"] .login-box { background: #1e293b; color: var(--text); }
         [data-theme="dark"] .login-box input { background: #0f172a; color: var(--text); border-color: var(--border); }
         [data-theme="dark"] .login-box .login-btn { background: var(--accent); }
@@ -78,6 +80,21 @@
         [data-theme="dark"] .search-nav-btn { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border); }
         [data-theme="dark"] .emoji-picker-popup { background: var(--bg-card); border-color: var(--border); }
         [data-theme="dark"] .quick-reply-btn { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border); }
+        [data-theme="dark"] .mention-me { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .search-highlight { background: #854d0e; color: #fef08a; }
+        [data-theme="dark"] .quote-block { background: rgba(59,130,246,0.12); color: #94a3b8; }
+        [data-theme="dark"] .comment-body.collapsed::after { background: linear-gradient(transparent, var(--bg-card)); }
+        [data-theme="dark"] .new-highlight { animation: newGlowDark 2s ease-out; }
+        @keyframes newGlowDark { 0% { background: rgba(59,130,246,0.2); } 100% { background: transparent; } }
+        [data-theme="dark"] .comment-org { opacity: 0.85; filter: brightness(0.85) saturate(1.2); }
+        [data-theme="dark"] .poll-container { background: var(--bg-card); border-color: var(--border); }
+        [data-theme="dark"] .poll-option { background: var(--bg); border-color: var(--border); }
+        [data-theme="dark"] .page-summary-card { background: var(--bg-card); border-color: var(--border); }
+        [data-theme="dark"] .comment-filter-tab:hover:not(.active) { border-color: var(--accent); }
+        [data-theme="dark"] .todo-item { color: var(--text); }
+        [data-theme="dark"] .reaction-btn:hover { background: var(--bg-hover); }
+        [data-theme="dark"] .reaction-btn.active { border-color: var(--accent); background: #1e3a5f; }
+        [data-theme="dark"] .comment-actions button:hover { color: var(--accent); }
         [data-theme="dark"] .notif-panel { background: #0f172a; border-color: var(--border); }
         [data-theme="dark"] .notif-item:hover { background: #1e293b; }
         [data-theme="dark"] .notif-panel-header { border-color: var(--border); }
@@ -430,7 +447,7 @@
             animation: fadeInUp 0.3s ease;
         }
         @keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        .comment-item:hover { background: #f1f5f9; }
+        .comment-item:hover { background: var(--bg-hover, #f1f5f9); }
         .comment-new { background: #eff6ff !important; border-left-color: var(--accent) !important; }
         .comment-header {
             display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
@@ -456,10 +473,10 @@
             margin-top: 6px; padding-left: 12px;
             border-left: 2px solid var(--border);
         }
-        .reply-list .reply-list { border-left-color: #e2e8f0; }
-        .reply-list .reply-list .reply-list { border-left-color: #f1f5f9; }
+        .reply-list .reply-list { border-left-color: var(--border); }
+        .reply-list .reply-list .reply-list { border-left-color: var(--border); }
         .reply-item {
-            padding: 10px 12px; margin-bottom: 6px; background: white; border-radius: 8px;
+            padding: 10px 12px; margin-bottom: 6px; background: var(--bg-card); border-radius: 8px;
             font-size: 0.84rem;
         }
         .reply-item .comment-header { margin-bottom: 4px; }
@@ -531,11 +548,11 @@
         .reaction-btn {
             display: inline-flex; align-items: center; gap: 3px;
             padding: 3px 8px; border-radius: 14px; border: 1px solid var(--border);
-            background: white; cursor: pointer; font-size: 0.82rem; transition: all 0.15s;
+            background: var(--bg-card); cursor: pointer; font-size: 0.82rem; transition: all 0.15s;
             user-select: none; position: relative;
         }
-        .reaction-btn:hover { background: #f1f5f9; }
-        .reaction-btn.active { border-color: var(--accent); background: #eff6ff; }
+        .reaction-btn:hover { background: var(--bg-hover, #f1f5f9); }
+        .reaction-btn.active { border-color: var(--accent); background: var(--active-bg, #eff6ff); }
         .reaction-btn .r-count { font-size: 0.72rem; color: var(--text-secondary); min-width: 8px; text-align: center; }
         .reaction-btn.active .r-count { color: var(--accent); font-weight: 600; }
 
@@ -643,7 +660,7 @@
         .comment-search:focus { border-color: var(--accent); }
         .sort-select {
             padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
-            font-size: 0.78rem; background: white; cursor: pointer; font-family: inherit;
+            font-size: 0.78rem; background: var(--bg-card); cursor: pointer; font-family: inherit; color: var(--text);
         }
 
         /* Unread badge */
