@@ -27,6 +27,7 @@
             --bg-card: #1e293b;
             --bg-hover: #334155;
             --active-bg: #1e3a5f;
+            --input-bg: #172554;
             --text: #e2e8f0;
             --text-secondary: #94a3b8;
             --border: #334155;
@@ -95,6 +96,8 @@
         [data-theme="dark"] .reaction-btn:hover { background: var(--bg-hover); }
         [data-theme="dark"] .reaction-btn.active { border-color: var(--accent); background: #1e3a5f; }
         [data-theme="dark"] .comment-actions button:hover { color: var(--accent); }
+        [data-theme="dark"] .comment-input-area { box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        [data-theme="dark"] .comment-input-area:focus-within { box-shadow: 0 0 0 4px rgba(59,130,246,0.25); }
         [data-theme="dark"] .notif-panel { background: #0f172a; border-color: var(--border); }
         [data-theme="dark"] .notif-item:hover { background: #1e293b; }
         [data-theme="dark"] .notif-panel-header { border-color: var(--border); }
@@ -356,18 +359,27 @@
         /* Comment System */
         .comment-input-area {
             display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
-            background: var(--bg-card); border: 2px solid var(--border); border-radius: 12px;
-            padding: 12px; transition: border-color 0.2s;
+            background: var(--input-bg, #eef4ff); border: 2px solid var(--accent);
+            border-radius: 14px; padding: 14px 16px; transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+            position: relative;
         }
-        .comment-input-area:focus-within { border-color: var(--accent); }
+        .comment-input-area::before {
+            content: '✏️ 의견 작성'; position: absolute; top: -10px; left: 16px;
+            background: var(--input-bg, #eef4ff); padding: 0 8px;
+            font-size: 0.72rem; font-weight: 700; color: var(--accent);
+            letter-spacing: 0.03em;
+        }
+        .comment-input-area:focus-within { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
         .comment-input-area textarea {
             width: 100%; padding: 8px 4px; border: none; border-radius: 0;
             font-size: 0.9rem; resize: none; min-height: 48px; outline: none;
             font-family: inherit; line-height: 1.6;
             background: transparent; color: var(--text);
         }
+        .comment-input-area textarea::placeholder { color: var(--text-secondary); }
         .comment-input-area .input-toolbar {
-            display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px;
+            display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(59,130,246,0.15); padding-top: 8px;
         }
         .comment-input-area .input-toolbar .img-btn {
             display: flex; align-items: center; gap: 4px; padding: 6px 12px;
