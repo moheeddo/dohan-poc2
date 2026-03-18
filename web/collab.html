@@ -1649,105 +1649,204 @@
             </div>
         </div>
 
-        <!-- ===== 7. PoC RAG 전략 ===== -->
+        <!-- ===== 7. PoC RAG 전략 (Full Content from Main Site) ===== -->
         <div class="page" id="page-rag-strategy">
             <div class="page-title">PoC 단계 RAG 전략</div>
             <div class="page-desc">풀스케일 RAG 구축 없이 "RAG 효과"를 입증하는 실용적 접근법</div>
 
+            <!-- 핵심 전략 배너 -->
             <div class="card" style="background:linear-gradient(135deg,#0ea5e9 0%,#0284c7 100%);color:white;border:none;">
-                <h3 style="color:white;">PoC 핵심 판단</h3>
+                <h3 style="color:white;margin-bottom:8px;">PoC 핵심 판단</h3>
                 <p style="font-size:0.88rem;opacity:0.95;line-height:1.8;">
-                    PoC 단계에서 대규모 RAG 인프라(벡터DB + 수만건 임베딩)를 구축하는 것은 과도합니다.<br>
+                    PoC 단계에서 대규모 RAG 인프라(벡터DB + 수만건 문서 임베딩)를 구축하는 것은 과도합니다.<br>
                     대신 <strong>"Golden Context 방식"</strong>으로 RAG와 동등한 효과를 데모하고,<br>
                     <strong>A/B 비교</strong>를 통해 "본격 RAG 구축 시 더 좋아진다"는 투자 정당성을 확보합니다.
                 </p>
             </div>
 
+            <!-- PoC RAG 전략 비교 -->
             <div class="module-grid">
                 <div class="module-card" style="border:2px solid var(--success);">
                     <h4>&#9733; 채택: Golden Context + Curated Prompt</h4>
                     <div class="desc">
-                        <p style="padding:10px;background:#f0fdf4;border-radius:6px;margin-bottom:10px;">
-                            강의안 업로드 시 관련 참고자료(절차서/규정)를 함께 첨부. 별도 벡터DB 없이 파싱 후 LLM 컨텍스트에 직접 주입.
-                        </p>
-                        <ul style="padding-left:16px;line-height:2;">
-                            <li><strong>Golden Context</strong>: 참고자료 2~5건 함께 업로드</li>
-                            <li><strong>Curated Prompt</strong>: SAT/Bloom/용어사전 내장</li>
-                            <li><strong>Few-shot</strong>: SME 모범 예시 5건 확보</li>
+                        <div style="padding:12px;background:#f0fdf4;border-radius:8px;margin-bottom:12px;">
+                            <strong style="color:#059669;">방식:</strong>
+                            강의안 업로드 시 <strong>관련 참고자료(절차서/규정/매뉴얼)를 함께 첨부</strong>.
+                            별도 벡터DB 없이, 업로드된 문서를 모두 Document Parse로 파싱한 후
+                            LLM 컨텍스트에 직접 주입.
+                        </div>
+                        <strong>구성 요소:</strong>
+                        <ul style="padding-left:16px;margin-top:6px;line-height:2.2;">
+                            <li><strong>Golden Context</strong>: 강사가 이미 보유한 참고자료 2~5건을 함께 업로드</li>
+                            <li><strong>Curated System Prompt</strong>: SAT 원칙, Bloom's Taxonomy, 원자력 핵심 용어 100~200개, 모범 스크립트/문항 예시를 프롬프트에 내장</li>
+                            <li><strong>Few-shot Examples</strong>: SME에게 "좋은 스크립트/문항" 예시 5건만 확보</li>
                         </ul>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
-                            <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:6px;">
-                                <div style="font-size:1.2rem;font-weight:700;color:#059669;">0원</div>
-                                <div style="font-size:0.72rem;">RAG 인프라 비용</div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;">
+                            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:8px;">
+                                <div style="font-size:1.3rem;font-weight:700;color:#059669;">0원</div>
+                                <div style="font-size:0.75rem;">RAG 인프라 비용</div>
                             </div>
-                            <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:6px;">
-                                <div style="font-size:1.2rem;font-weight:700;color:#059669;">0일</div>
-                                <div style="font-size:0.72rem;">벡터DB 구축 시간</div>
+                            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:8px;">
+                                <div style="font-size:1.3rem;font-weight:700;color:#059669;">0일</div>
+                                <div style="font-size:0.75rem;">벡터DB 구축 시간</div>
                             </div>
-                            <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:6px;">
-                                <div style="font-size:1.2rem;font-weight:700;color:#059669;">90%</div>
-                                <div style="font-size:0.72rem;">RAG 대비 효과</div>
+                            <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:8px;">
+                                <div style="font-size:1.3rem;font-weight:700;color:#059669;">90%</div>
+                                <div style="font-size:0.75rem;">RAG 대비 효과</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="module-card" style="opacity:0.7;">
-                    <h4>&#128260; 보류: 풀스케일 RAG (Phase 2 이후)</h4>
+                    <h4>&#128260; 보류: 풀스케일 RAG</h4>
                     <div class="desc">
-                        <p style="padding:10px;background:#fef3c7;border-radius:6px;margin-bottom:10px;">
-                            PoC 12주 내 벡터DB 구축은 비현실적. RAG 인프라가 아니라 생성 품질 검증이 목적.
-                        </p>
-                        <ul style="padding-left:16px;line-height:2;">
+                        <div style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:12px;">
+                            <strong style="color:#92400e;">보류 사유:</strong>
+                            PoC 12주 내에 벡터DB 구축 + 수만건 문서 임베딩은 비현실적.
+                            RAG 인프라 자체가 목적이 아니라, 생성 품질 검증이 목적.
+                        </div>
+                        <strong>Phase 2에서 구축할 RAG:</strong>
+                        <ul style="padding-left:16px;margin-top:6px;line-height:2.2;">
                             <li>ChromaDB/Milvus 영구 벡터 저장소</li>
-                            <li>전체 교육자료/규정 임베딩</li>
+                            <li>전체 교육자료/규정/절차서 임베딩</li>
                             <li>Hybrid Search (Dense + Sparse)</li>
                             <li>자동 문서 갱신 파이프라인</li>
+                            <li>메타데이터 필터링 (과목/역량단위/난이도)</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
+            <!-- A/B 비교 데모 전략 -->
             <div class="card" style="border:2px solid #1e3a5f;">
                 <h3>&#128202; A/B 비교 데모 전략 — PoC의 킬러 장면</h3>
-                <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin-top:8px;">
-                    <div style="padding:14px;background:#fef2f2;border-radius:10px;border:2px solid #fca5a5;">
-                        <div style="text-align:center;margin-bottom:8px;">
-                            <span style="display:inline-block;background:#dc2626;color:white;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:700;">A: 강의안만</span>
+                <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;">RAG 투자 정당성을 한 방에 보여주는 시나리오</p>
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin-top:8px;">
+                    <!-- A 조건 -->
+                    <div style="padding:16px;background:#fef2f2;border-radius:12px;border:2px solid #fca5a5;">
+                        <div style="text-align:center;margin-bottom:10px;">
+                            <span style="display:inline-block;background:#dc2626;color:white;padding:4px 14px;border-radius:16px;font-size:0.82rem;font-weight:700;">A 조건: 강의안만</span>
                         </div>
-                        <div style="font-size:0.82rem;line-height:1.7;color:var(--text-secondary);">
-                            Input: 강의안 PDF 1건<br>Context: 없음<br>
-                            → 일반적 설명, 전문용어 부정확 가능
+                        <div style="font-size:0.85rem;line-height:1.8;color:var(--text-secondary);">
+                            <div style="font-family:monospace;background:var(--bg-card);padding:10px;border-radius:6px;margin-bottom:8px;font-size:0.8rem;">
+                                Input: 강의안 PDF 1건<br>
+                                Context: 없음<br>
+                                Prompt: 기본 생성
+                            </div>
+                            <strong>결과 예상:</strong><br>
+                            - 일반적인 설명 수준<br>
+                            - 원자력 전문 용어 부정확 가능<br>
+                            - 실무 사례 부재<br>
+                            - 문항 정답 오류 가능
                         </div>
                     </div>
-                    <div style="display:flex;align-items:center;font-size:1.5rem;font-weight:900;color:#1e3a5f;">VS</div>
-                    <div style="padding:14px;background:#f0fdf4;border-radius:10px;border:2px solid #86efac;">
-                        <div style="text-align:center;margin-bottom:8px;">
-                            <span style="display:inline-block;background:#059669;color:white;padding:3px 12px;border-radius:14px;font-size:0.8rem;font-weight:700;">B: 강의안 + 참고자료</span>
+                    <!-- VS -->
+                    <div style="display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#1e3a5f;">VS</div>
+                    <!-- B 조건 -->
+                    <div style="padding:16px;background:#f0fdf4;border-radius:12px;border:2px solid #86efac;">
+                        <div style="text-align:center;margin-bottom:10px;">
+                            <span style="display:inline-block;background:#059669;color:white;padding:4px 14px;border-radius:16px;font-size:0.82rem;font-weight:700;">B 조건: 강의안 + 참고자료</span>
                         </div>
-                        <div style="font-size:0.82rem;line-height:1.7;color:var(--text-secondary);">
-                            Input: 강의안 + 절차서 2건 + 규정 1건<br>
-                            → 전문용어 정확, 규정 인용, 실무 맥락 반영
+                        <div style="font-size:0.85rem;line-height:1.8;color:var(--text-secondary);">
+                            <div style="font-family:monospace;background:var(--bg-card);padding:10px;border-radius:6px;margin-bottom:8px;font-size:0.8rem;">
+                                Input: 강의안 PDF 1건<br>
+                                Context: 절차서 2건 + 규정 1건<br>
+                                Prompt: SAT/Bloom 내장
+                            </div>
+                            <strong>결과 예상:</strong><br>
+                            - 전문 용어 정확한 설명<br>
+                            - 관련 규정 인용 포함<br>
+                            - 실무 맥락 반영<br>
+                            - 문항 정답 검증 가능
                         </div>
                     </div>
                 </div>
-                <div style="margin-top:14px;padding:12px;background:#f0f9ff;border-radius:8px;text-align:center;font-size:0.88rem;">
-                    <strong style="color:#1e3a5f;">피칭:</strong> "참고자료 3건만 넣어도 이 차이. <strong>본격 RAG로 수천 건 연결하면</strong> 훨씬 더 좋아집니다."
+                <div style="margin-top:16px;padding:14px;background:var(--bg-hover,#f0f9ff);border-radius:8px;text-align:center;font-size:0.92rem;">
+                    <strong style="color:#1e3a5f;">피칭 포인트:</strong>
+                    "PoC에서 참고자료 3건만 넣어도 이 정도 차이가 납니다.
+                    <strong>본격 RAG로 수천 건의 지식을 연결하면</strong>, 이보다 훨씬 더 좋아집니다."
                 </div>
             </div>
 
+            <!-- Curated Prompt 구성 상세 -->
             <div class="card">
-                <h3>&#128221; Curated System Prompt 체크리스트 (SME 사전 확보)</h3>
+                <h3>&#128221; Curated System Prompt 구성 체크리스트</h3>
+                <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:10px;">SME에게 사전 확보해야 할 자료 목록</p>
                 <table class="std-table">
-                    <thead><tr><th>항목</th><th>내용</th><th>분량</th><th>상태</th></tr></thead>
+                    <thead><tr><th>항목</th><th>내용</th><th>분량</th><th>확보 방법</th><th>상태</th></tr></thead>
                     <tbody>
-                        <tr><td>SAT 원칙 가이드</td><td>SAT 5단계 정의, 학습목표 작성법</td><td>~2,000자</td><td><span class="status-badge pending">대기</span></td></tr>
-                        <tr><td>Bloom's Taxonomy</td><td>수준별 문항 유형, 행동 동사</td><td>~1,500자</td><td><span class="status-badge pending">대기</span></td></tr>
-                        <tr><td>원자력 핵심 용어</td><td>PWR/BWR 계통, 안전계통, 운전용어</td><td>100~200개</td><td><span class="status-badge pending">대기</span></td></tr>
-                        <tr><td>모범 스크립트 예시</td><td>잘 작성된 강의 스크립트</td><td>3~5건</td><td><span class="status-badge pending">대기</span></td></tr>
-                        <tr><td>모범 문항 예시</td><td>수준별 모범 문항 + 해설</td><td>총 8건</td><td><span class="status-badge pending">대기</span></td></tr>
-                        <tr><td>문항 작성 기준</td><td>KHNP 내부 출제 가이드라인</td><td>~1,000자</td><td><span class="status-badge pending">대기</span></td></tr>
+                        <tr>
+                            <td><strong>SAT 원칙 가이드</strong></td>
+                            <td>SAT 5단계 정의, 학습목표 작성법, 평가 연계 원칙</td>
+                            <td>~2,000자</td>
+                            <td>인재개발원 내부 문서</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bloom's Taxonomy 가이드</strong></td>
+                            <td>수준별 문항 유형, 행동 동사, 난이도 기준</td>
+                            <td>~1,500자</td>
+                            <td>교수설계 담당자</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>원자력 핵심 용어 사전</strong></td>
+                            <td>PWR/BWR 계통, 안전계통, 운전용어 등</td>
+                            <td>100~200개 용어</td>
+                            <td>기존 교재/용어집</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>모범 스크립트 예시</strong></td>
+                            <td>잘 작성된 강의 스크립트 (다양한 과목)</td>
+                            <td>3~5건</td>
+                            <td>우수 강사 자료</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>모범 문항 예시</strong></td>
+                            <td>수준별 잘 만든 문항 + 해설</td>
+                            <td>수준별 2문항 (총 8건)</td>
+                            <td>기존 문제은행</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>문항 작성 기준</strong></td>
+                            <td>KHNP 내부 문항 출제 가이드라인</td>
+                            <td>~1,000자</td>
+                            <td>교육평가 담당자</td>
+                            <td><span class="status-badge pending">대기</span></td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Upstage/EY 피칭 전략 -->
+            <div class="module-grid">
+                <div class="module-card" style="border-left:4px solid #6c5ce7;">
+                    <h4>&#128172; Upstage에게 이렇게 말한다</h4>
+                    <div class="desc">
+                        <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;">Technology Partner Pitch</p>
+                        <div style="padding:12px;background:var(--bg-hover,#f5f3ff);border-radius:8px;font-size:0.88rem;line-height:1.8;font-style:italic;color:var(--text);">
+                            "PoC에서는 <strong>Document Parse + Solar Pro의 기본 성능</strong>을 검증하고,
+                            참고자료 동시 투입 방식으로 <strong>RAG 효과의 proof point</strong>를 확보합니다.
+                            풀스케일 RAG는 PoC 결과를 기반으로 <strong>Phase 2에서 Upstage Embedding API + 벡터DB로 구축</strong>합니다.
+                            따라서 PoC에서는 <strong>Document Parse 성능과 Solar Pro 생성 품질</strong>이 가장 중요합니다."
+                        </div>
+                    </div>
+                </div>
+                <div class="module-card" style="border-left:4px solid #d97706;">
+                    <h4>&#128172; EY에게 이렇게 말한다</h4>
+                    <div class="desc">
+                        <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:6px;">Strategy Consultant Pitch</p>
+                        <div style="padding:12px;background:var(--bg-hover,#fefce8);border-radius:8px;font-size:0.88rem;line-height:1.8;font-style:italic;color:var(--text);">
+                            "PoC에서 <strong>A/B 비교 데모</strong>를 통해 RAG 효과를 정량적으로 입증합니다.
+                            이 결과가 <strong>Phase 2 RAG 인프라 투자의 ROI 근거</strong>가 됩니다.
+                            EY 보고서에 'PoC 결과 기반 RAG 확장 시 <strong>예상 효과 N배 향상</strong>' 시나리오를 포함해주세요.
+                            <strong>단계적 투자 전략</strong>으로 리스크를 최소화하면서 성과를 극대화하는 접근입니다."
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="card">
@@ -1756,135 +1855,757 @@
             </div>
         </div>
 
-        <!-- ===== 8. 방법론 & QA ===== -->
+        <!-- ===== 8. 방법론 & QA (Full Content from Main Site) ===== -->
         <div class="page" id="page-methodology">
             <div class="page-title">방법론 & QA 파이프라인</div>
-            <div class="page-desc">VLM 기반 강의스크립트/문제은행 생성의 구체적 방법론, 품질 검증 체계</div>
+            <div class="page-desc">VLM 기반 강의스크립트/문제은행 생성의 구체적 방법론, 품질 검증 체계, 교육선순환 설계</div>
 
-            <div class="card">
-                <h3>&#9881; End-to-End 파이프라인 (11단계)</h3>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
-                    <div style="background:linear-gradient(135deg,#6c5ce7,#a855f7);color:white;padding:14px;border-radius:10px;text-align:center;">
-                        <div style="font-size:1rem;font-weight:800;">Step 1-2</div>
-                        <div style="font-size:0.78rem;margin-top:4px;opacity:0.9;">Document Parse<br>+ VLM 시각자료</div>
+            <!-- E2E 파이프라인 상세 -->
+            <div class="card" style="border-left:4px solid #8b5cf6;">
+                <h3 style="color:var(--text);">End-to-End 파이프라인 (11단계) <span style="background:#8b5cf6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4</span></h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px;">
+                    <div style="background:linear-gradient(135deg,#6c5ce7,#a855f7);color:white;padding:16px;border-radius:10px;text-align:center;">
+                        <div style="font-size:1.1rem;font-weight:800;">Step 1-2</div>
+                        <div style="font-size:0.8rem;margin-top:6px;opacity:0.9;">Document Parse<br>+ VLM 시각자료 분석</div>
+                        <div style="font-size:0.7rem;margin-top:8px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:4px;">강의안 PDF → 구조화 데이터<br>도면/P&ID/차트 해석</div>
                     </div>
-                    <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;padding:14px;border-radius:10px;text-align:center;">
-                        <div style="font-size:1rem;font-weight:800;">Step 3</div>
-                        <div style="font-size:0.78rem;margin-top:4px;opacity:0.9;">Golden Context<br>+ Curated Prompt</div>
+                    <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;padding:16px;border-radius:10px;text-align:center;">
+                        <div style="font-size:1.1rem;font-weight:800;">Step 3</div>
+                        <div style="font-size:0.8rem;margin-top:6px;opacity:0.9;">Golden Context<br>+ Curated Prompt</div>
+                        <div style="font-size:0.7rem;margin-top:8px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:4px;">참고자료 파싱 주입<br>SAT/Bloom/용어 내장</div>
                     </div>
-                    <div style="background:linear-gradient(135deg,#059669,#22c55e);color:white;padding:14px;border-radius:10px;text-align:center;">
-                        <div style="font-size:1rem;font-weight:800;">Step 4-5</div>
-                        <div style="font-size:0.78rem;margin-top:4px;opacity:0.9;">Solar Pro LLM<br>스크립트+문제 생성</div>
+                    <div style="background:linear-gradient(135deg,#059669,#22c55e);color:white;padding:16px;border-radius:10px;text-align:center;">
+                        <div style="font-size:1.1rem;font-weight:800;">Step 4-5</div>
+                        <div style="font-size:0.8rem;margin-top:6px;opacity:0.9;">Solar Pro LLM<br>스크립트 + 문제 생성</div>
+                        <div style="font-size:0.7rem;margin-top:8px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:4px;">5단계 스크립트 + 2-Pass 문항<br>Few-shot 앵커링</div>
                     </div>
-                    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;padding:14px;border-radius:10px;text-align:center;">
-                        <div style="font-size:1rem;font-weight:800;">Step 6-11</div>
-                        <div style="font-size:0.78rem;margin-top:4px;opacity:0.9;">안전태깅 + QA<br>+ 버전관리</div>
+                    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;padding:16px;border-radius:10px;text-align:center;">
+                        <div style="font-size:1.1rem;font-weight:800;">Step 6-11</div>
+                        <div style="font-size:0.8rem;margin-top:6px;opacity:0.9;">안전태깅 + QA + 버전관리<br>+ 스크립트 품질평가</div>
+                        <div style="font-size:0.7rem;margin-top:8px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:4px;">Graded Approach + IRT 보정<br>자동 폐기 + QTI 내보내기</div>
                     </div>
                 </div>
             </div>
 
+            <!-- VLM + 스크립트 생성 -->
             <div class="module-grid">
-                <div class="module-card" style="border-left:3px solid #6366f1;">
+                <div class="module-card" style="border-left:4px solid #6c5ce7;">
                     <h4>&#128065; VLM 시각자료 심층 분석</h4>
                     <div class="desc">
-                        <p>원자력 강의안의 30~50%는 시각자료. Document Parse Enhanced + Solar VLM 2단계 분석:</p>
-                        <ol style="padding-left:16px;margin-top:6px;line-height:2;">
-                            <li><strong>1단계</strong>: 이미지/차트 감지 → VLM 구조화 설명</li>
-                            <li><strong>2단계</strong>: 원자력 도메인 맥락 재해석 → 교육용 설명</li>
+                        <p><strong>왜 VLM이 핵심인가?</strong></p>
+                        <p>원자력 강의안의 30~50%는 시각자료(설비도면, P&ID, 계통도, 운전 파라미터 차트)입니다.
+                        텍스트만 파싱하면 강의 내용의 절반을 놓칩니다.</p>
+                        <div style="margin-top:10px;padding:10px;background:var(--bg-hover,#f5f3ff);border-radius:8px;">
+                            <strong>Document Parse Enhanced + Solar VLM 2단계 분석:</strong>
+                            <ol style="padding-left:18px;margin-top:6px;line-height:2;">
+                                <li><strong>1단계 (Document Parse Enhanced)</strong>: 이미지/차트를 감지하고, VLM으로 구조화된 설명(자연어 + 데이터) 생성</li>
+                                <li><strong>2단계 (Solar Pro 심층 분석)</strong>: 1단계 결과를 원자력 도메인 맥락에서 재해석하여 교육용 설명 생성</li>
+                            </ol>
+                        </div>
+                        <div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;">
+                            <strong style="color:#dc2626;">Upstage 확인 필요:</strong>
+                            Document Parse Enhanced가 원자력 P&ID/계통도를 얼마나 정확하게 구조화하는지 샘플 테스트 필요.
+                        </div>
+                    </div>
+                </div>
+                <div class="module-card" style="border-left:4px solid #059669;">
+                    <h4>&#128221; 강의 스크립트 생성 방법론</h4>
+                    <div class="desc">
+                        <p><strong>슬라이드별 생성 구조:</strong></p>
+                        <table class="std-table" style="margin-top:6px;margin-bottom:10px;">
+                            <thead><tr><th>구간</th><th>내용</th><th>시간</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>도입</strong></td><td>이전 내용 연결, 학습목표 제시, 동기부여</td><td>~30초</td></tr>
+                                <tr><td><strong>전개(텍스트)</strong></td><td>핵심 개념 설명, 전문 용어 풀이</td><td>~2분</td></tr>
+                                <tr><td><strong>전개(시각)</strong></td><td>VLM 분석 기반 도면/차트 설명</td><td>~1분</td></tr>
+                                <tr><td><strong>전개(맥락)</strong></td><td>Golden Context에서 가져온 규정/사례 인용</td><td>~1분</td></tr>
+                                <tr><td><strong>정리</strong></td><td>핵심 요약, 다음 내용 예고</td><td>~30초</td></tr>
+                            </tbody>
+                        </table>
+                        <div style="padding:10px;background:#f0fdf4;border-radius:8px;">
+                            <strong>품질 향상 핵심:</strong>
+                            <ul style="padding-left:16px;margin-top:4px;">
+                                <li>Few-shot: SME 우수 스크립트 3~5건을 예시로 제공</li>
+                                <li>이전 슬라이드 요약을 다음 슬라이드 생성 시 전달 (흐름 연결)</li>
+                                <li>VLM 분석 결과를 "시각자료 설명" 구간에 자동 삽입</li>
+                                <li><strong>[v2 구현완료]</strong> Curated System Prompt (SAT/Bloom/용어사전) 주입 지원</li>
+                            </ul>
+                        </div>
+                        <div style="margin-top:10px;padding:10px;background:#ede9fe;border-radius:8px;">
+                            <strong style="color:#6c5ce7;">v2: VLM 시각자료 5단계 통합 스크립트</strong>
+                            <p style="margin-top:4px;font-size:0.85rem;">
+                                기존 3단계(도입/전개/정리)에서 <strong>5단계</strong>로 확장:<br>
+                                도입 → 전개(핵심개념) → <span style="color:#6c5ce7;font-weight:700;">전개(시각자료)</span> → 전개(맥락보충) → 정리
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QA 파이프라인 -->
+            <div class="card" style="border:2px solid #dc2626;">
+                <h3>&#9888; AI 문항 품질 검증 (QA) 파이프라인 — 가장 중요</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">연구 근거 기반 검증 체계</p>
+                <div style="padding:14px;background:#fef2f2;border-radius:8px;margin-bottom:14px;font-size:0.88rem;">
+                    <strong style="color:#dc2626;">연구 결과 (BMC Medical Education 2025):</strong><br>
+                    AI 생성 문항의 <strong>비기능적 오답(nonfunctional distractor) 비율 33.75%</strong> vs 인간 출제 13.75%.<br>
+                    → <strong>오답 매력도 검증이 AI 문항 QA의 최우선 과제</strong>
+                </div>
+                <table class="std-table">
+                    <thead><tr><th>검증 단계</th><th>검증 내용</th><th>방법</th><th>통과 기준</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. 지문 명확성</strong></td>
+                            <td>모호한 표현, 이중해석 가능성</td>
+                            <td>Solar Pro LLM 자동 검증</td>
+                            <td>모호성 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. 정답 정확성</strong></td>
+                            <td>정답이 틀리거나 복수 정답 가능</td>
+                            <td>Golden Context 기반 fact-check</td>
+                            <td>참고자료에서 정답 확인</td>
+                        </tr>
+                        <tr style="background:#fef2f2;">
+                            <td><strong>3. 오답 매력도</strong></td>
+                            <td>각 오답을 선택할 합리적 이유 존재?</td>
+                            <td>LLM이 각 오답의 "선택 이유" 생성 시도</td>
+                            <td>비기능적 오답 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. 난이도 적정성</strong></td>
+                            <td>Bloom 수준 대비 난이도 매칭</td>
+                            <td>Item Analysis 시뮬레이션</td>
+                            <td>난이도 지수 0.3~0.7</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. SAT 정합성</strong></td>
+                            <td>학습목표와 직접 연계</td>
+                            <td>학습목표 키워드 매칭</td>
+                            <td>미연계 문항 0건</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6. Bloom 분포</strong></td>
+                            <td>수준별 배분 준수</td>
+                            <td>자동 카운팅</td>
+                            <td>각 수준 &plusmn;10%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div style="padding:14px;background:#f0fdf4;border-radius:8px;">
+                        <strong style="color:#059669;">자동 QA 결과 예시</strong>
+                        <div style="font-family:monospace;font-size:0.8rem;margin-top:8px;background:var(--bg-card);padding:10px;border-radius:4px;">
+                            총 20문항 검증 결과:<br>
+                            - Pass: 14 (70%)<br>
+                            - Needs Revision: 4 (20%)<br>
+                            - Reject: 2 (10%)<br>
+                            - 평균 품질점수: 78.5/100<br>
+                            - 최빈 이슈: 오답 매력도 (6건)
+                        </div>
+                    </div>
+                    <div style="padding:14px;background:#fef3c7;border-radius:8px;">
+                        <strong style="color:#92400e;">SME 최종 검토 워크플로우</strong>
+                        <ol style="padding-left:16px;font-size:0.85rem;margin-top:8px;line-height:2;">
+                            <li>AI가 문항 생성 + 자동 QA</li>
+                            <li>QA Pass 문항 → SME 최종 확인</li>
+                            <li>Needs Revision → AI 자동 수정 후 SME 확인</li>
+                            <li>Reject 문항 → 재생성 또는 삭제</li>
+                            <li>SME 승인 → 문제은행 등록</li>
                         </ol>
                     </div>
                 </div>
-                <div class="module-card" style="border-left:3px solid #059669;">
-                    <h4>&#128221; 강의 스크립트 5단계 생성</h4>
-                    <div class="desc">
-                        <table class="std-table" style="margin-bottom:8px;">
-                            <thead><tr><th>구간</th><th>내용</th><th>시간</th></tr></thead>
-                            <tbody>
-                                <tr><td>도입</td><td>이전 내용 연결, 학습목표, 동기부여</td><td>~30초</td></tr>
-                                <tr><td>전개(텍스트)</td><td>핵심 개념, 전문 용어 풀이</td><td>~2분</td></tr>
-                                <tr><td>전개(시각)</td><td>VLM 분석 기반 도면/차트 설명</td><td>~1분</td></tr>
-                                <tr><td>전개(맥락)</td><td>Golden Context 규정/사례 인용</td><td>~1분</td></tr>
-                                <tr><td>정리</td><td>핵심 요약, 다음 내용 예고</td><td>~30초</td></tr>
-                            </tbody>
-                        </table>
+            </div>
+
+            <!-- 2-Pass 문항 생성 엔진 -->
+            <div class="card" style="border:2px solid #6c5ce7;">
+                <h3>&#9889; 2-Pass 문항 생성 엔진 <span style="background:#6c5ce7;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;margin-left:8px;">v2 구현완료</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">AI 오답 매력도 문제의 근본 해결책</p>
+                <div style="padding:14px;background:#ede9fe;border-radius:8px;margin-bottom:14px;font-size:0.88rem;">
+                    <strong style="color:#6c5ce7;">핵심 아이디어:</strong> AI 오답의 33.75%가 비기능적인 문제를 <strong>생성 시점</strong>에서 해결.
+                    1차 생성에서 "오답 선택 이유"를 강제로 기술하게 하고, 2차 검증에서 약한 오답을 자동 교체.
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div style="padding:14px;background:#f0f9ff;border-radius:8px;border-left:4px solid #0ea5e9;">
+                        <strong style="color:#0ea5e9;">Pass 1: 생성 + 오답 근거</strong>
+                        <ul style="padding-left:16px;margin-top:8px;font-size:0.83rem;line-height:2;">
+                            <li>각 오답에 <code>distractor_rationale</code> 필드 필수</li>
+                            <li>"학습 부족자가 이 오답을 선택할 수 있는 구체적 이유"를 기술</li>
+                            <li>모든 보기에 합리적 선택 이유가 있어야 통과</li>
+                            <li>Few-shot 예시 포함 시 비기능적 오답 50% → 16% 감소 (연구결과)</li>
+                        </ul>
+                    </div>
+                    <div style="padding:14px;background:#fef2f2;border-radius:8px;border-left:4px solid #dc2626;">
+                        <strong style="color:#dc2626;">Pass 2: 오답 정제(Refine)</strong>
+                        <ul style="padding-left:16px;margin-top:8px;font-size:0.83rem;line-height:2;">
+                            <li>전용 LLM 호출로 각 오답의 기능성 재검증</li>
+                            <li>"학습자 30%가 선택할 수 있는가?" 테스트</li>
+                            <li>약한 오답 감지 시 대체 오답 + 새로운 근거 생성</li>
+                            <li>최종 <code>distractor_quality_score</code> 부여 (1~5점)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top:14px;padding:10px;background:#f0fdf4;border-radius:8px;">
+                    <strong style="color:#059669;">기대 효과:</strong>
+                    비기능적 오답 비율 33.75% → <strong>목표 10% 이하</strong> (인간 출제 수준 13.75% 달성 목표)
+                </div>
+            </div>
+
+            <!-- 시나리오형 문항 -->
+            <div class="card" style="border:2px solid #f59e0b;">
+                <h3>&#127919; 시나리오 기반 문항 생성 <span style="background:#f59e0b;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;margin-left:8px;">v2 구현완료</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">IAEA 역량평가 트렌드 반영 — 상황 기반 의사결정형</p>
+                <div style="padding:14px;background:#fef3c7;border-radius:8px;margin-bottom:14px;font-size:0.88rem;">
+                    <strong style="color:#92400e;">원자력 교육 트렌드:</strong> 단순 암기형(Knowledge) → <strong>상황 기반 의사결정형(Application/Analysis)</strong>으로 전환 중.
+                    IAEA는 운전원의 인지적 기술(cognitive skills)을 시나리오 기반으로 평가하도록 권고.
+                </div>
+                <table class="std-table">
+                    <thead><tr><th>시나리오 유형</th><th>설명</th><th>문항 예시</th><th>Bloom</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>정상운전</strong></td>
+                            <td>일상 운전 절차 기반 상황</td>
+                            <td>"1차 냉각재 펌프 기동 전 확인사항은?"</td>
+                            <td>Application</td>
+                        </tr>
+                        <tr>
+                            <td><strong>비정상운전</strong></td>
+                            <td>예기치 않은 파라미터 변동 대응</td>
+                            <td>"증기발생기 수위가 급격히 하강할 때 최우선 조치는?"</td>
+                            <td>Application</td>
+                        </tr>
+                        <tr style="background:#fef2f2;">
+                            <td><strong>비상운전</strong></td>
+                            <td>사고 시나리오 대응 판단</td>
+                            <td>"LOCA 발생 시 ECCS 자동작동 확인 후 운전원의 다음 조치는?"</td>
+                            <td>Analysis</td>
+                        </tr>
+                        <tr>
+                            <td><strong>정비/점검</strong></td>
+                            <td>설비 점검/정비 절차 기반</td>
+                            <td>"밸브 정비 후 기능시험 절차에서 누락 시 발생 가능한 문제는?"</td>
+                            <td>Analysis</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div style="padding:12px;background:#f0f9ff;border-radius:8px;">
+                        <strong>시나리오 세트 구조:</strong>
+                        <ul style="padding-left:16px;margin-top:6px;font-size:0.83rem;">
+                            <li>1개 시나리오 당 2~3개 연계 문항</li>
+                            <li>상황 제시 → 판단 → 후속 조치 순서</li>
+                            <li>실제 발전소 운영 맥락 반영</li>
+                        </ul>
+                    </div>
+                    <div style="padding:12px;background:var(--bg-hover,#f5f3ff);border-radius:8px;">
+                        <strong>생성 전략:</strong>
+                        <ul style="padding-left:16px;margin-top:6px;font-size:0.83rem;">
+                            <li>VLM이 해석한 P&ID/계통도 기반 시나리오 자동 구성</li>
+                            <li>Golden Context의 절차서/규정 맥락 활용</li>
+                            <li>시나리오별 난이도 자동 조절</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <div class="card" style="border:2px solid #dc2626;">
-                <h3>&#9888; AI 문항 품질 검증 (QA) — 가장 중요</h3>
-                <div style="padding:12px;background:#fef2f2;border-radius:8px;margin-bottom:12px;font-size:0.85rem;">
-                    <strong style="color:#dc2626;">연구 결과:</strong> AI 생성 문항의 비기능적 오답 비율 33.75% vs 인간 출제 13.75%.
-                    → <strong>오답 매력도 검증이 최우선 과제</strong>
+            <!-- 안전 태깅 + Few-shot -->
+            <div class="module-grid">
+                <div class="module-card" style="border:2px solid #dc2626;">
+                    <h4>&#9888; 안전 중요도 태깅 <span style="background:#dc2626;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v3 구현완료</span></h4>
+                    <div class="desc">
+                        <p>"평가의 엄격도는 안전 중요도에 비례해야 한다" — IAEA TECDOC-2082</p>
+                        <table class="std-table" style="margin-top:8px;">
+                            <thead><tr><th>등급</th><th>대상</th><th>QA 기준</th></tr></thead>
+                            <tbody>
+                                <tr style="background:#fef2f2;">
+                                    <td><strong style="color:#dc2626;">Safety Critical</strong></td>
+                                    <td>ECCS, 격납건물, RPS, 비상운전, 방사선방호</td>
+                                    <td>품질 85+, 2-Pass 필수, SME 검토 필수, 6개월 재검증</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color:#f59e0b;">Safety Related</strong></td>
+                                    <td>CVCS, CCW, 비정상운전, 정비절차, 안전문화</td>
+                                    <td>품질 75+, 2-Pass 필수, SME 검토 필수, 12개월 재검증</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color:#6b7280;">General</strong></td>
+                                    <td>일반 운전지식, 관리업무, 기초이론</td>
+                                    <td>품질 65+, 1-Pass 가능, SME 선택적, 24개월 재검증</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top:8px;padding:8px;background:#fef2f2;border-radius:6px;font-size:0.82rem;">
+                            키워드 기반 자동 태깅 + LLM 정밀 태깅 이중 시스템.
+                            원자력 안전계통/사고유형/규정 키워드 사전 내장.
+                        </div>
+                    </div>
                 </div>
-                <table class="std-table">
-                    <thead><tr><th>검증 단계</th><th>검증 내용</th><th>통과 기준</th></tr></thead>
+                <div class="module-card" style="border:2px solid #059669;">
+                    <h4>&#128214; Few-shot 예시 관리 <span style="background:#059669;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v3 구현완료</span></h4>
+                    <div class="desc">
+                        <p>연구: Few-shot 예시 제공 시 비기능적 오답 <strong>50% → 16%</strong> 감소</p>
+                        <ul style="padding-left:16px;margin-top:8px;font-size:0.83rem;line-height:2;">
+                            <li>SME 검수 모범 문항/스크립트/시나리오 저장소</li>
+                            <li>Bloom 수준별, 안전등급별, 주제태그별 검색</li>
+                            <li>생성 시 자동으로 가장 관련 높은 3~5건 선택</li>
+                            <li>사용 이력 추적 + 품질 점수 기반 정렬</li>
+                            <li>시드 데이터: LOCA/SGTR/EDG 모범 문항 3건 기본 탑재</li>
+                        </ul>
+                        <div style="margin-top:8px;padding:8px;background:#d1fae5;border-radius:6px;font-size:0.82rem;">
+                            <strong>SME Checklist:</strong> 모범 문항 최소 10건 확보 → Few-shot 효과 극대화
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 원자력 교육 트렌드 -->
+            <div class="card" style="border-left:4px solid #0ea5e9;">
+                <h3>&#128218; 원자력 직무교육 트렌드 & 우리 시스템 연계</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">IAEA/NRC 최신 동향 기반</p>
+                <table class="std-table" style="font-size:0.82rem;">
+                    <thead><tr><th>글로벌 트렌드</th><th>내용</th><th>우리 시스템 연계</th><th>상태</th></tr></thead>
                     <tbody>
-                        <tr><td>1. 지문 명확성</td><td>모호한 표현, 이중해석</td><td>모호성 0건</td></tr>
-                        <tr><td>2. 정답 정확성</td><td>정답 오류, 복수 정답</td><td>참고자료에서 확인</td></tr>
-                        <tr style="background:#fef2f2;"><td><strong>3. 오답 매력도</strong></td><td>각 오답 선택 합리적 이유?</td><td>비기능적 오답 0건</td></tr>
-                        <tr><td>4. 난이도 적정성</td><td>Bloom 수준 대비 매칭</td><td>난이도 0.3~0.7</td></tr>
-                        <tr><td>5. SAT 정합성</td><td>학습목표 직접 연계</td><td>미연계 0건</td></tr>
-                        <tr><td>6. Bloom 분포</td><td>수준별 배분 준수</td><td>각 수준 ±10%</td></tr>
+                        <tr>
+                            <td><strong>CBT 디지털 전환</strong></td>
+                            <td>종이 → 컴퓨터 기반 훈련/평가</td>
+                            <td>AI 문제은행이 CBT 플랫폼에 자동 연동</td>
+                            <td><span class="status-badge done">PoC 대상</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>적응형 평가</strong></td>
+                            <td>IRT 기반 학습자 수준별 문항 자동 선별</td>
+                            <td>Item Analysis 축적 후 난이도 기반 적응형 출제</td>
+                            <td><span class="status-badge progress">Phase 2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>시뮬레이터 연계</strong></td>
+                            <td>IAEA 권고: 시뮬레이터 기반 역량 평가 강화</td>
+                            <td>AI 시나리오형 문항 → 시뮬레이터 시나리오 연계</td>
+                            <td><span class="status-badge pending">Phase 3</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>역량 기반 교육 (CBC)</strong></td>
+                            <td>직무 역량 단위로 교육과정 설계/평가</td>
+                            <td>SAT 학습목표 ↔ Bloom 수준 ↔ 문항 자동 매핑</td>
+                            <td><span class="status-badge done">구현완료</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>마이크로러닝</strong></td>
+                            <td>짧은 단위(5~10분) 모듈형 학습</td>
+                            <td>슬라이드별 독립 스크립트 → 마이크로 콘텐츠화</td>
+                            <td><span class="status-badge done">기본지원</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI 지식관리 (KM)</strong></td>
+                            <td>경험 인력 퇴직 대비 암묵지 디지털화</td>
+                            <td>SME 수정 이력 → 교육 노하우 자동 축적</td>
+                            <td><span class="status-badge progress">Phase 2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI 개인화 평가</strong></td>
+                            <td>Westinghouse Quiz-T-Bot: AI 성과분석 후 맞춤 출제, 5% 향상 실증</td>
+                            <td>Item Analysis + 학습이력 기반 취약영역 집중 출제</td>
+                            <td><span class="status-badge progress">Phase 2</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>간격 반복 (Spaced Repetition)</strong></td>
+                            <td>최적 복습 간격으로 문항 재출제, 장기 기억 강화</td>
+                            <td>문항별 정답률 이력 → 최적 재출제 스케줄 자동 생성</td>
+                            <td><span class="status-badge pending">Phase 3</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>OECD NEA AIxpertise</strong></td>
+                            <td>2026 Q1 발족 다국적 공동 프로젝트</td>
+                            <td>글로벌 AI 교육 표준 벤치마킹</td>
+                            <td><span class="status-badge pending">모니터링</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Graded Approach</strong></td>
+                            <td>IAEA TECDOC-2082: 안전 중요도별 교육/평가 차등</td>
+                            <td>문항 안전 중요도 태그 → 안전 핵심 영역 강화 검증</td>
+                            <td><span class="status-badge progress">Phase 2</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:14px;padding:14px;background:#f0f9ff;border-radius:8px;">
+                    <strong style="color:#0284c7;">IAEA/NRC 핵심 참고문서:</strong>
+                    <ul style="padding-left:16px;margin-top:6px;font-size:0.83rem;line-height:1.8;">
+                        <li><strong>IAEA TECDOC-2082 (2025)</strong>: Use of a Graded Approach in the Application of SAT</li>
+                        <li><strong>IAEA TECDOC-1893 (2019)</strong>: Methodology to Evaluate the Effectiveness of Training</li>
+                        <li><strong>IAEA NE Series NP-T-2.8 (2021)</strong>: SAT Processes, Methodology and Practices</li>
+                        <li><strong>NRC NUREG-1220</strong>: Training Review Criteria and Procedures</li>
+                        <li><strong>NRC AI Project Plan (2024, ML24194A116)</strong>: AI 규제 프레임워크 검토</li>
+                    </ul>
+                </div>
+                <div style="margin-top:12px;padding:14px;background:#ede9fe;border-radius:8px;">
+                    <strong style="color:#6c5ce7;">글로벌 벤치마크:</strong>
+                    <ul style="padding-left:16px;margin-top:6px;font-size:0.83rem;line-height:2;">
+                        <li><strong>EDF (프랑스)</strong>: CORYS 전체 시뮬레이터 현대화, 클라우드 EPR 시뮬레이터</li>
+                        <li><strong>Westinghouse (미국)</strong>: PLANT 디지털 학습 + Quiz-T-Bot AI 개인화 평가 (5% 향상 실증)</li>
+                        <li><strong>OECD NEA</strong>: AIxpertise — 데이터/벤치마크/교육 3축 (2026 Q1 발족)</li>
+                        <li><strong>운전 시뮬레이터 시장</strong>: 2030년 USD 219억 (CAGR 11.2%)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 교육 선순환 체계 -->
+            <div class="card" style="border:2px solid #1e3a5f;">
+                <h3>&#128260; 교육 선순환 체계 설계</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">SAT Evaluation 환류 기반 지속 개선 모델</p>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:16px 0;">
+                    <div style="background:#1e3a5f;color:white;padding:12px 16px;border-radius:10px;text-align:center;min-width:110px;">
+                        <strong>1. 교재 투입</strong><br><span style="font-size:0.75rem;">강의안 PDF</span>
+                    </div>
+                    <span style="font-size:1.3rem;color:#1e3a5f;">→</span>
+                    <div style="background:#6c5ce7;color:white;padding:12px 16px;border-radius:10px;text-align:center;min-width:110px;">
+                        <strong>2. AI 생성</strong><br><span style="font-size:0.75rem;">스크립트+문제</span>
+                    </div>
+                    <span style="font-size:1.3rem;color:#1e3a5f;">→</span>
+                    <div style="background:#dc2626;color:white;padding:12px 16px;border-radius:10px;text-align:center;min-width:110px;">
+                        <strong>3. QA 검증</strong><br><span style="font-size:0.75rem;">자동+SME</span>
+                    </div>
+                    <span style="font-size:1.3rem;color:#1e3a5f;">→</span>
+                    <div style="background:#059669;color:white;padding:12px 16px;border-radius:10px;text-align:center;min-width:110px;">
+                        <strong>4. 교육 실행</strong><br><span style="font-size:0.75rem;">강의+평가</span>
+                    </div>
+                    <span style="font-size:1.3rem;color:#1e3a5f;">→</span>
+                    <div style="background:#f59e0b;color:white;padding:12px 16px;border-radius:10px;text-align:center;min-width:110px;">
+                        <strong>5. 데이터 환류</strong><br><span style="font-size:0.75rem;">Item Analysis</span>
+                    </div>
+                </div>
+                <div style="text-align:center;font-size:1.5rem;color:#1e3a5f;margin:6px 0;">↓ 환류 ↓</div>
+                <div style="padding:14px;background:var(--bg-hover,#f0f9ff);border-radius:8px;">
+                    <strong style="color:#1e3a5f;">환류 데이터가 품질을 올리는 구조:</strong>
+                    <table class="std-table" style="margin-top:10px;">
+                        <thead><tr><th>환류 데이터</th><th>활용 방법</th><th>기대 효과</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td>시험 응답 데이터<br>(정답률, 선택 분포)</td>
+                                <td>Item Analysis: 난이도/변별도 실측<br>비기능적 오답 자동 감지 → 교체</td>
+                                <td>문제은행 품질 지속 향상<br>2회차부터 품질 급상승</td>
+                            </tr>
+                            <tr>
+                                <td>SME 수정 이력<br>(AI 초안 → 최종본 diff)</td>
+                                <td>프롬프트 개선 학습 데이터로 활용<br>"SME가 자주 수정하는 패턴" 분석</td>
+                                <td>AI 생성 품질 자동 개선<br>SME 검토 시간 점진적 감소</td>
+                            </tr>
+                            <tr>
+                                <td>교육생 만족도 피드백</td>
+                                <td>스크립트 스타일/깊이 조절 참고</td>
+                                <td>수준별 맞춤 스크립트</td>
+                            </tr>
+                            <tr>
+                                <td>규정/절차서 변경</td>
+                                <td>Golden Context 자동 갱신<br>영향 받는 문항 자동 플래깅</td>
+                                <td>항상 최신 교육 컨텐츠</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top:14px;padding:14px;background:#f0fdf4;border-radius:8px;">
+                    <strong style="color:#059669;">핵심 인사이트: "AI는 1회차에서 80점, 환류 데이터로 2회차부터 95점"</strong>
+                    <p style="margin-top:6px;font-size:0.88rem;">
+                        AI가 처음 생성한 문항은 인간 수준에 근접하지만 완벽하지 않습니다 (오답 매력도 이슈).
+                        그러나 <strong>실제 시험 데이터가 환류</strong>되면 어떤 오답이 기능하지 않는지 객관적으로 파악되고,
+                        <strong>자동으로 교체/개선</strong>됩니다. 이것이 AI 교육 시스템의 진정한 가치입니다.
+                    </p>
+                </div>
+                <div style="margin-top:14px;padding:14px;background:#ede9fe;border-radius:8px;">
+                    <strong style="color:#6c5ce7;">IAEA SAT 환류 4단계 평가 (Kirkpatrick Model):</strong>
+                    <table class="std-table" style="margin-top:8px;">
+                        <thead><tr><th>수준</th><th>평가 내용</th><th>우리 시스템 연계</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Level 1 (반응)</strong></td><td>교육생 만족도 설문</td><td>스크립트 스타일/깊이 조절 피드백</td></tr>
+                            <tr><td><strong>Level 2 (학습)</strong></td><td>성취도 평가 — 문제은행 핵심 영역</td><td>AI 문제은행 + Item Analysis 자동화</td></tr>
+                            <tr><td><strong>Level 3 (전이)</strong></td><td>현장 적용 관찰 (OJT)</td><td>시나리오형 문항이 현장 의사결정 역량 측정</td></tr>
+                            <tr><td><strong>Level 4 (결과)</strong></td><td>발전소 성과지표 연계</td><td>교육 효과 ↔ 발전소 KPI 상관분석 (장기)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SME 검토 워크플로우 -->
+            <div class="card" style="border-left:4px solid #8b5cf6;">
+                <h3>&#128101; SME 검토 워크플로우 <span style="background:#8b5cf6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">AI 초안 → SME 수정 → Diff 학습 → 프롬프트 자동 개선</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px;">
+                    <div style="background:#f3e8ff;padding:10px;border-radius:8px;text-align:center;">
+                        <div style="font-weight:700;color:#7c3aed;font-size:0.85rem;">1. AI 생성</div>
+                        <div style="font-size:0.75rem;margin-top:4px;">2-Pass + Few-shot<br>문항 초안 생성</div>
+                    </div>
+                    <div style="background:#fef3c7;padding:10px;border-radius:8px;text-align:center;">
+                        <div style="font-weight:700;color:#d97706;font-size:0.85rem;">2. SME 배정</div>
+                        <div style="font-size:0.75rem;margin-top:4px;">안전등급별<br>전문가 배정</div>
+                    </div>
+                    <div style="background:#dbeafe;padding:10px;border-radius:8px;text-align:center;">
+                        <div style="font-weight:700;color:#2563eb;font-size:0.85rem;">3. 검토/수정</div>
+                        <div style="font-size:0.75rem;margin-top:4px;">승인/수정/반려<br>수정 사유 기록</div>
+                    </div>
+                    <div style="background:#d1fae5;padding:10px;border-radius:8px;text-align:center;">
+                        <div style="font-weight:700;color:#059669;font-size:0.85rem;">4. Diff 분석</div>
+                        <div style="font-size:0.75rem;margin-top:4px;">수정 패턴 자동 분류<br>9가지 유형 감지</div>
+                    </div>
+                    <div style="background:#fce7f3;padding:10px;border-radius:8px;text-align:center;">
+                        <div style="font-weight:700;color:#db2777;font-size:0.85rem;">5. 프롬프트 개선</div>
+                        <div style="font-size:0.75rem;margin-top:4px;">인사이트 추출<br>Few-shot 후보 추천</div>
+                    </div>
+                </div>
+                <div style="padding:10px;background:var(--bg-hover,#f5f3ff);border-radius:8px;">
+                    <strong>수정 유형 자동 분류 (9가지):</strong>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;font-size:0.82rem;">
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#9888; 기술적 오류</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#128203; 오답지 품질</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#128221; 문항 명확성</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#9762; 안전 정확성</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#128218; 용어 부정확</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#127891; Bloom 부적합</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#127917; 시나리오 현실성</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#128214; 해설 깊이</div>
+                        <div style="padding:6px;background:var(--bg-card);border-radius:4px;">&#128220; 규정 불일치</div>
+                    </div>
+                </div>
+                <div style="margin-top:12px;padding:10px;background:#fef2f2;border-radius:8px;">
+                    <strong>안전등급별 검토 기준 차별화:</strong>
+                    <table class="std-table" style="margin-top:8px;font-size:0.82rem;">
+                        <thead><tr><th>등급</th><th>SME 검토</th><th>2-Pass</th><th>비기능적 오답 허용</th><th>재검증 주기</th></tr></thead>
+                        <tbody>
+                            <tr><td style="color:#dc2626;font-weight:700;">Safety Critical</td><td>필수 (전문가)</td><td>필수</td><td>0건</td><td>6개월</td></tr>
+                            <tr><td style="color:#f59e0b;font-weight:700;">Safety Related</td><td>필수</td><td>필수</td><td>최대 1건</td><td>12개월</td></tr>
+                            <tr><td style="color:#22c55e;font-weight:700;">General</td><td>선택</td><td>선택</td><td>최대 1건</td><td>24개월</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 문항 라이프사이클 관리 -->
+            <div class="card" style="border-left:4px solid #0ea5e9;">
+                <h3>&#128196; 문항 라이프사이클 관리 <span style="background:#0ea5e9;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">생성 → 검토 → 출제 → IRT교정 → 재검증/폐기 전 이력 추적</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                    <span style="padding:4px 12px;background:#e0e7ff;border-radius:20px;font-size:0.8rem;font-weight:600;">Draft</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="padding:4px 12px;background:#fef3c7;border-radius:20px;font-size:0.8rem;font-weight:600;">SME Review</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="padding:4px 12px;background:#d1fae5;border-radius:20px;font-size:0.8rem;font-weight:600;">Approved</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="padding:4px 12px;background:#bfdbfe;border-radius:20px;font-size:0.8rem;font-weight:600;">Active</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="padding:4px 12px;background:#e9d5ff;border-radius:20px;font-size:0.8rem;font-weight:600;">Calibrated</span>
+                    <span style="color:var(--text-secondary);">→</span>
+                    <span style="padding:4px 12px;background:#fecaca;border-radius:20px;font-size:0.8rem;font-weight:600;">Retired</span>
+                </div>
+                <div style="padding:12px;background:#f0f9ff;border-radius:8px;">
+                    <strong>핵심 기능:</strong>
+                    <ul style="padding-left:16px;margin-top:4px;">
+                        <li><strong>불변 버전 관리</strong>: 모든 수정은 새 버전으로 기록 (Git-like), 원본 보존</li>
+                        <li><strong>IRT 파라미터 추적</strong>: 난이도/변별도 교정 이력 및 신뢰도 수준 관리</li>
+                        <li><strong>재검증 자동 알림</strong>: 안전등급별 주기(6/12/24개월) 도래 시 자동 리마인드</li>
+                        <li><strong>폐기/대체 추적</strong>: 문항 폐기 사유 기록, 대체 문항과의 연결관계 유지</li>
+                        <li><strong>감사 추적</strong>: 누가, 언제, 왜 변경했는지 완전 추적 (규제 대응)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 교육선순환 데이터 수집 API -->
+            <div class="card" style="border-left:4px solid #f97316;">
+                <h3>&#128260; 교육선순환 데이터 수집 API <span style="background:#f97316;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">Kirkpatrick 4단계 평가 데이터 수집 → 컨텐츠 자동 개선</p>
+                <table class="std-table" style="font-size:0.82rem;">
+                    <thead><tr><th>API 엔드포인트</th><th>용도</th><th>수집 데이터</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>POST /feedback/exam-response</code></td><td>시험 응시 결과</td><td>정답여부, 선택답, 소요시간</td></tr>
+                        <tr><td><code>POST /feedback/exam-responses/batch</code></td><td>배치 응시 결과</td><td>일괄 수집 (CBT 연동)</td></tr>
+                        <tr><td><code>POST /feedback/trainee-satisfaction</code></td><td>교육생 만족도</td><td>만족도(5점), 난이도 인식, 자유기술</td></tr>
+                        <tr><td><code>GET /feedback/exam-stats/{id}</code></td><td>문항별 통계</td><td>정답률, 선택지 분포, IRT 준비도</td></tr>
+                        <tr><td><code>GET /feedback/satisfaction-summary</code></td><td>만족도 종합</td><td>평균 만족도, 난이도 분포</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:10px;padding:10px;background:#fff7ed;border-radius:8px;font-size:0.82rem;">
+                    <strong>데이터 활용:</strong>
+                    응시 결과 200건+ 축적 → IRT 파라미터 교정 → 문항 난이도 실측 반영 → 적응형 평가 기반 마련 / 반복 오답 자동 폐기 후보 추출
+                </div>
+            </div>
+
+            <!-- Hybrid 안전 태깅 -->
+            <div class="card" style="border-left:4px solid #dc2626;">
+                <h3>&#9762; Hybrid 안전 태깅 전략 <span style="background:#dc2626;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v3 신규</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">키워드 1차(전체) + LLM 2차(safety_critical만) = 비용 70% 절감</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="padding:12px;background:#f0fdf4;border-radius:8px;">
+                        <strong>1차: 키워드 매칭 (전체 문항)</strong>
+                        <ul style="padding-left:16px;margin-top:4px;font-size:0.82rem;">
+                            <li>60+ 원자력 안전 키워드 사전</li>
+                            <li>systems / topics / regulations 3개 카테고리</li>
+                            <li>2개 이상 critical 키워드 → safety_critical 판정</li>
+                            <li>처리시간: &lt;1ms/문항, 비용: 0원</li>
+                        </ul>
+                    </div>
+                    <div style="padding:12px;background:#fef2f2;border-radius:8px;">
+                        <strong>2차: LLM 정밀 태깅 (critical만)</strong>
+                        <ul style="padding-left:16px;margin-top:4px;font-size:0.82rem;">
+                            <li>Solar Pro가 맥락 기반 안전 중요도 판단</li>
+                            <li>키워드 오탐 보정</li>
+                            <li>관련 안전기능 구체적 식별</li>
+                            <li>API 호출 ~70% 절감</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QTI + 적응형 엔진 -->
+            <div class="module-grid">
+                <div class="module-card" style="border-left:4px solid #6366f1;">
+                    <h4>&#128230; QTI 2.1 표준 내보내기 <span style="background:#6366f1;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v4</span></h4>
+                    <div class="desc">
+                        <p><strong>지원 형식:</strong></p>
+                        <ul style="padding-left:16px;">
+                            <li><strong>QTI 2.1 XML</strong>: IMS Global 표준, LMS/CBT 호환</li>
+                            <li><strong>JSON</strong>: 내부 시스템 연동 (khnp-qbank-v4 스키마)</li>
+                            <li><strong>CSV</strong>: 간이 내보내기, LMS 일괄 업로드</li>
+                        </ul>
+                        <div style="margin-top:8px;padding:8px;background:#eef2ff;border-radius:6px;font-size:0.82rem;">
+                            <strong>포함 메타데이터:</strong> Bloom 수준, 안전등급, 시나리오, 해설, 오답근거, 난이도 추정치
+                        </div>
+                    </div>
+                </div>
+                <div class="module-card" style="border-left:4px solid #ec4899;">
+                    <h4>&#127919; 적응형 난이도 엔진 <span style="background:#ec4899;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v4</span></h4>
+                    <div class="desc">
+                        <p><strong>5단계 선별 알고리즘:</strong></p>
+                        <ol style="padding-left:18px;font-size:0.82rem;">
+                            <li>안전 핵심 문항 필수 확보 (최소 5문항)</li>
+                            <li>안전 관련 문항 확보 (최소 5문항)</li>
+                            <li>취약 주제 문항 배치 (Spaced Repetition)</li>
+                            <li>이전 오답 재출제 (최근 3회)</li>
+                            <li>Bloom 분포 + 정보함수 최대화 채우기</li>
+                        </ol>
+                        <div style="margin-top:8px;padding:8px;background:#fdf2f8;border-radius:6px;font-size:0.82rem;">
+                            <strong>EAP 능력 추정:</strong> 응시 결과마다 교육생 능력치(θ) 실시간 업데이트
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 스크립트 품질 자동 평가 -->
+            <div class="card" style="border-left:4px solid #14b8a6;">
+                <h3>&#9989; 스크립트 품질 자동 평가 <span style="background:#14b8a6;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v4</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">4가지 메트릭으로 자동 품질 점수 산출</p>
+                <table class="std-table" style="font-size:0.82rem;">
+                    <thead><tr><th>메트릭</th><th>가중치</th><th>측정 내용</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>완전성</strong></td><td>20%</td><td>모든 슬라이드에 스크립트 생성 여부</td></tr>
+                        <tr><td><strong>구조 준수</strong></td><td>30%</td><td>5단계 구조(도입/전개3/정리) 포함 여부</td></tr>
+                        <tr><td><strong>시각자료 활용</strong></td><td>30%</td><td>VLM 데이터 슬라이드에 시각 설명 포함 여부</td></tr>
+                        <tr><td><strong>분량 적정성</strong></td><td>20%</td><td>슬라이드당 200~800자 적정 범위</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top:8px;padding:8px;background:#f0fdfa;border-radius:6px;font-size:0.82rem;">
+                    80점 이상: 우수 | 60~80점: 보통 (시각자료/구조 개선) | 60점 미만: 개선 필요
+                </div>
+            </div>
+
+            <!-- 원자력 용어사전 + 대시보드 -->
+            <div class="module-grid">
+                <div class="module-card" style="border-left:4px solid #059669;">
+                    <h4>&#128218; 원자력 전문 용어사전 <span style="background:#059669;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v5</span></h4>
+                    <div class="desc">
+                        <p><strong>현재 수록: 20+ 핵심 용어</strong> (RCS, ECCS, 전원, 계측, 사고, 규제)</p>
+                        <ul style="padding-left:16px;font-size:0.82rem;">
+                            <li><strong>Curated Prompt 주입</strong>: LLM이 정확한 기술 용어 사용</li>
+                            <li><strong>VLM 컨텍스트</strong>: 도면 분석 시 설비 식별 보조</li>
+                            <li><strong>QA 용어 일관성</strong>: 문항 내 용어 통일 검증</li>
+                            <li><strong>SME 검증</strong>: 용어별 전문가 검증 상태 추적</li>
+                        </ul>
+                        <div style="margin-top:8px;padding:8px;background:#ecfdf5;border-radius:6px;font-size:0.82rem;">
+                            API: <code>/glossary/search</code>, <code>/glossary/prompt-text</code>, <code>/glossary/statistics</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="module-card" style="border-left:4px solid #7c3aed;">
+                    <h4>&#128202; 통합 대시보드 API <span style="background:#7c3aed;color:white;font-size:0.7rem;padding:2px 8px;border-radius:4px;">v5</span></h4>
+                    <div class="desc">
+                        <p><strong>GET /api/v1/dashboard</strong> 호출 시 반환:</p>
+                        <ul style="padding-left:16px;font-size:0.82rem;">
+                            <li>문항은행 통계 (라이프사이클별, 안전등급별)</li>
+                            <li>SME 검토 현황 (대기/완료/수정률/인사이트)</li>
+                            <li>교육 피드백 (응시 수, IRT 준비 문항 수)</li>
+                            <li>파싱 캐시 현황 (파일 수, 슬라이드 수)</li>
+                            <li>용어사전 통계 (용어 수, 검증률)</li>
+                            <li>14개 모듈 × 25개 API 엔드포인트 상태</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 구현 현황 요약 -->
+            <div class="card" style="border-left:4px solid #1e3a5f;">
+                <h3>&#128640; PoC 구현 현황 (v10)</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">20개 모듈, 40개 API, 11단계 파이프라인, 52개 E2E 테스트</p>
+                <table class="std-table" style="font-size:0.78rem;">
+                    <thead><tr><th>카테고리</th><th>모듈</th><th>상태</th><th>주요 기능</th></tr></thead>
+                    <tbody>
+                        <tr><td rowspan="2"><strong>문서처리</strong></td><td>parser</td><td style="color:#22c55e;">● 구현완료</td><td>Upstage Document Parse (Standard/Enhanced/Auto)</td></tr>
+                        <tr><td>vlm_analyzer</td><td style="color:#22c55e;">● v4 강화</td><td>VLM 시각자료 분석 + 용어사전 연계</td></tr>
+                        <tr><td><strong>스크립트</strong></td><td>generator</td><td style="color:#22c55e;">● v2</td><td>5단계 구조 + VLM 통합 + Curated Prompt</td></tr>
+                        <tr><td rowspan="8"><strong>문제은행</strong></td><td>generator</td><td style="color:#22c55e;">● v2</td><td>2-Pass + 시나리오 + Few-shot</td></tr>
+                        <tr><td>quality_validator</td><td style="color:#22c55e;">● v2</td><td>QA 파이프라인 + IRT 교정</td></tr>
+                        <tr><td>safety_tagger</td><td style="color:#22c55e;">● v3 Hybrid</td><td>키워드 1차 + LLM 2차 태깅</td></tr>
+                        <tr><td>few_shot_manager</td><td style="color:#22c55e;">● 완료</td><td>SME 모범 문항 관리</td></tr>
+                        <tr><td>sme_review</td><td style="color:#22c55e;">● 완료</td><td>검토 워크플로우 + Diff 학습</td></tr>
+                        <tr><td>version_manager</td><td style="color:#22c55e;">● 완료</td><td>라이프사이클 + 재검증 관리</td></tr>
+                        <tr><td>qti_exporter</td><td style="color:#22c55e;">● 완료</td><td>QTI 2.1 / JSON / CSV 내보내기</td></tr>
+                        <tr><td>adaptive_engine</td><td style="color:#22c55e;">● 완료</td><td>IRT 2PL + 안전등급 연계 선별</td></tr>
+                        <tr><td><strong>도메인</strong></td><td>nuclear_glossary</td><td style="color:#22c55e;">● 완료</td><td>20+ 핵심 용어, 계통별 분류</td></tr>
+                        <tr><td><strong>프롬프트</strong></td><td>template_manager</td><td style="color:#22c55e;">● v6</td><td>YAML 기반 프롬프트 외부 관리 + 핫리로드</td></tr>
+                        <tr><td rowspan="2"><strong>LLM 라우팅</strong></td><td>llm_router</td><td style="color:#22c55e;">● v8</td><td>하이브리드 라우터, 정책 기반 자동 분배</td></tr>
+                        <tr><td>router.py</td><td style="color:#22c55e;">● v8</td><td>7개 정책, fallback, 크로스체크</td></tr>
+                        <tr><td><strong>파이프라인</strong></td><td>pipeline</td><td style="color:#22c55e;">● v3 (11단계)</td><td>E2E 오케스트레이터</td></tr>
+                        <tr><td><strong>A/B 테스트</strong></td><td>ab_testing</td><td style="color:#22c55e;">● v10</td><td>실험 생성/변형 할당/결과 기록/승자 판정</td></tr>
+                        <tr><td><strong>배포</strong></td><td>Docker + Nginx</td><td style="color:#22c55e;">● v10</td><td>Python 3.13 + FastAPI 컨테이너</td></tr>
+                        <tr><td><strong>테스트</strong></td><td>E2E Suite</td><td style="color:#22c55e;">● v10 (52개)</td><td>12개 모듈 × Mock E2E</td></tr>
+                        <tr><td><strong>API</strong></td><td>FastAPI</td><td style="color:#22c55e;">● 40 endpoints</td><td>생성/검토/피드백/대시보드/라우터/A/B</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="module-grid">
-                <div class="module-card" style="border:2px solid #6c5ce7;">
-                    <h4>&#9889; 2-Pass 문항 생성 엔진</h4>
-                    <div class="desc">
-                        <div style="padding:8px;background:#ede9fe;border-radius:6px;margin-bottom:8px;">
-                            AI 오답 33.75%가 비기능적인 문제를 <strong>생성 시점</strong>에서 해결
-                        </div>
-                        <p><strong>Pass 1</strong>: 오답별 <code>distractor_rationale</code> 필수 기술</p>
-                        <p><strong>Pass 2</strong>: 약한 오답 감지 → 대체 오답 + 새 근거 생성</p>
-                        <p style="margin-top:8px;padding:6px;background:#f0fdf4;border-radius:4px;">
-                            <strong>목표:</strong> 비기능적 오답 33.75% → <strong>10% 이하</strong>
-                        </p>
-                    </div>
-                </div>
-                <div class="module-card" style="border:2px solid #f59e0b;">
-                    <h4>&#127919; 시나리오 기반 문항 생성</h4>
-                    <div class="desc">
-                        <table class="std-table">
-                            <thead><tr><th>유형</th><th>Bloom</th></tr></thead>
-                            <tbody>
-                                <tr><td>정상운전 절차 기반</td><td>Application</td></tr>
-                                <tr><td>비정상운전 대응</td><td>Application</td></tr>
-                                <tr><td>비상운전 사고 판단</td><td>Analysis</td></tr>
-                                <tr><td>정비/점검 절차</td><td>Analysis</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- 프롬프트 템플릿 외부화 -->
+            <div class="card" style="border-left:4px solid #d97706;">
+                <h3>&#128221; 프롬프트 템플릿 외부화 (YAML) <span style="background:#d97706;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v6</span></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">코드 변경 없이 LLM 프롬프트 튜닝 가능</p>
+                <p style="font-size:0.85rem;"><strong>문제</strong>: 6개 프롬프트가 Python 하드코딩 → 튜닝마다 코드 수정+배포 필요</p>
+                <p style="font-size:0.85rem;"><strong>해결</strong>: YAML 외부 설정 + 핫리로드 + 런타임 오버라이드</p>
+                <table class="std-table" style="font-size:0.82rem;margin-top:8px;">
+                    <thead><tr><th>프롬프트 키</th><th>용도</th><th>temp</th><th>max_tokens</th></tr></thead>
+                    <tbody>
+                        <tr><td>script_generation</td><td>강의 스크립트</td><td>0.7</td><td>4,096</td></tr>
+                        <tr><td>vlm_analysis</td><td>VLM 시각자료</td><td>0.3</td><td>2,048</td></tr>
+                        <tr><td>question_generation</td><td>문항 생성 (1차)</td><td>0.3</td><td>8,192</td></tr>
+                        <tr><td>distractor_refinement</td><td>오답 개선 (2차)</td><td>0.2</td><td>2,048</td></tr>
+                        <tr><td>scenario_generation</td><td>시나리오형 문항</td><td>0.4</td><td>8,192</td></tr>
+                        <tr><td>quality_validation</td><td>문항 QA 검증</td><td>0.2</td><td>2,048</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;font-size:0.82rem;"><strong>API</strong>: <code>GET /prompts/list</code> | <code>GET /prompts/{key}</code> | <code>POST /prompts/override</code> | <code>DELETE /prompts/override/{key}</code></p>
             </div>
 
-            <div class="module-grid">
-                <div class="module-card" style="border:2px solid #dc2626;">
-                    <h4>&#9888; 안전 중요도 태깅 (Graded Approach)</h4>
-                    <div class="desc">
-                        <table class="std-table">
-                            <thead><tr><th>등급</th><th>대상</th><th>QA 기준</th></tr></thead>
-                            <tbody>
-                                <tr style="background:#fef2f2;"><td><strong style="color:#dc2626;">Safety Critical</strong></td><td>ECCS, RPS, 비상운전</td><td>품질85+, SME필수, 6개월</td></tr>
-                                <tr><td><strong style="color:#f59e0b;">Safety Related</strong></td><td>CVCS, CCW, 비정상</td><td>품질75+, SME필수, 12개월</td></tr>
-                                <tr><td><strong style="color:#6b7280;">General</strong></td><td>일반 운전, 기초이론</td><td>품질65+, SME선택, 24개월</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="module-card" style="border:2px solid #059669;">
-                    <h4>&#128214; Few-shot 예시 관리</h4>
-                    <div class="desc">
-                        <p>SME 모범 문항으로 품질 앵커링. 비기능적 오답 50% → 16% 감소 (연구)</p>
-                        <ul style="padding-left:16px;margin-top:6px;line-height:2;">
-                            <li>Bloom/안전등급/주제별 검색</li>
-                            <li>자동 관련 3~5건 선택</li>
-                            <li>LOCA/SGTR/EDG 시드 3건 탑재</li>
-                        </ul>
-                    </div>
-                </div>
+            <!-- E2E 테스트 -->
+            <div class="card" style="border-left:4px solid #059669;">
+                <h3>&#9989; E2E 통합 테스트 스위트 (52 테스트) <span style="background:#059669;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;">v10</span></h3>
+                <table class="std-table" style="font-size:0.82rem;">
+                    <thead><tr><th>테스트 클래스</th><th>수</th><th>검증 대상</th></tr></thead>
+                    <tbody>
+                        <tr><td>TestSafetyTagger</td><td>3</td><td>안전 태깅 (단건/배치/critical)</td></tr>
+                        <tr><td>TestItemAnalysis</td><td>5</td><td>난이도 추정, IRT 교정, 시험 후 분석</td></tr>
+                        <tr><td>TestVersionManager</td><td>4</td><td>문항 생성, 상태 변경, 버전, 통계</td></tr>
+                        <tr><td>TestSMEReview</td><td>3</td><td>검토 등록, 대기 목록, 수정 제출</td></tr>
+                        <tr><td>TestQTIExporter</td><td>3</td><td>QTI XML, JSON, CSV</td></tr>
+                        <tr><td>TestAdaptiveEngine</td><td>3</td><td>IRT 확률, 시험 설정, 프로필</td></tr>
+                        <tr><td>TestNuclearGlossary</td><td>7</td><td>검색, 약어, 프롬프트, VLM 컨텍스트</td></tr>
+                        <tr><td>TestPromptTemplateManager</td><td>7</td><td>로드, 조회, 설정, 오버라이드</td></tr>
+                        <tr><td>TestE2EPipeline</td><td>3</td><td>11단계 E2E, 메타데이터, 직렬화</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;font-size:0.82rem;"><strong>실행</strong>: <code>python3 -m pytest tests/test_e2e_pipeline.py -v</code> → <span style="color:#22c55e;font-weight:bold;">52 passed</span></p>
             </div>
 
             <div class="card">
@@ -2669,10 +3390,18 @@ function renderComments(page) {
         }
         const replyIndent = Math.min(indent * 16, 48);
         h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${replyIndent}px;margin-bottom:6px;">
-            <textarea id="reply-input-${comment.id}" placeholder="답글... (Ctrl+Enter 전송, Shift+Enter 줄바꿈)" rows="2"
-                   oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
-                   onkeydown="if(event.key==='Enter'&&!event.shiftKey&&(event.ctrlKey||event.metaKey)){event.preventDefault();postReply('${page}',${comment.id})}"></textarea>
+            <div style="flex:1;min-width:0;">
+                <textarea id="reply-input-${comment.id}" placeholder="답글... (Ctrl+Enter 전송, Shift+Enter 줄바꿈)" rows="2"
+                       oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+                       onkeydown="if(event.key==='Enter'&&!event.shiftKey&&(event.ctrlKey||event.metaKey)){event.preventDefault();postReply('${page}',${comment.id})}"
+                       onpaste="handleReplyPaste(event,'reply-${comment.id}')"></textarea>
+                <div class="img-preview-row" id="img-preview-reply-${comment.id}"></div>
+            </div>
             <div class="reply-actions">
+                <label style="cursor:pointer;font-size:1rem;padding:4px 6px;border:1px solid var(--border);border-radius:6px;text-align:center;" title="사진 첨부">
+                    &#128247;
+                    <input type="file" accept="image/*" multiple style="display:none" onchange="handleImageSelect('reply-${comment.id}', this.files)">
+                </label>
                 <button onclick="postReply('${page}',${comment.id})">답글</button>
                 <span class="reply-hint">Ctrl+↵</span>
             </div>
@@ -3071,13 +3800,15 @@ async function postReply(page, parentId) {
     if (!_session) { alert('로그인이 필요합니다.'); return; }
     const input = document.getElementById('reply-input-' + parentId);
     const content = input.value.trim();
-    if (!content) return;
+    const replyKey = 'reply-' + parentId;
+    const images = (_pendingImages[replyKey] || []).map(img => img.dataUrl);
+    if (!content && images.length === 0) return;
 
     const section = getCommentSection(page);
 
     if (_useLocalMode) {
         const comment = {
-            id: _lsNextId(), section, content, parent_id: String(parentId),
+            id: _lsNextId(), section, content, parent_id: String(parentId), images,
             author: _user.name, org: _user.org, role: _user.role || '',
             color: _user.color || '#6b7280',
             created_at: new Date().toISOString(), timestamp: Date.now() / 1000,
@@ -3086,6 +3817,7 @@ async function postReply(page, parentId) {
         all.push(comment);
         _lsSaveComments(all);
         input.value = '';
+        _pendingImages[replyKey] = [];
         addCommentToCache(comment);
         renderComments(page);
         updateAllCommentCounts();
@@ -3097,7 +3829,7 @@ async function postReply(page, parentId) {
         const resp = await fetch(API_BASE + '/collab/comments', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({session_id: _session, access_code, section, content, parent_id: String(parentId)}),
+            body: JSON.stringify({session_id: _session, access_code, section, content, parent_id: String(parentId), images}),
         });
         if (!resp.ok) {
             const err = await resp.json();
@@ -3107,11 +3839,24 @@ async function postReply(page, parentId) {
         }
         const data = await resp.json();
         input.value = '';
+        _pendingImages[replyKey] = [];
         addCommentToCache(data.comment);
         renderComments(page);
         updateAllCommentCounts();
     } catch (e) {
         alert('답글 전송 실패: ' + e.message);
+    }
+}
+
+function handleReplyPaste(e, replyKey) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            handleImageFiles(replyKey, [item.getAsFile()]);
+            break;
+        }
     }
 }
 
