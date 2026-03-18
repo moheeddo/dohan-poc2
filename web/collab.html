@@ -45,6 +45,11 @@
         [data-theme="dark"] .mention-popup { background: var(--bg-card); border-color: var(--border); }
         [data-theme="dark"] .std-table th { background: var(--bg-card); }
         [data-theme="dark"] textarea { background: var(--bg-card); color: var(--text); }
+        [data-theme="dark"] .profile-popup { background: var(--bg-card); border-color: var(--border); }
+        [data-theme="dark"] .bookmark-filter-btn { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+        [data-theme="dark"] .bookmark-filter-btn.active { background: #422006; color: #fbbf24; border-color: #854d0e; }
+        [data-theme="dark"] .export-btn { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+        [data-theme="dark"] .comment-item.pinned { background: #1c1917; }
 
         /* Theme toggle button */
         .theme-toggle {
@@ -481,6 +486,58 @@
         }
         .comment-body a.auto-link:hover { text-decoration: underline; }
 
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+            font-size: 0.76rem; color: var(--text-secondary); min-height: 24px;
+        }
+        .typing-indicator:empty { display: none; }
+        .typing-dots { display: inline-flex; gap: 3px; }
+        .typing-dots span {
+            width: 5px; height: 5px; border-radius: 50%; background: var(--text-secondary);
+            animation: typingBounce 1.2s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        /* User profile popup */
+        .profile-popup {
+            position: fixed; z-index: 150; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; box-shadow: var(--shadow-lg); padding: 20px; width: 260px;
+            animation: profileFadeIn 0.2s ease-out;
+        }
+        @keyframes profileFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .profile-popup .p-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .profile-popup .p-avatar {
+            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 1.1rem;
+        }
+        .profile-popup .p-name { font-weight: 600; font-size: 0.95rem; }
+        .profile-popup .p-title { font-size: 0.78rem; color: var(--text-secondary); }
+        .profile-popup .p-info { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.8; }
+        .profile-popup .p-stat { display: flex; gap: 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .profile-popup .p-stat-item { text-align: center; flex: 1; }
+        .profile-popup .p-stat-num { font-weight: 700; font-size: 1rem; color: var(--accent); }
+        .profile-popup .p-stat-label { font-size: 0.68rem; color: var(--text-secondary); }
+
+        /* Bookmark */
+        .bookmark-btn {
+            background: none; border: none; cursor: pointer; font-size: 0.82rem; padding: 2px 4px;
+            opacity: 0.4; transition: all 0.15s;
+        }
+        .bookmark-btn:hover { opacity: 0.8; }
+        .bookmark-btn.bookmarked { opacity: 1; color: #f59e0b; }
+        .bookmark-filter-btn {
+            padding: 5px 12px; border: 1px solid var(--border); border-radius: 8px;
+            background: white; font-size: 0.76rem; cursor: pointer; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .bookmark-filter-btn.active { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
         .toast {
@@ -566,6 +623,23 @@
 
             /* Mode indicator */
             #mode-indicator { font-size: 0.6rem !important; padding: 2px 6px !important; }
+
+            /* Profile popup — full width on mobile */
+            .profile-popup { width: calc(100vw - 24px); left: 12px !important; right: 12px; max-width: none; }
+
+            /* Comment toolbar — scroll on mobile */
+            .comment-toolbar { gap: 6px; }
+            .comment-search { min-width: 100px; font-size: 0.78rem; }
+            .sort-select { font-size: 0.72rem; padding: 6px 8px; }
+            .bookmark-filter-btn { font-size: 0.72rem; padding: 4px 8px; }
+            .export-btn { font-size: 0.72rem; padding: 4px 8px; }
+
+            /* Reaction buttons — larger touch targets */
+            .reaction-btn { min-width: 44px; min-height: 36px; padding: 4px 10px; }
+            .comment-actions button { min-height: 36px; padding: 6px 10px; }
+
+            /* Bookmark button */
+            .bookmark-btn { font-size: 1rem; min-width: 36px; min-height: 36px; }
         }
 
         @media (max-width: 400px) {
@@ -781,6 +855,7 @@
                     <option value="oldest">오래된순</option>
                     <option value="reactions">반응 많은순</option>
                 </select>
+                <button class="bookmark-filter-btn" id="bookmark-filter" onclick="toggleBookmarkFilter()">★ 북마크</button>
                 <button class="export-btn" onclick="exportComments()">📋 내보내기</button>
             </div>
 
@@ -1916,6 +1991,7 @@ function renderComments(page) {
     }
     html += '</div>';
     html += `
+        <div class="typing-indicator" id="typing-${page}"></div>
         <div class="comment-input-area" id="input-area-${page}">
             <div class="drag-overlay" id="drag-overlay-${page}">이미지를 여기에 드롭하세요</div>
             <textarea id="input-${page}" placeholder="의견을 입력하세요... (Ctrl+Enter 전송, 이미지 붙여넣기 가능)" rows="2"></textarea>
@@ -2113,7 +2189,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
     return `
         <div class="${cls}${pinnedClass}" style="border-left-color:${c.color || '#cbd5e1'}" id="comment-${c.id}">
             <div class="comment-header">
-                <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
+                <span class="comment-author" style="color:${c.color || 'inherit'};cursor:pointer;" onclick="showProfile('${escapeHtml(c.author)}',this)">${escapeHtml(c.author)}</span>
                 <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>${_discussionTab === 'general' && c.section && c.section.startsWith('discussion_') ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;">${{discussion_technical:'기술',discussion_content:'컨텐츠',discussion_process:'일정',discussion_general:'전체'}[c.section]||''}</span>` : ''}
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
                 <span class="comment-time" title="${absTime}">${time}</span>${editedLabel}
@@ -2131,6 +2207,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
             </div>
             <div class="comment-actions">
                 <button onclick="toggleReply(${c.id})">답글</button>
+                <button class="bookmark-btn${_bookmarks[String(c.id)] ? ' bookmarked' : ''}" onclick="toggleBookmark(${c.id},'${page}',this)" title="북마크">${_bookmarks[String(c.id)] ? '★' : '☆'}</button>
                 ${isOwn ? `<button onclick="startEdit(${c.id},'${page}')">수정</button>` : ''}
                 ${isAdmin && !isReply ? `<button onclick="togglePin(${c.id},'${page}')">${isPinned ? '고정해제' : '📌 고정'}</button>` : ''}
                 ${(isOwn || isAdmin) ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
@@ -2768,6 +2845,181 @@ const _origSwitchPage = switchPage;
 switchPage = function(page) {
     _origSwitchPage(page);
     renderComments(page);
+};
+
+// ============================================================
+// Bookmarks
+// ============================================================
+let _bookmarks = JSON.parse(localStorage.getItem('poc2_bookmarks') || '{}');
+let _showBookmarksOnly = false;
+
+function toggleBookmark(commentId, page, btn) {
+    const key = String(commentId);
+    if (_bookmarks[key]) {
+        delete _bookmarks[key];
+        btn.classList.remove('bookmarked');
+        btn.textContent = '☆';
+        showToast('북마크가 해제되었습니다.');
+    } else {
+        _bookmarks[key] = Date.now();
+        btn.classList.add('bookmarked');
+        btn.textContent = '★';
+        showToast('북마크에 추가되었습니다.');
+    }
+    localStorage.setItem('poc2_bookmarks', JSON.stringify(_bookmarks));
+}
+
+function toggleBookmarkFilter() {
+    _showBookmarksOnly = !_showBookmarksOnly;
+    const btn = document.getElementById('bookmark-filter');
+    if (btn) btn.classList.toggle('active', _showBookmarksOnly);
+    renderComments(_currentPage);
+}
+
+// Patch renderComments to support bookmark filter
+const _origRenderComments = renderComments;
+renderComments = function(page) {
+    _origRenderComments(page);
+    if (_showBookmarksOnly && page === 'discussion') {
+        // Hide non-bookmarked comments
+        const list = document.getElementById('list-' + page);
+        if (!list) return;
+        list.querySelectorAll('.comment-item').forEach(el => {
+            const id = el.id.replace('comment-', '');
+            if (!_bookmarks[id]) el.style.display = 'none';
+        });
+    }
+};
+
+// ============================================================
+// User Profile Popup
+// ============================================================
+let _activeProfile = null;
+
+function showProfile(authorName, el) {
+    // Close existing popup
+    closeProfile();
+
+    const user = _allUsers.find(u => u.name === authorName);
+    if (!user) return;
+
+    // Count comments by this author
+    let commentCount = 0;
+    let replyCount = 0;
+    let reactionCount = 0;
+    for (const section of Object.keys(_commentCache)) {
+        (_commentCache[section] || []).forEach(c => {
+            if (c.author === authorName) {
+                if (c.parent_id) replyCount++;
+                else commentCount++;
+            }
+            // Count reactions received
+            const reactions = c.reactions || _reactions[String(c.id)] || {};
+            for (const arr of Object.values(reactions)) {
+                if (c.author === authorName) reactionCount += arr.length;
+            }
+        });
+    }
+
+    const initial = authorName.charAt(0);
+    const rect = el.getBoundingClientRect();
+
+    const popup = document.createElement('div');
+    popup.className = 'profile-popup';
+    popup.id = 'profile-popup';
+    popup.innerHTML = `
+        <div class="p-header">
+            <div class="p-avatar" style="background:${user.color}">${initial}</div>
+            <div>
+                <div class="p-name">${escapeHtml(authorName)}</div>
+                <div class="p-title">${user.org}</div>
+            </div>
+        </div>
+        <div class="p-stat">
+            <div class="p-stat-item"><div class="p-stat-num">${commentCount}</div><div class="p-stat-label">의견</div></div>
+            <div class="p-stat-item"><div class="p-stat-num">${replyCount}</div><div class="p-stat-label">답글</div></div>
+            <div class="p-stat-item"><div class="p-stat-num">${reactionCount}</div><div class="p-stat-label">받은 반응</div></div>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    // Position popup near the clicked element
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    if (left + 260 > window.innerWidth) left = window.innerWidth - 270;
+    if (top + 200 > window.innerHeight) top = rect.top - 200;
+    popup.style.top = top + 'px';
+    popup.style.left = Math.max(10, left) + 'px';
+
+    _activeProfile = popup;
+
+    // Close on click outside
+    setTimeout(() => {
+        document.addEventListener('click', closeProfileOnOutside);
+    }, 10);
+}
+
+function closeProfile() {
+    if (_activeProfile) {
+        _activeProfile.remove();
+        _activeProfile = null;
+    }
+    document.removeEventListener('click', closeProfileOnOutside);
+}
+
+function closeProfileOnOutside(e) {
+    if (_activeProfile && !_activeProfile.contains(e.target) && !e.target.classList.contains('comment-author')) {
+        closeProfile();
+    }
+}
+
+// ============================================================
+// Typing Indicator
+// ============================================================
+let _typingTimer = null;
+let _isTyping = false;
+let _typingUsers = {};
+
+function sendTypingStatus(page) {
+    if (!_user || _useLocalMode) return;
+    if (_isTyping) return;
+    _isTyping = true;
+
+    // Send typing status via online endpoint
+    const section = getCommentSection(page);
+    try {
+        const ac = localStorage.getItem('poc2_access_code') || '';
+        fetch(API_BASE + '/collab/online?access_code=' + encodeURIComponent(ac) + '&typing=' + encodeURIComponent(section), {
+            signal: AbortSignal.timeout(2000)
+        }).catch(() => {});
+    } catch {}
+
+    // Reset after 3 seconds
+    clearTimeout(_typingTimer);
+    _typingTimer = setTimeout(() => { _isTyping = false; }, 3000);
+}
+
+function updateTypingIndicator(page, typingList) {
+    const el = document.getElementById('typing-' + page);
+    if (!el) return;
+    const others = (typingList || []).filter(name => !_user || name !== _user.name);
+    if (others.length === 0) {
+        el.innerHTML = '';
+        return;
+    }
+    const names = others.length <= 2 ? others.join(', ') : `${others[0]} 외 ${others.length - 1}명`;
+    el.innerHTML = `<span class="typing-dots"><span></span><span></span><span></span></span> ${escapeHtml(names)}님이 입력 중...`;
+}
+
+// Hook typing detection into setupInputArea
+const _origSetupInputArea = setupInputArea;
+setupInputArea = function(page) {
+    _origSetupInputArea(page);
+    const textarea = document.getElementById('input-' + page);
+    if (textarea) {
+        textarea.addEventListener('input', () => sendTypingStatus(page));
+    }
 };
 
 // Initial render for architecture page
