@@ -3,8 +3,8 @@ Vercel Serverless Function — Collab Portal API
 Handles /api/v1/collab/* routes via rewrite in vercel.json.
 
 Storage priority:
-  1. Upstash Redis (persistent, shared) — if UPSTASH_REDIS_REST_URL configured
-  2. /tmp JSON file (ephemeral, shared within warm instance) — zero config fallback
+  1. GitHub Gist (persistent) — GIST_STORAGE_ID + GIST_STORAGE_TOKEN
+  2. /tmp JSON file (ephemeral fallback)
 """
 from http.server import BaseHTTPRequestHandler
 import json, os, time, uuid, fcntl
@@ -13,41 +13,82 @@ import urllib.request
 import urllib.error
 
 # ────────────────────────────────────────────
-# Upstash Redis REST API (optional)
+# GitHub Gist Persistent Storage
 # ────────────────────────────────────────────
-REDIS_URL = os.environ.get("UPSTASH_REDIS_REST_URL", "")
-REDIS_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+GIST_ID = os.environ.get("GIST_STORAGE_ID", "")
+GIST_TOKEN = os.environ.get("GIST_STORAGE_TOKEN", "")
+GIST_FILE = "collab_data.json"
+
+# In-memory cache to reduce API calls (refreshed every 5s)
+_gist_cache = {"data": None, "ts": 0}
 
 
-def _redis(cmd_args):
-    if not REDIS_URL or not REDIS_TOKEN:
-        return None
+def gist_ok():
+    return bool(GIST_ID and GIST_TOKEN)
+
+
+def _gist_load():
+    """Load data from GitHub Gist with in-memory caching."""
+    now = time.time()
+    if _gist_cache["data"] is not None and now - _gist_cache["ts"] < 5:
+        return _gist_cache["data"]
     try:
-        data = json.dumps(cmd_args).encode()
         req = urllib.request.Request(
-            REDIS_URL, data=data,
-            headers={"Authorization": f"Bearer {REDIS_TOKEN}", "Content-Type": "application/json"},
-            method="POST",
+            f"https://api.github.com/gists/{GIST_ID}",
+            headers={
+                "Authorization": f"token {GIST_TOKEN}",
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "collab-api",
+            },
         )
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            return json.loads(resp.read()).get("result")
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            gist = json.loads(resp.read())
+            content = gist["files"][GIST_FILE]["content"]
+            data = json.loads(content)
+            _gist_cache["data"] = data
+            _gist_cache["ts"] = now
+            return data
     except Exception as e:
-        print(f"[Redis] {e}")
-        return None
+        print(f"[Gist Load] {e}")
+        return _gist_cache["data"] or {"comments": [], "next_id": 0, "online": {}}
 
 
-def redis_ok():
-    return bool(REDIS_URL and REDIS_TOKEN)
+def _gist_save(data):
+    """Save data to GitHub Gist."""
+    _gist_cache["data"] = data
+    _gist_cache["ts"] = time.time()
+    try:
+        body = json.dumps({
+            "files": {
+                GIST_FILE: {
+                    "content": json.dumps(data, ensure_ascii=False)
+                }
+            }
+        }).encode()
+        req = urllib.request.Request(
+            f"https://api.github.com/gists/{GIST_ID}",
+            data=body,
+            headers={
+                "Authorization": f"token {GIST_TOKEN}",
+                "Content-Type": "application/json",
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "collab-api",
+            },
+            method="PATCH",
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            resp.read()
+    except Exception as e:
+        print(f"[Gist Save] {e}")
 
 
 # ────────────────────────────────────────────
-# /tmp File Storage (fallback, zero config)
+# /tmp File Storage (fallback)
 # ────────────────────────────────────────────
 TMP_FILE = "/tmp/collab_data.json"
 
 
 def _tmp_load():
-    """Load data from /tmp file with file locking."""
     try:
         with open(TMP_FILE, "r") as f:
             fcntl.flock(f, fcntl.LOCK_SH)
@@ -59,11 +100,24 @@ def _tmp_load():
 
 
 def _tmp_save(data):
-    """Save data to /tmp file with file locking."""
     with open(TMP_FILE, "w") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
         json.dump(data, f, ensure_ascii=False)
         fcntl.flock(f, fcntl.LOCK_UN)
+
+
+# Unified load/save that prefers Gist
+def _load():
+    if gist_ok():
+        return _gist_load()
+    return _tmp_load()
+
+
+def _save(data):
+    if gist_ok():
+        _gist_save(data)
+    else:
+        _tmp_save(data)
 
 
 # ────────────────────────────────────────────
@@ -114,14 +168,9 @@ class handler(BaseHTTPRequestHandler):
         return endpoint, extra, params
 
     def _auth(self, access_code="", session_id=""):
-        """Authenticate user by access_code (stateless) or session."""
         user = USERS.get(access_code)
         if user:
             return user
-        if redis_ok() and session_id:
-            raw = _redis(["GET", f"session:{session_id}"])
-            if raw:
-                return json.loads(raw) if isinstance(raw, str) else raw
         return None
 
     # ── CORS ──
@@ -140,7 +189,7 @@ class handler(BaseHTTPRequestHandler):
         elif ep == "online":
             self._get_online(params)
         elif ep == "health":
-            self._json(200, {"status": "ok", "redis": redis_ok(), "storage": "redis" if redis_ok() else "tmpfile"})
+            self._json(200, {"status": "ok", "storage": "gist" if gist_ok() else "tmpfile", "gist_id": GIST_ID[:8] + "..." if GIST_ID else ""})
         else:
             self._json(404, {"detail": "Not found"})
 
@@ -159,9 +208,8 @@ class handler(BaseHTTPRequestHandler):
     def do_DELETE(self):
         ep, extra, params = self._route()
         if ep == "comments" and extra:
-            session_id = params.get("session_id", [""])[0]
             access_code = params.get("access_code", [""])[0]
-            self._delete_comment(extra, access_code, session_id)
+            self._delete_comment(extra, access_code)
         else:
             self._json(404, {"detail": "Not found"})
 
@@ -174,14 +222,7 @@ class handler(BaseHTTPRequestHandler):
         if not user:
             self._json(401, {"detail": "유효하지 않은 접속 코드입니다."})
             return
-
         session_id = str(uuid.uuid4())
-
-        if redis_ok():
-            session_data = {**user, "session_id": session_id, "access_code": code}
-            _redis(["SET", f"session:{session_id}", json.dumps(session_data), "EX", "86400"])
-
-        # Track online
         self._touch_online(user)
         self._json(200, {"session_id": session_id, "user": user})
 
@@ -192,18 +233,8 @@ class handler(BaseHTTPRequestHandler):
         section = params.get("section", [""])[0]
         since_id = int(params.get("since_id", ["0"])[0])
 
-        if redis_ok():
-            raw_list = _redis(["LRANGE", "collab:comments", "0", "-1"]) or []
-            comments = []
-            for raw in raw_list:
-                try:
-                    c = json.loads(raw) if isinstance(raw, str) else raw
-                    comments.append(c)
-                except:
-                    continue
-        else:
-            data = _tmp_load()
-            comments = data.get("comments", [])
+        data = _load()
+        comments = data.get("comments", [])
 
         if section:
             comments = [c for c in comments if c.get("section") == section]
@@ -237,13 +268,9 @@ class handler(BaseHTTPRequestHandler):
             self._json(401, {"detail": "인증 실패. 다시 로그인하세요."})
             return
 
-        # Generate ID
-        if redis_ok():
-            comment_id = int(_redis(["INCR", "collab:comment_id"]) or int(time.time() * 1000) % 2147483647)
-        else:
-            data = _tmp_load()
-            data["next_id"] = data.get("next_id", 0) + 1
-            comment_id = data["next_id"]
+        data = _load()
+        data["next_id"] = data.get("next_id", 0) + 1
+        comment_id = data["next_id"]
 
         comment = {
             "id": comment_id,
@@ -259,13 +286,8 @@ class handler(BaseHTTPRequestHandler):
             "timestamp": time.time(),
         }
 
-        if redis_ok():
-            _redis(["RPUSH", "collab:comments", json.dumps(comment)])
-        else:
-            data = _tmp_load()
-            data["next_id"] = comment_id
-            data.setdefault("comments", []).append(comment)
-            _tmp_save(data)
+        data.setdefault("comments", []).append(comment)
+        _save(data)
 
         self._touch_online(user)
         self._json(200, {"comment": comment})
@@ -273,41 +295,25 @@ class handler(BaseHTTPRequestHandler):
     # ──────────────────────────────────────────
     # Delete Comment
     # ──────────────────────────────────────────
-    def _delete_comment(self, comment_id_str, access_code, session_id):
+    def _delete_comment(self, comment_id_str, access_code):
         try:
             comment_id = int(comment_id_str)
         except ValueError:
             self._json(400, {"detail": "Invalid comment ID"})
             return
 
-        user = self._auth(access_code, session_id)
+        user = self._auth(access_code)
         if not user:
             self._json(401, {"detail": "인증 실패."})
             return
 
-        if redis_ok():
-            raw_list = _redis(["LRANGE", "collab:comments", "0", "-1"]) or []
-            for raw in raw_list:
-                try:
-                    c = json.loads(raw) if isinstance(raw, str) else raw
-                    if c.get("id") == comment_id:
-                        is_admin = user.get("name") == "김도한"
-                        if c.get("author") != user.get("name") and not is_admin:
-                            self._json(403, {"detail": "본인의 댓글만 삭제할 수 있습니다."})
-                            return
-                        _redis(["LREM", "collab:comments", "1", raw if isinstance(raw, str) else json.dumps(c)])
-                        break
-                except:
-                    continue
-        else:
-            data = _tmp_load()
-            is_admin = user.get("name") == "김도한"
-            data["comments"] = [
-                c for c in data.get("comments", [])
-                if not (c.get("id") == comment_id and (c.get("author") == user.get("name") or is_admin))
-            ]
-            _tmp_save(data)
-
+        data = _load()
+        is_admin = user.get("name") == "김도한"
+        data["comments"] = [
+            c for c in data.get("comments", [])
+            if not (c.get("id") == comment_id and (c.get("author") == user.get("name") or is_admin))
+        ]
+        _save(data)
         self._json(200, {"ok": True})
 
     # ──────────────────────────────────────────
@@ -319,33 +325,16 @@ class handler(BaseHTTPRequestHandler):
         if user:
             self._touch_online(user)
 
-        if redis_ok():
-            raw = _redis(["HGETALL", "online_users"]) or []
-            users = []
-            if isinstance(raw, list):
-                for i in range(0, len(raw), 2):
-                    try:
-                        u = json.loads(raw[i + 1]) if isinstance(raw[i + 1], str) else raw[i + 1]
-                        if time.time() - u.get("last_seen", 0) < 300:
-                            users.append(u)
-                    except:
-                        continue
-            self._json(200, {"online": users})
-        else:
-            data = _tmp_load()
-            online = data.get("online", {})
-            users = [v for v in online.values() if time.time() - v.get("last_seen", 0) < 300]
-            self._json(200, {"online": users})
+        data = _load()
+        online = data.get("online", {})
+        users = [v for v in online.values() if time.time() - v.get("last_seen", 0) < 300]
+        self._json(200, {"online": users})
 
     def _touch_online(self, user):
-        """Update user's last_seen timestamp."""
         info = {"name": user["name"], "org": user["org"], "color": user["color"], "last_seen": time.time()}
-        if redis_ok():
-            _redis(["HSET", "online_users", user["name"], json.dumps(info)])
-        else:
-            data = _tmp_load()
-            data.setdefault("online", {})[user["name"]] = info
-            _tmp_save(data)
+        data = _load()
+        data.setdefault("online", {})[user["name"]] = info
+        _save(data)
 
     def log_message(self, format, *args):
         pass

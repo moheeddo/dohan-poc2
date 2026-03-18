@@ -223,11 +223,13 @@
         }
         .comment-actions button:hover { color: var(--accent); }
 
-        /* Reply thread */
+        /* Reply thread — Reddit style */
         .reply-list {
-            margin-top: 10px; margin-left: 20px; padding-left: 12px;
+            margin-top: 6px; padding-left: 12px;
             border-left: 2px solid var(--border);
         }
+        .reply-list .reply-list { border-left-color: #e2e8f0; }
+        .reply-list .reply-list .reply-list { border-left-color: #f1f5f9; }
         .reply-item {
             padding: 10px 12px; margin-bottom: 6px; background: white; border-radius: 8px;
             font-size: 0.84rem;
@@ -288,6 +290,37 @@
         /* Pulse animation for live indicator */
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .live-dot { animation: pulse 2s infinite; }
+
+        /* Reactions */
+        .reaction-bar { display: flex; gap: 4px; margin-top: 6px; }
+        .reaction-btn {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 3px 8px; border-radius: 14px; border: 1px solid var(--border);
+            background: white; cursor: pointer; font-size: 0.82rem; transition: all 0.15s;
+            user-select: none; position: relative;
+        }
+        .reaction-btn:hover { background: #f1f5f9; }
+        .reaction-btn.active { border-color: var(--accent); background: #eff6ff; }
+        .reaction-btn .r-count { font-size: 0.72rem; color: var(--text-secondary); min-width: 8px; text-align: center; }
+        .reaction-btn.active .r-count { color: var(--accent); font-weight: 600; }
+
+        /* Heart burst animation */
+        @keyframes heartBurst {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.4); }
+            30% { transform: scale(0.9); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+        @keyframes heartParticle {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+        .heart-burst { animation: heartBurst 0.5s ease-out; }
+        .heart-particle {
+            position: absolute; pointer-events: none; font-size: 0.7rem;
+            animation: heartParticle 0.6s ease-out forwards;
+        }
 
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
@@ -1519,6 +1552,7 @@ function renderComments(page) {
     const section = getCommentSection(page);
     const container = document.getElementById('comments-' + page);
     if (!container) return;
+    injectReactions();
     // 전체토론: 모든 discussion 섹션 댓글 통합
     let allComments;
     if (page === 'discussion' && _discussionTab === 'general') {
@@ -1533,13 +1567,32 @@ function renderComments(page) {
         allComments = _commentCache[section] || [];
     }
 
-    // 부모/답글 분리
+    // 부모/답글 분리 (재귀 트리 구조)
     const topLevel = allComments.filter(c => !c.parent_id);
     const repliesMap = {};
     allComments.filter(c => c.parent_id).forEach(c => {
-        if (!repliesMap[c.parent_id]) repliesMap[c.parent_id] = [];
-        repliesMap[c.parent_id].push(c);
+        const pid = String(c.parent_id);
+        if (!repliesMap[pid]) repliesMap[pid] = [];
+        repliesMap[pid].push(c);
     });
+
+    // Reddit 스타일 재귀 렌더링
+    function renderThread(comment, depth) {
+        const maxIndent = 5;
+        const indent = Math.min(depth, maxIndent);
+        let h = '';
+        if (depth > 0) h += `<div class="reply-list" style="margin-left:${indent * 16}px;">`;
+        h += renderSingleComment(comment, page, depth > 0, depth);
+        h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${indent * 16 + 12}px;margin-bottom:6px;">
+            <input type="text" id="reply-input-${comment.id}" placeholder="답글..."
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();postReply('${page}',${comment.id})}">
+            <button onclick="postReply('${page}',${comment.id})">답글</button>
+        </div>`;
+        const children = repliesMap[String(comment.id)] || [];
+        children.forEach(child => { h += renderThread(child, depth + 1); });
+        if (depth > 0) h += '</div>';
+        return h;
+    }
 
     let html = `<div class="comment-list" id="list-${page}">`;
 
@@ -1547,19 +1600,7 @@ function renderComments(page) {
         html += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
     } else {
         [...topLevel].reverse().forEach(c => {
-            html += renderSingleComment(c, page);
-            const replies = repliesMap[String(c.id)] || [];
-            if (replies.length > 0) {
-                html += '<div class="reply-list">';
-                replies.forEach(r => html += renderSingleComment(r, page, true));
-                html += '</div>';
-            }
-            html += `
-                <div class="reply-input-area" id="reply-area-${c.id}" style="margin-left:20px;margin-bottom:10px;">
-                    <input type="text" id="reply-input-${c.id}" placeholder="답글..."
-                           onkeydown="if(event.key==='Enter'){event.preventDefault();postReply('${page}',${c.id})}">
-                    <button onclick="postReply('${page}',${c.id})">답글</button>
-                </div>`;
+            html += renderThread(c, 0);
         });
     }
     html += '</div>';
@@ -1608,19 +1649,28 @@ function setupInputArea(page) {
             }
         });
     }
-    // 드래그 & 드롭
+    // 드래그 & 드롭 — inputArea 전용
     if (inputArea) {
         const overlay = document.getElementById('drag-overlay-' + page);
-        inputArea.addEventListener('dragover', (e) => { e.preventDefault(); overlay?.classList.add('show'); });
-        inputArea.addEventListener('dragleave', (e) => { if (!inputArea.contains(e.relatedTarget)) overlay?.classList.remove('show'); });
+        inputArea.addEventListener('dragenter', (e) => { e.preventDefault(); e.stopPropagation(); overlay?.classList.add('show'); });
+        inputArea.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; });
+        inputArea.addEventListener('dragleave', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            // relatedTarget이 inputArea 밖일 때만 숨김
+            if (!inputArea.contains(e.relatedTarget)) overlay?.classList.remove('show');
+        });
         inputArea.addEventListener('drop', (e) => {
-            e.preventDefault();
+            e.preventDefault(); e.stopPropagation();
             overlay?.classList.remove('show');
             const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
             if (files.length) handleImageFiles(page, files);
         });
     }
 }
+
+// 페이지 전체에서 드래그&드롭 기본 동작(이미지 열기) 방지
+document.addEventListener('dragover', (e) => e.preventDefault());
+document.addEventListener('drop', (e) => e.preventDefault());
 
 // ============================================================
 // Image Handling
@@ -1633,14 +1683,25 @@ function handleImageSelect(page, fileList) {
 
 function handleImageFiles(page, files) {
     if (!_pendingImages[page]) _pendingImages[page] = [];
-    files.forEach(file => {
+    if (_pendingImages[page].length >= 3) {
+        showToast('댓글당 최대 3장까지 첨부 가능합니다.');
+        return;
+    }
+    const remaining = 3 - _pendingImages[page].length;
+    const filesToProcess = Array.from(files).slice(0, remaining);
+    if (filesToProcess.length < files.length) {
+        showToast('댓글당 최대 3장까지 첨부 가능합니다.');
+    }
+    filesToProcess.forEach(file => {
         if (file.size > 5 * 1024 * 1024) {
             showToast('이미지 크기는 5MB 이하만 가능합니다.');
             return;
         }
         compressImage(file, 800, 0.8, (dataUrl) => {
-            _pendingImages[page].push({ dataUrl, name: file.name });
-            renderImagePreviews(page);
+            if (_pendingImages[page].length < 3) {
+                _pendingImages[page].push({ dataUrl, name: file.name });
+                renderImagePreviews(page);
+            }
         });
     });
 }
@@ -1694,7 +1755,7 @@ function closeLightbox() {
     document.getElementById('lightbox').classList.remove('show');
 }
 
-function renderSingleComment(c, page, isReply = false) {
+function renderSingleComment(c, page, isReply = false, depth = 0) {
     const orgColors = {
         '한수원': {bg:'#dbeafe',color:'#1e40af'},
         'EY': {bg:'#fef3c7',color:'#92400e'},
@@ -1713,8 +1774,18 @@ function renderSingleComment(c, page, isReply = false) {
                 <span class="comment-time">${time}</span>
             </div>
             <div class="comment-body">${escapeHtml(c.content)}</div>${c.images && c.images.length ? `<div class="comment-image">${c.images.map(img => `<img src="${img}" alt="첨부 이미지" onclick="openLightbox(this.src)" loading="lazy">`).join('')}</div>` : ''}
+            <div class="reaction-bar">
+                ${['❤️','👍','✅'].map(emoji => {
+                    const reactions = (c.reactions || {})[emoji] || [];
+                    const myName = _user ? _user.name : '';
+                    const active = reactions.includes(myName);
+                    return `<button class="reaction-btn${active ? ' active' : ''}" onclick="toggleReaction(${c.id},'${emoji}','${page}',this)" data-emoji="${emoji}">
+                        <span class="r-emoji">${emoji}</span><span class="r-count">${reactions.length || ''}</span>
+                    </button>`;
+                }).join('')}
+            </div>
             <div class="comment-actions">
-                ${!isReply ? `<button onclick="toggleReply(${c.id})">답글</button>` : ''}
+                <button onclick="toggleReply(${c.id})">답글</button>
                 ${(isOwn || (_user && _user.name === '김도한')) ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
             </div>
         </div>
@@ -1953,6 +2024,75 @@ async function loadOnlineUsers() {
             </div>
         `).join('');
     } catch (e) { /* ignore */ }
+}
+
+// ============================================================
+// Reactions
+// ============================================================
+// Local reactions store (persisted in localStorage)
+let _reactions = JSON.parse(localStorage.getItem('poc2_reactions') || '{}');
+
+function toggleReaction(commentId, emoji, page, btn) {
+    if (!_user) { alert('로그인이 필요합니다.'); return; }
+    const key = String(commentId);
+    if (!_reactions[key]) _reactions[key] = {};
+    if (!_reactions[key][emoji]) _reactions[key][emoji] = [];
+
+    const idx = _reactions[key][emoji].indexOf(_user.name);
+    if (idx >= 0) {
+        // Remove reaction
+        _reactions[key][emoji].splice(idx, 1);
+        btn.classList.remove('active');
+    } else {
+        // Add reaction
+        _reactions[key][emoji].push(_user.name);
+        btn.classList.add('active');
+        // Heart burst effect
+        if (emoji === '❤️') {
+            burstHearts(btn);
+        }
+    }
+    // Update count display
+    const countEl = btn.querySelector('.r-count');
+    countEl.textContent = _reactions[key][emoji].length || '';
+
+    // Also inject reactions into comment cache so re-renders preserve state
+    for (const section of Object.keys(_commentCache)) {
+        _commentCache[section].forEach(c => {
+            if (c.id === commentId) c.reactions = _reactions[key];
+        });
+    }
+    localStorage.setItem('poc2_reactions', JSON.stringify(_reactions));
+}
+
+function burstHearts(btn) {
+    const emojiEl = btn.querySelector('.r-emoji');
+    emojiEl.classList.remove('heart-burst');
+    void emojiEl.offsetWidth; // force reflow
+    emojiEl.classList.add('heart-burst');
+
+    // Spawn particles
+    for (let i = 0; i < 6; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'heart-particle';
+        particle.textContent = '❤️';
+        const angle = (i / 6) * Math.PI * 2;
+        const dist = 18 + Math.random() * 14;
+        particle.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        particle.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        btn.appendChild(particle);
+        setTimeout(() => particle.remove(), 600);
+    }
+}
+
+// Inject reactions from localStorage into comments on load
+function injectReactions() {
+    for (const section of Object.keys(_commentCache)) {
+        _commentCache[section].forEach(c => {
+            const r = _reactions[String(c.id)];
+            if (r) c.reactions = r;
+        });
+    }
 }
 
 // ============================================================
