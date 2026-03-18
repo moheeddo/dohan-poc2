@@ -559,6 +559,56 @@
             font-size: 0.85em; border-radius: 0 6px 6px 0;
         }
 
+        /* Poll */
+        .poll-container {
+            margin: 8px 0; padding: 10px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .poll-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .poll-option {
+            display: flex; align-items: center; gap: 8px; padding: 7px 10px; margin-bottom: 4px;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+            cursor: pointer; font-size: 0.82rem; transition: all 0.15s; position: relative; overflow: hidden;
+        }
+        .poll-option:hover { border-color: var(--accent); }
+        .poll-option.voted { border-color: var(--accent); background: rgba(59,130,246,0.06); }
+        .poll-option .poll-bar {
+            position: absolute; left: 0; top: 0; bottom: 0; background: rgba(59,130,246,0.1);
+            border-radius: 8px; transition: width 0.3s ease;
+        }
+        .poll-option .poll-text { position: relative; z-index: 1; flex: 1; }
+        .poll-option .poll-count { position: relative; z-index: 1; font-size: 0.72rem; color: var(--text-secondary); font-weight: 600; }
+        .poll-total { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; text-align: right; }
+
+        /* Comment filter tabs */
+        .comment-filter-tabs {
+            display: flex; gap: 4px; margin-bottom: 8px;
+        }
+        .comment-filter-tab {
+            padding: 4px 12px; border-radius: 16px; border: 1px solid var(--border);
+            background: transparent; font-size: 0.74rem; cursor: pointer; font-family: inherit;
+            color: var(--text-secondary); transition: all 0.15s;
+        }
+        .comment-filter-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .comment-filter-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+        [data-theme="dark"] .comment-filter-tab { border-color: var(--border); }
+
+        /* TODO checklist */
+        .todo-item {
+            display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 0.88em;
+        }
+        .todo-item input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+        }
+        .todo-item.done { text-decoration: line-through; opacity: 0.6; }
+
+        /* Comment link button */
+        .link-btn {
+            background: none; border: none; font-size: 0.72rem; color: var(--text-secondary);
+            cursor: pointer; padding: 2px 4px; opacity: 0.5; transition: opacity 0.15s;
+        }
+        .link-btn:hover { opacity: 1; color: var(--accent); }
+
         /* Quote reply floating button */
         .quote-reply-btn {
             position: fixed; z-index: 120; padding: 6px 14px; background: var(--khnp-primary);
@@ -1067,6 +1117,13 @@
                 </select>
                 <button class="bookmark-filter-btn" id="bookmark-filter" onclick="toggleBookmarkFilter()">★ 북마크</button>
                 <button class="export-btn" onclick="exportComments()">📋 내보내기</button>
+            </div>
+
+            <div class="comment-filter-tabs">
+                <button class="comment-filter-tab active" onclick="setCommentFilter('all',this)">전체</button>
+                <button class="comment-filter-tab" onclick="setCommentFilter('mine',this)">내 댓글</button>
+                <button class="comment-filter-tab" onclick="setCommentFilter('mentioned',this)">@멘션</button>
+                <button class="comment-filter-tab" onclick="setCommentFilter('polls',this)">투표</button>
             </div>
 
             <div id="comments-discussion"></div>
@@ -2467,9 +2524,16 @@ function closeLightbox() {
     _lbGallery = [];
 }
 
-function parseMentions(text) {
+function parseMentions(text, commentId) {
     let result = escapeHtml(text);
     const myName = _user ? _user.name : '';
+    // TODO 체크리스트: - [ ] item / - [x] item
+    result = result.replace(/^- \[([ x])\] (.+)$/gm, (match, checked, content) => {
+        const isDone = checked === 'x';
+        const cls = isDone ? ' done' : '';
+        const chk = isDone ? 'checked' : '';
+        return `<div class="todo-item${cls}"><input type="checkbox" ${chk} onclick="toggleTodoItem(${commentId || 0},this)" disabled><span>${content}</span></div>`;
+    });
     // 인용 블록 (> 로 시작하는 줄)
     result = result.replace(/^(&gt;\s?.+)$/gm, '<span class="quote-block">$1</span>');
     // URL 자동 링크
@@ -2518,7 +2582,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
                 <span class="comment-time" title="${absTime}">${time}</span>${editedLabel}
             </div>
-            <div class="comment-body" id="body-${c.id}">${parseMentions(c.content)}</div>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
+            <div class="comment-body" id="body-${c.id}">${renderCommentContent(c)}</div>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
                 ${['❤️','👍','✅'].map(emoji => {
                     const reactions = (c.reactions || {})[emoji] || [];
@@ -2532,6 +2596,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
             <div class="comment-actions">
                 <button onclick="toggleReply(${c.id})">답글</button>
                 <button onclick="quoteReply(${c.id},'${page}')" title="인용 답글">❝ 인용</button>
+                <button class="link-btn" onclick="copyCommentLink(${c.id})" title="링크 복사">🔗</button>
                 <button class="bookmark-btn${_bookmarks[String(c.id)] ? ' bookmarked' : ''}" onclick="toggleBookmark(${c.id},'${page}',this)" title="북마크">${_bookmarks[String(c.id)] ? '★' : '☆'}</button>
                 ${isOwn ? `<button onclick="startEdit(${c.id},'${page}')">수정</button>` : ''}
                 ${isAdmin && !isReply ? `<button onclick="togglePin(${c.id},'${page}')">${isPinned ? '고정해제' : '📌 고정'}</button>` : ''}
@@ -3624,6 +3689,132 @@ function showSkeleton(page) {
         <div class="skeleton-comment"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div></div>
     `;
 }
+
+// ============================================================
+// Poll (투표) — /poll 옵션1 | 옵션2 | 옵션3
+// ============================================================
+let _pollVotes = JSON.parse(localStorage.getItem('poc2_polls') || '{}');
+
+function renderPoll(commentId, options) {
+    const key = String(commentId);
+    const votes = _pollVotes[key] || {};
+    const totalVoters = new Set(Object.values(votes).flat()).size;
+    const myName = _user ? _user.name : '';
+
+    return `<div class="poll-container">
+        <div class="poll-title">투표</div>
+        ${options.map((opt, i) => {
+            const voters = votes[i] || [];
+            const pct = totalVoters > 0 ? Math.round(voters.length / totalVoters * 100) : 0;
+            const voted = voters.includes(myName);
+            return `<div class="poll-option${voted ? ' voted' : ''}" onclick="votePoll(${commentId},${i})">
+                <div class="poll-bar" style="width:${pct}%"></div>
+                <span class="poll-text">${escapeHtml(opt.trim())}</span>
+                <span class="poll-count">${voters.length > 0 ? voters.length + '표 (' + pct + '%)' : ''}</span>
+            </div>`;
+        }).join('')}
+        <div class="poll-total">${totalVoters}명 참여</div>
+    </div>`;
+}
+
+function votePoll(commentId, optionIdx) {
+    if (!_user) return;
+    const key = String(commentId);
+    if (!_pollVotes[key]) _pollVotes[key] = {};
+    const myName = _user.name;
+
+    // Remove previous vote
+    for (const [idx, voters] of Object.entries(_pollVotes[key])) {
+        _pollVotes[key][idx] = voters.filter(n => n !== myName);
+    }
+
+    // Add new vote
+    if (!_pollVotes[key][optionIdx]) _pollVotes[key][optionIdx] = [];
+    _pollVotes[key][optionIdx].push(myName);
+    localStorage.setItem('poc2_polls', JSON.stringify(_pollVotes));
+    renderComments(_currentPage);
+    showToast('투표 완료!');
+}
+
+// ============================================================
+// Comment content renderer (handles polls + markdown)
+// ============================================================
+function renderCommentContent(c) {
+    const text = c.content || '';
+    // Check for poll syntax: /poll 옵션1 | 옵션2 | 옵션3
+    const pollMatch = text.match(/^\/poll\s+(.+)/);
+    if (pollMatch) {
+        const options = pollMatch[1].split('|').map(o => o.trim()).filter(o => o);
+        if (options.length >= 2) {
+            return renderPoll(c.id, options);
+        }
+    }
+    return parseMentions(text, c.id);
+}
+
+// ============================================================
+// Comment filter tabs
+// ============================================================
+let _commentFilter = 'all';
+
+function setCommentFilter(filter, btn) {
+    _commentFilter = filter;
+    document.querySelectorAll('.comment-filter-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderComments(_currentPage);
+}
+
+// Patch renderComments to apply filter
+const _origRenderComments2 = renderComments;
+renderComments = function(page) {
+    _origRenderComments2(page);
+    if (page === 'discussion' && _commentFilter !== 'all') {
+        const list = document.getElementById('list-' + page);
+        if (!list) return;
+        const myName = _user ? _user.name : '';
+        list.querySelectorAll('.comment-item').forEach(el => {
+            const id = el.id.replace('comment-', '');
+            let comment = null;
+            for (const s of Object.keys(_commentCache)) {
+                comment = (_commentCache[s] || []).find(c => String(c.id) === id);
+                if (comment) break;
+            }
+            if (!comment) return;
+            let show = true;
+            if (_commentFilter === 'mine') show = comment.author === myName;
+            else if (_commentFilter === 'mentioned') show = (comment.content || '').includes('@' + myName);
+            else if (_commentFilter === 'polls') show = (comment.content || '').startsWith('/poll ');
+            if (!show) el.style.display = 'none';
+        });
+    }
+};
+
+// ============================================================
+// Copy comment link
+// ============================================================
+function copyCommentLink(commentId) {
+    const url = window.location.origin + window.location.pathname + '#comment-' + commentId;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('댓글 링크가 복사되었습니다.');
+    }).catch(() => {
+        showToast('복사 실패');
+    });
+}
+
+// Scroll to comment from URL hash on load
+(function() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+        setTimeout(() => {
+            const el = document.getElementById(hash.slice(1));
+            if (el) {
+                el.scrollIntoView({behavior: 'smooth', block: 'center'});
+                el.style.outline = '2px solid var(--accent)';
+                setTimeout(() => el.style.outline = '', 3000);
+            }
+        }, 1500);
+    }
+})();
 
 // Initial render for architecture page
 setTimeout(() => renderComments('architecture'), 100);
