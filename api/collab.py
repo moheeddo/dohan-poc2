@@ -80,23 +80,35 @@ def _gist_save(filename, data):
     _cache[filename]["data"] = data
     _cache[filename]["ts"] = time.time()
     try:
+        content_str = json.dumps(data, ensure_ascii=False)
         body = json.dumps({
             "files": {
                 filename: {
-                    "content": json.dumps(data, ensure_ascii=False)
+                    "content": content_str
                 }
             }
         }).encode()
+        headers = {
+            "Authorization": f"token {GIST_TOKEN}",
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "collab-api",
+        }
         req = urllib.request.Request(
             f"https://api.github.com/gists/{GIST_ID}",
             data=body,
-            headers={**_gist_headers(), "Content-Type": "application/json"},
+            headers=headers,
             method="PATCH",
         )
-        with urllib.request.urlopen(req, timeout=8) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            status = resp.status
             resp.read()
+            print(f"[Gist Save {filename}] OK status={status} len={len(content_str)}")
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode() if e.fp else ""
+        print(f"[Gist Save {filename}] HTTP {e.code}: {err_body[:200]}")
     except Exception as e:
-        print(f"[Gist Save {filename}] {e}")
+        print(f"[Gist Save {filename}] {type(e).__name__}: {e}")
 
 
 # ────────────────────────────────────────────
@@ -275,7 +287,24 @@ class handler(BaseHTTPRequestHandler):
         elif ep == "online":
             self._get_online(params)
         elif ep == "health":
-            self._json(200, {"status": "ok", "storage": "gist" if gist_ok() else "tmpfile", "gist_id": GIST_ID[:8] + "..." if GIST_ID else ""})
+            # Debug: test gist write capability
+            write_ok = False
+            if gist_ok():
+                try:
+                    test_data = {"_health_check": time.time()}
+                    body = json.dumps({"files": {"_health_test.json": {"content": json.dumps(test_data)}}}).encode()
+                    req = urllib.request.Request(
+                        f"https://api.github.com/gists/{GIST_ID}",
+                        data=body,
+                        headers={"Authorization": f"token {GIST_TOKEN}", "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json", "User-Agent": "collab-api"},
+                        method="PATCH",
+                    )
+                    with urllib.request.urlopen(req, timeout=8) as resp:
+                        write_ok = resp.status == 200
+                        resp.read()
+                except Exception as e:
+                    write_ok = str(e)
+            self._json(200, {"status": "ok", "storage": "gist" if gist_ok() else "tmpfile", "gist_id": GIST_ID[:8] + "..." if GIST_ID else "", "write_ok": write_ok, "token_len": len(GIST_TOKEN)})
         else:
             self._json(404, {"detail": "Not found"})
 
