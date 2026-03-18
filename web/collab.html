@@ -539,6 +539,41 @@
         }
         @keyframes badgePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
+        /* New comment highlight */
+        .comment-item.new-highlight, .reply-item.new-highlight {
+            animation: newGlow 2s ease-out;
+        }
+        @keyframes newGlow {
+            0% { background: rgba(59,130,246,0.15); }
+            100% { background: transparent; }
+        }
+        .new-badge {
+            display: inline-block; font-size: 0.6rem; font-weight: 700;
+            background: var(--accent); color: white; padding: 1px 5px;
+            border-radius: 4px; margin-left: 6px; vertical-align: middle;
+            animation: badgePop 0.3s ease-out;
+        }
+
+        /* Search result count & nav */
+        .search-result-info {
+            display: none; align-items: center; gap: 6px; font-size: 0.78rem;
+            color: var(--text-secondary); white-space: nowrap;
+        }
+        .search-result-info.visible { display: flex; }
+        .search-nav-btn {
+            width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 4px;
+            background: var(--bg-card); cursor: pointer; font-size: 0.7rem; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .search-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Draft indicator */
+        .draft-indicator {
+            font-size: 0.7rem; color: var(--text-secondary); margin-left: 8px;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .draft-indicator.visible { opacity: 1; }
+
         /* Activity summary card */
         .activity-summary {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -1169,6 +1204,11 @@
             <!-- 검색 & 정렬 -->
             <div class="comment-toolbar">
                 <input type="text" class="comment-search" id="comment-search" placeholder="댓글 검색..." oninput="onSearchChange()">
+                <div class="search-result-info" id="search-result-info">
+                    <span id="search-result-count">0건</span>
+                    <button class="search-nav-btn" onclick="navSearchResult(-1)" title="이전">▲</button>
+                    <button class="search-nav-btn" onclick="navSearchResult(1)" title="다음">▼</button>
+                </div>
                 <select class="sort-select" id="comment-sort" onchange="onSortChange()">
                     <option value="newest">최신순</option>
                     <option value="oldest">오래된순</option>
@@ -1830,6 +1870,9 @@ let _commentCache = {};
 let _lastEventId = 0;
 let _searchQuery = '';
 let _sortMode = 'newest';
+let _searchResultIds = [];
+let _searchCurrentIdx = -1;
+let _lastVisitTimestamp = JSON.parse(localStorage.getItem('poc2_lastVisit') || '{}');
 let _lastSeenIds = JSON.parse(localStorage.getItem('poc2_lastSeen') || '{}');
 let _sseSource = null;
 let _useLocalMode = false; // true면 localStorage 전용 (Vercel 등 서버 없는 환경)
@@ -2267,7 +2310,35 @@ function markSectionRead(section) {
 
 function onSearchChange() {
     _searchQuery = (document.getElementById('comment-search')?.value || '').trim().toLowerCase();
+    _searchResultIds = [];
+    _searchCurrentIdx = -1;
     renderComments('discussion');
+    // Update search result count
+    const infoEl = document.getElementById('search-result-info');
+    const countEl = document.getElementById('search-result-count');
+    if (_searchQuery) {
+        const items = document.querySelectorAll('#comments-discussion .comment-item, #comments-discussion .reply-item');
+        _searchResultIds = Array.from(items).map(el => el.id);
+        if (countEl) countEl.textContent = _searchResultIds.length + '건';
+        if (infoEl) infoEl.classList.add('visible');
+    } else {
+        if (infoEl) infoEl.classList.remove('visible');
+    }
+}
+
+function navSearchResult(dir) {
+    if (_searchResultIds.length === 0) return;
+    _searchCurrentIdx += dir;
+    if (_searchCurrentIdx < 0) _searchCurrentIdx = _searchResultIds.length - 1;
+    if (_searchCurrentIdx >= _searchResultIds.length) _searchCurrentIdx = 0;
+    const el = document.getElementById(_searchResultIds[_searchCurrentIdx]);
+    if (el) {
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        el.style.outline = '2px solid var(--accent)';
+        setTimeout(() => { el.style.outline = ''; }, 1500);
+    }
+    const countEl = document.getElementById('search-result-count');
+    if (countEl) countEl.textContent = `${_searchCurrentIdx + 1}/${_searchResultIds.length}`;
 }
 
 function onSortChange() {
@@ -2634,13 +2705,19 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
     const isPinned = _pinnedComments[String(c.id)];
     const pinnedClass = isPinned ? ' pinned' : '';
     const editedLabel = c.edited ? '<span style="font-size:0.68rem;color:var(--text-secondary);margin-left:4px;">(수정됨)</span>' : '';
+    const section = c.section || page;
+    const lastVisit = _lastVisitTimestamp[section] || 0;
+    const commentTs = c.timestamp || (new Date(c.created_at).getTime() / 1000);
+    const isNew = commentTs > lastVisit && !isOwn;
+    const newHighlight = isNew ? ' new-highlight' : '';
+    const newBadge = isNew ? '<span class="new-badge">NEW</span>' : '';
     return `
-        <div class="${cls}${pinnedClass}" style="border-left-color:${c.color || '#cbd5e1'}" id="comment-${c.id}">
+        <div class="${cls}${pinnedClass}${newHighlight}" style="border-left-color:${c.color || '#cbd5e1'}" id="comment-${c.id}">
             <div class="comment-header">
                 <span class="comment-author" style="color:${c.color || 'inherit'};cursor:pointer;" onclick="showProfile('${escapeHtml(c.author)}',this)">${escapeHtml(c.author)}</span>
                 <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>${_discussionTab === 'general' && c.section && c.section.startsWith('discussion_') ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;">${{discussion_technical:'기술',discussion_content:'컨텐츠',discussion_process:'일정',discussion_general:'전체'}[c.section]||''}</span>` : ''}
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
-                <span class="comment-time" title="${absTime}" data-created="${c.created_at || ''}">${time}</span>${editedLabel}
+                <span class="comment-time" title="${absTime}" data-created="${c.created_at || ''}">${time}</span>${editedLabel}${newBadge}
             </div>
             <div class="comment-body" id="body-${c.id}">${renderCommentContent(c)}</div>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
@@ -4055,14 +4132,6 @@ setTimeout(() => renderComments('architecture'), 100);
 // Auto-refresh relative timestamps every 60 seconds
 // ============================================================
 setInterval(() => {
-    document.querySelectorAll('.comment-time').forEach(el => {
-        const absTime = el.getAttribute('title');
-        if (absTime) {
-            // Reconstruct the ISO-like date from absTime (ko-KR locale)
-            // We stored created_at as data attribute instead
-        }
-    });
-    // Simpler approach: just re-render the visible page's timestamps
     document.querySelectorAll('.comment-time[data-created]').forEach(el => {
         el.textContent = relativeTime(el.getAttribute('data-created'));
     });
@@ -4081,11 +4150,10 @@ function insertQuickReply(page, text) {
     input.dispatchEvent(new Event('input'));
 }
 
-// Monkey-patch setupInputArea to add quick reply bar
+// Monkey-patch setupInputArea to add quick reply bar and draft restore
 const _origSetupInput = setupInputArea;
 setupInputArea = function(page) {
     _origSetupInput(page);
-    // Add quick reply bar if not exists
     const container = document.getElementById('input-' + page)?.closest('.comment-input-area');
     if (container && !container.querySelector('.quick-reply-bar')) {
         const bar = document.createElement('div');
@@ -4095,7 +4163,96 @@ setupInputArea = function(page) {
         ).join('');
         container.insertBefore(bar, container.firstChild);
     }
+    // Restore draft
+    const input = document.getElementById('input-' + page);
+    if (input) {
+        const draft = localStorage.getItem('poc2_draft_' + page);
+        if (draft && !input.value) input.value = draft;
+    }
 };
+
+// ============================================================
+// Auto-save drafts (input content → localStorage)
+// ============================================================
+let _draftTimers = {};
+function onDraftInput(page) {
+    clearTimeout(_draftTimers[page]);
+    _draftTimers[page] = setTimeout(() => {
+        const input = document.getElementById('input-' + page);
+        if (input) {
+            if (input.value.trim()) {
+                localStorage.setItem('poc2_draft_' + page, input.value);
+                showDraftIndicator(page, true);
+            } else {
+                localStorage.removeItem('poc2_draft_' + page);
+                showDraftIndicator(page, false);
+            }
+        }
+    }, 500);
+}
+function showDraftIndicator(page, show) {
+    let ind = document.getElementById('draft-ind-' + page);
+    if (!ind) {
+        const area = document.getElementById('input-' + page)?.closest('.comment-input-area');
+        if (!area) return;
+        ind = document.createElement('span');
+        ind.id = 'draft-ind-' + page;
+        ind.className = 'draft-indicator';
+        ind.textContent = '임시저장됨';
+        const toolbar = area.querySelector('.input-toolbar') || area;
+        toolbar.appendChild(ind);
+    }
+    ind.classList.toggle('visible', show);
+}
+function clearDraft(page) {
+    localStorage.removeItem('poc2_draft_' + page);
+    showDraftIndicator(page, false);
+}
+
+// Hook draft auto-save into textareas
+document.addEventListener('input', (e) => {
+    if (e.target.tagName === 'TEXTAREA' && e.target.id && e.target.id.startsWith('input-')) {
+        const page = e.target.id.replace('input-', '');
+        onDraftInput(page);
+    }
+});
+
+// Clear draft on successful post — monkey-patch postComment
+const _origPostComment = postComment;
+postComment = async function(page) {
+    await _origPostComment(page);
+    clearDraft(page);
+};
+
+// ============================================================
+// Mark last visit timestamp per section (for NEW badge)
+// ============================================================
+const _origSwitchPage = switchPage;
+switchPage = function(page) {
+    // Save current section's visit timestamp before switching
+    if (_currentPage) {
+        const section = getCommentSection(_currentPage);
+        _lastVisitTimestamp[section] = Date.now() / 1000;
+        localStorage.setItem('poc2_lastVisit', JSON.stringify(_lastVisitTimestamp));
+    }
+    _origSwitchPage(page);
+};
+
+// Also mark on discussion tab switch
+const _origSwitchDiscTab = switchDiscussionTab;
+switchDiscussionTab = function(tab) {
+    const section = 'discussion_' + _discussionTab;
+    _lastVisitTimestamp[section] = Date.now() / 1000;
+    localStorage.setItem('poc2_lastVisit', JSON.stringify(_lastVisitTimestamp));
+    _origSwitchDiscTab(tab);
+};
+
+// Mark on initial page load after 3 seconds
+setTimeout(() => {
+    const section = getCommentSection(_currentPage);
+    _lastVisitTimestamp[section] = Date.now() / 1000;
+    localStorage.setItem('poc2_lastVisit', JSON.stringify(_lastVisitTimestamp));
+}, 3000);
 </script>
 </body>
 </html>
