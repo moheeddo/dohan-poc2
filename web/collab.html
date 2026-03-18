@@ -486,6 +486,37 @@
         }
         .comment-body a.auto-link:hover { text-decoration: underline; }
 
+        /* Inline code */
+        .inline-code {
+            background: #f1f5f9; padding: 1px 5px; border-radius: 4px;
+            font-family: 'SF Mono', 'Consolas', monospace; font-size: 0.82em; color: #e11d48;
+        }
+        [data-theme="dark"] .inline-code { background: #334155; color: #fb923c; }
+
+        /* Quote block */
+        .quote-block {
+            display: block; border-left: 3px solid var(--accent); padding: 4px 10px;
+            margin: 4px 0; background: rgba(59,130,246,0.05); color: var(--text-secondary);
+            font-size: 0.85em; border-radius: 0 6px 6px 0;
+        }
+
+        /* Quote reply floating button */
+        .quote-reply-btn {
+            position: fixed; z-index: 120; padding: 6px 14px; background: var(--khnp-primary);
+            color: white; border: none; border-radius: 8px; font-size: 0.78rem; cursor: pointer;
+            box-shadow: var(--shadow-lg); display: none; animation: profileFadeIn 0.15s ease-out;
+        }
+        .quote-reply-btn:hover { background: var(--khnp-secondary); }
+
+        /* Online user presence */
+        .online-user { display: flex; align-items: center; gap: 8px; padding: 6px 4px; font-size: 0.84rem; }
+        .online-user .dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .online-user .last-seen {
+            font-size: 0.68rem; color: var(--text-secondary); margin-left: auto;
+        }
+
         /* Typing indicator */
         .typing-indicator {
             display: flex; align-items: center; gap: 6px; padding: 6px 12px;
@@ -2211,11 +2242,17 @@ function closeLightbox() {
 }
 
 function parseMentions(text) {
-    // @이름 → highlighted mention span
     let result = escapeHtml(text);
     const myName = _user ? _user.name : '';
+    // 인용 블록 (> 로 시작하는 줄)
+    result = result.replace(/^(&gt;\s?.+)$/gm, '<span class="quote-block">$1</span>');
     // URL 자동 링크
     result = result.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" class="auto-link" target="_blank" rel="noopener">$1</a>');
+    // 간단 Markdown: 볼드, 이탤릭, 코드, 취소선
+    result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    result = result.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    result = result.replace(/`(.+?)`/g, '<code class="inline-code">$1</code>');
+    result = result.replace(/~~(.+?)~~/g, '<del>$1</del>');
     // 멘션 하이라이트
     result = result.replace(/@(김도한|박소연|서진수|조성수|구진일|EY 컨설팅팀|Upstage 기술팀)/g, (match, name) => {
         const isMeClass = name === myName ? ' mention-me' : '';
@@ -2268,6 +2305,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
             </div>
             <div class="comment-actions">
                 <button onclick="toggleReply(${c.id})">답글</button>
+                <button onclick="quoteReply(${c.id},'${page}')" title="인용 답글">❝ 인용</button>
                 <button class="bookmark-btn${_bookmarks[String(c.id)] ? ' bookmarked' : ''}" onclick="toggleBookmark(${c.id},'${page}',this)" title="북마크">${_bookmarks[String(c.id)] ? '★' : '☆'}</button>
                 ${isOwn ? `<button onclick="startEdit(${c.id},'${page}')">수정</button>` : ''}
                 ${isAdmin && !isReply ? `<button onclick="togglePin(${c.id},'${page}')">${isPinned ? '고정해제' : '📌 고정'}</button>` : ''}
@@ -2504,13 +2542,15 @@ async function loadOnlineUsers() {
         const data = await resp.json();
         const list = data.online || [];
         document.getElementById('online-count').textContent = `${list.length}명 접속중`;
-        document.getElementById('online-list').innerHTML = list.map(u => `
+        document.getElementById('online-list').innerHTML = list.map(u => {
+            const lastSeen = u.last_seen ? relativeTime(new Date(u.last_seen * 1000).toISOString()) : '';
+            return `
             <div class="online-user">
                 <span class="dot" style="background:${u.color || '#10b981'}"></span>
                 <span>${u.name}</span>
-                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">${u.org}</span>
-            </div>
-        `).join('');
+                <span class="last-seen">${lastSeen || u.org}</span>
+            </div>`;
+        }).join('');
     } catch (e) { /* ignore */ }
 }
 
@@ -3157,6 +3197,81 @@ setupInputArea = function(page) {
         textarea.addEventListener('input', () => sendTypingStatus(page));
     }
 };
+
+// ============================================================
+// Quote Reply — 인용 답글
+// ============================================================
+function quoteReply(commentId, page) {
+    // Find comment content
+    let comment = null;
+    for (const section of Object.keys(_commentCache)) {
+        comment = (_commentCache[section] || []).find(c => c.id === commentId);
+        if (comment) break;
+    }
+    if (!comment) return;
+
+    // Open reply area and insert quoted text
+    toggleReply(commentId);
+    const input = document.getElementById('reply-input-' + commentId);
+    if (input) {
+        const quoted = comment.content.split('\n').map(l => '> ' + l).join('\n');
+        input.value = quoted + '\n\n';
+        input.focus();
+        input.selectionStart = input.selectionEnd = input.value.length;
+    }
+}
+
+// Text selection → quote reply floating button
+let _quoteBtn = null;
+document.addEventListener('mouseup', (e) => {
+    // Remove existing button
+    if (_quoteBtn) { _quoteBtn.remove(); _quoteBtn = null; }
+
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+    if (!text || text.length < 3) return;
+
+    // Check if selection is inside a comment body
+    const anchor = sel.anchorNode;
+    const commentBody = anchor?.parentElement?.closest?.('.comment-body');
+    if (!commentBody) return;
+    const commentEl = commentBody.closest('.comment-item, .reply-item');
+    if (!commentEl) return;
+    const commentId = commentEl.id?.replace('comment-', '');
+    if (!commentId) return;
+
+    // Create floating quote button
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    _quoteBtn = document.createElement('button');
+    _quoteBtn.className = 'quote-reply-btn';
+    _quoteBtn.style.display = 'block';
+    _quoteBtn.style.top = (rect.top - 36 + window.scrollY) + 'px';
+    _quoteBtn.style.left = (rect.left + rect.width / 2 - 40) + 'px';
+    _quoteBtn.textContent = '❝ 인용 답글';
+    _quoteBtn.onclick = () => {
+        const page = _currentPage;
+        toggleReply(parseInt(commentId));
+        const input = document.getElementById('reply-input-' + commentId);
+        if (input) {
+            const quoted = text.split('\n').map(l => '> ' + l).join('\n');
+            input.value = quoted + '\n\n';
+            input.focus();
+            input.selectionStart = input.selectionEnd = input.value.length;
+        }
+        _quoteBtn.remove();
+        _quoteBtn = null;
+        sel.removeAllRanges();
+    };
+    document.body.appendChild(_quoteBtn);
+});
+
+// Hide quote button on click elsewhere
+document.addEventListener('mousedown', (e) => {
+    if (_quoteBtn && !_quoteBtn.contains(e.target)) {
+        _quoteBtn.remove();
+        _quoteBtn = null;
+    }
+});
 
 // Initial render for architecture page
 setTimeout(() => renderComments('architecture'), 100);
