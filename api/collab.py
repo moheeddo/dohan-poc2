@@ -241,7 +241,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
         self.wfile.write(body)
@@ -274,7 +274,7 @@ class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
@@ -300,6 +300,16 @@ class handler(BaseHTTPRequestHandler):
             self._login(body)
         elif ep == "comments":
             self._post_comment(body)
+        else:
+            self._json(404, {"detail": "Not found"})
+
+    # ── PATCH (edit comment) ──
+    def do_PATCH(self):
+        _maybe_migrate()
+        ep, extra, params = self._route()
+        body = self._body()
+        if ep == "comments" and extra:
+            self._edit_comment(extra, body)
         else:
             self._json(404, {"detail": "Not found"})
 
@@ -418,6 +428,38 @@ class handler(BaseHTTPRequestHandler):
         ]
         _save_comments(data)
         self._json(200, {"ok": True})
+
+    # ──────────────────────────────────────────
+    # Edit Comment
+    # ──────────────────────────────────────────
+    def _edit_comment(self, comment_id_str, body):
+        try:
+            comment_id = int(comment_id_str)
+        except ValueError:
+            self._json(400, {"detail": "Invalid comment ID"})
+            return
+
+        access_code = body.get("access_code", "")
+        user = self._auth(access_code)
+        if not user:
+            self._json(401, {"detail": "인증 실패."})
+            return
+
+        new_content = body.get("content", "").strip()
+        if not new_content:
+            self._json(400, {"detail": "내용을 입력하세요."})
+            return
+
+        data = _load_comments(force=True)
+        for c in data.get("comments", []):
+            if c.get("id") == comment_id and c.get("author") == user.get("name"):
+                c["content"] = new_content
+                c["edited"] = True
+                _save_comments(data)
+                self._json(200, {"comment": c})
+                return
+
+        self._json(403, {"detail": "수정 권한이 없습니다."})
 
     # ──────────────────────────────────────────
     # Online Users (separate from comments!)

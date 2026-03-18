@@ -322,6 +322,46 @@
             animation: heartParticle 0.6s ease-out forwards;
         }
 
+        /* Mention highlight */
+        .mention { color: var(--accent); font-weight: 600; cursor: default; }
+        .mention.mention-me { background: #dbeafe; padding: 1px 4px; border-radius: 4px; }
+
+        /* Pinned comment */
+        .comment-item.pinned { background: #fffbeb; border-left-color: #f59e0b !important; position: relative; }
+        .comment-item.pinned::before {
+            content: '📌 고정됨'; position: absolute; top: 6px; right: 10px;
+            font-size: 0.68rem; color: #d97706; font-weight: 600;
+        }
+
+        /* Edit mode */
+        .comment-edit-area { display: flex; gap: 6px; margin-top: 6px; }
+        .comment-edit-area textarea {
+            flex: 1; padding: 8px; border: 1px solid var(--accent); border-radius: 8px;
+            font-size: 0.84rem; font-family: inherit; resize: vertical; min-height: 40px;
+        }
+        .comment-edit-actions { display: flex; gap: 4px; align-items: flex-end; }
+        .comment-edit-actions button {
+            padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+        }
+        .comment-edit-actions .save-btn { background: var(--accent); color: white; }
+        .comment-edit-actions .cancel-btn { background: #f1f5f9; color: var(--text-secondary); }
+
+        /* Mention autocomplete */
+        .mention-popup {
+            position: absolute; bottom: 100%; left: 0; right: 0;
+            background: white; border: 1px solid var(--border); border-radius: 10px;
+            box-shadow: var(--shadow-lg); max-height: 180px; overflow-y: auto; z-index: 50;
+            display: none;
+        }
+        .mention-popup.show { display: block; }
+        .mention-popup-item {
+            padding: 8px 14px; cursor: pointer; font-size: 0.84rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .mention-popup-item:hover, .mention-popup-item.active { background: #f1f5f9; }
+        .mention-popup-item .m-color { width: 8px; height: 8px; border-radius: 50%; }
+        .mention-popup-item .m-org { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
+
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
         .toast {
@@ -1599,7 +1639,11 @@ function renderComments(page) {
     if (topLevel.length === 0) {
         html += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
     } else {
-        [...topLevel].reverse().forEach(c => {
+        // 고정 댓글 먼저 표시
+        const pinned = topLevel.filter(c => _pinnedComments[String(c.id)]);
+        const unpinned = topLevel.filter(c => !_pinnedComments[String(c.id)]);
+        pinned.forEach(c => { html += renderThread(c, 0); });
+        [...unpinned].reverse().forEach(c => {
             html += renderThread(c, 0);
         });
     }
@@ -1636,6 +1680,8 @@ function setupInputArea(page) {
                 postComment(page);
             }
         });
+        // @ 멘션 자동완성
+        setupMentionAutocomplete(textarea);
         // Ctrl+V 이미지 붙여넣기
         textarea.addEventListener('paste', (e) => {
             const items = e.clipboardData?.items;
@@ -1755,6 +1801,19 @@ function closeLightbox() {
     document.getElementById('lightbox').classList.remove('show');
 }
 
+function parseMentions(text) {
+    // @이름 → highlighted mention span
+    const escaped = escapeHtml(text);
+    const myName = _user ? _user.name : '';
+    return escaped.replace(/@(김도한|박소연|서진수|조성수|구진일|EY 컨설팅팀|Upstage 기술팀)/g, (match, name) => {
+        const isMeClass = name === myName ? ' mention-me' : '';
+        return `<span class="mention${isMeClass}">@${name}</span>`;
+    });
+}
+
+// Pinned comments (stored in localStorage, synced per section)
+let _pinnedComments = JSON.parse(localStorage.getItem('poc2_pinned') || '{}');
+
 function renderSingleComment(c, page, isReply = false, depth = 0) {
     const orgColors = {
         '한수원': {bg:'#dbeafe',color:'#1e40af'},
@@ -1763,17 +1822,21 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
     };
     const oc = orgColors[c.org] || {bg:'#f3f4f6',color:'#374151'};
     const isOwn = _user && c.author === _user.name;
+    const isAdmin = _user && _user.name === '김도한';
     const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const cls = isReply ? 'reply-item' : 'comment-item';
+    const isPinned = _pinnedComments[String(c.id)];
+    const pinnedClass = isPinned ? ' pinned' : '';
+    const editedLabel = c.edited ? '<span style="font-size:0.68rem;color:var(--text-secondary);margin-left:4px;">(수정됨)</span>' : '';
     return `
-        <div class="${cls}" style="border-left-color:${c.color || '#cbd5e1'}">
+        <div class="${cls}${pinnedClass}" style="border-left-color:${c.color || '#cbd5e1'}" id="comment-${c.id}">
             <div class="comment-header">
                 <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
                 <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>${_discussionTab === 'general' && c.section && c.section.startsWith('discussion_') ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;">${{discussion_technical:'기술',discussion_content:'컨텐츠',discussion_process:'일정',discussion_general:'전체'}[c.section]||''}</span>` : ''}
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
-                <span class="comment-time">${time}</span>
+                <span class="comment-time">${time}</span>${editedLabel}
             </div>
-            <div class="comment-body">${escapeHtml(c.content)}</div>${c.images && c.images.length ? `<div class="comment-image">${c.images.map(img => `<img src="${img}" alt="첨부 이미지" onclick="openLightbox(this.src)" loading="lazy">`).join('')}</div>` : ''}
+            <div class="comment-body" id="body-${c.id}">${parseMentions(c.content)}</div>${c.images && c.images.length ? `<div class="comment-image">${c.images.map(img => `<img src="${img}" alt="첨부 이미지" onclick="openLightbox(this.src)" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
                 ${['❤️','👍','✅'].map(emoji => {
                     const reactions = (c.reactions || {})[emoji] || [];
@@ -1786,7 +1849,9 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
             </div>
             <div class="comment-actions">
                 <button onclick="toggleReply(${c.id})">답글</button>
-                ${(isOwn || (_user && _user.name === '김도한')) ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
+                ${isOwn ? `<button onclick="startEdit(${c.id},'${page}')">수정</button>` : ''}
+                ${isAdmin && !isReply ? `<button onclick="togglePin(${c.id},'${page}')">${isPinned ? '고정해제' : '📌 고정'}</button>` : ''}
+                ${(isOwn || isAdmin) ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
             </div>
         </div>
     `;
@@ -2024,6 +2089,162 @@ async function loadOnlineUsers() {
             </div>
         `).join('');
     } catch (e) { /* ignore */ }
+}
+
+// ============================================================
+// Pin / Edit / Mention
+// ============================================================
+function togglePin(commentId, page) {
+    const key = String(commentId);
+    if (_pinnedComments[key]) {
+        delete _pinnedComments[key];
+        showToast('고정이 해제되었습니다.');
+    } else {
+        _pinnedComments[key] = true;
+        showToast('댓글이 상단에 고정되었습니다.');
+    }
+    localStorage.setItem('poc2_pinned', JSON.stringify(_pinnedComments));
+    renderComments(page);
+}
+
+function startEdit(commentId, page) {
+    // Find comment in cache
+    let comment = null;
+    for (const section of Object.keys(_commentCache)) {
+        comment = _commentCache[section].find(c => c.id === commentId);
+        if (comment) break;
+    }
+    if (!comment) return;
+
+    const bodyEl = document.getElementById('body-' + commentId);
+    if (!bodyEl) return;
+    const actionsEl = bodyEl.closest('.comment-item, .reply-item')?.querySelector('.comment-actions');
+
+    bodyEl.innerHTML = `
+        <div class="comment-edit-area">
+            <textarea id="edit-input-${commentId}">${escapeHtml(comment.content)}</textarea>
+            <div class="comment-edit-actions">
+                <button class="save-btn" onclick="saveEdit(${commentId},'${page}')">저장</button>
+                <button class="cancel-btn" onclick="renderComments('${page}')">취소</button>
+            </div>
+        </div>
+    `;
+    if (actionsEl) actionsEl.style.display = 'none';
+    const editInput = document.getElementById('edit-input-' + commentId);
+    if (editInput) { editInput.focus(); editInput.selectionStart = editInput.value.length; }
+}
+
+async function saveEdit(commentId, page) {
+    const input = document.getElementById('edit-input-' + commentId);
+    if (!input) return;
+    const newContent = input.value.trim();
+    if (!newContent) return;
+
+    // Update in cache
+    for (const section of Object.keys(_commentCache)) {
+        const c = _commentCache[section].find(c => c.id === commentId);
+        if (c) { c.content = newContent; c.edited = true; break; }
+    }
+
+    // Update on server
+    if (!_useLocalMode) {
+        try {
+            const ac = localStorage.getItem('poc2_access_code') || '';
+            await fetch(API_BASE + '/collab/comments/' + commentId, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({access_code: ac, session_id: _session, content: newContent}),
+            });
+        } catch (e) { console.warn('Edit failed:', e); }
+    } else {
+        const all = _lsLoadComments();
+        const c = all.find(c => c.id === commentId);
+        if (c) { c.content = newContent; c.edited = true; _lsSaveComments(all); }
+    }
+
+    showToast('수정되었습니다.');
+    renderComments(page);
+}
+
+// Mention autocomplete for textarea
+const _allUsers = [
+    {name: '김도한', org: '한수원', color: '#1e40af'},
+    {name: '박소연', org: '한수원', color: '#7c3aed'},
+    {name: '서진수', org: '한수원', color: '#0891b2'},
+    {name: '조성수', org: '한수원', color: '#059669'},
+    {name: '구진일', org: '한수원', color: '#d97706'},
+    {name: 'EY 컨설팅팀', org: 'EY', color: '#ffe600'},
+    {name: 'Upstage 기술팀', org: 'Upstage', color: '#6366f1'},
+];
+
+function setupMentionAutocomplete(textarea) {
+    let popup = textarea.parentElement.querySelector('.mention-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.className = 'mention-popup';
+        textarea.parentElement.style.position = 'relative';
+        textarea.parentElement.insertBefore(popup, textarea);
+    }
+
+    let activeIdx = 0;
+    let filtered = [];
+
+    textarea.addEventListener('input', () => {
+        const val = textarea.value;
+        const cursor = textarea.selectionStart;
+        const before = val.slice(0, cursor);
+        const match = before.match(/@([^\s@]*)$/);
+        if (!match) { popup.classList.remove('show'); return; }
+        const query = match[1].toLowerCase();
+        filtered = _allUsers.filter(u => u.name.toLowerCase().includes(query));
+        if (filtered.length === 0) { popup.classList.remove('show'); return; }
+        activeIdx = 0;
+        renderMentionPopup(popup, filtered, activeIdx);
+        popup.classList.add('show');
+    });
+
+    textarea.addEventListener('keydown', (e) => {
+        if (!popup.classList.contains('show')) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = (activeIdx + 1) % filtered.length; renderMentionPopup(popup, filtered, activeIdx); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = (activeIdx - 1 + filtered.length) % filtered.length; renderMentionPopup(popup, filtered, activeIdx); }
+        else if (e.key === 'Enter' || e.key === 'Tab') {
+            if (filtered.length > 0) {
+                e.preventDefault();
+                insertMention(textarea, filtered[activeIdx].name);
+                popup.classList.remove('show');
+            }
+        }
+        else if (e.key === 'Escape') { popup.classList.remove('show'); }
+    });
+
+    popup.addEventListener('click', (e) => {
+        const item = e.target.closest('.mention-popup-item');
+        if (!item) return;
+        const name = item.dataset.name;
+        insertMention(textarea, name);
+        popup.classList.remove('show');
+        textarea.focus();
+    });
+}
+
+function renderMentionPopup(popup, users, activeIdx) {
+    popup.innerHTML = users.map((u, i) => `
+        <div class="mention-popup-item${i === activeIdx ? ' active' : ''}" data-name="${escapeHtml(u.name)}">
+            <span class="m-color" style="background:${u.color}"></span>
+            <span>${escapeHtml(u.name)}</span>
+            <span class="m-org">${u.org}</span>
+        </div>
+    `).join('');
+}
+
+function insertMention(textarea, name) {
+    const val = textarea.value;
+    const cursor = textarea.selectionStart;
+    const before = val.slice(0, cursor);
+    const after = val.slice(cursor);
+    const newBefore = before.replace(/@[^\s@]*$/, `@${name} `);
+    textarea.value = newBefore + after;
+    textarea.selectionStart = textarea.selectionEnd = newBefore.length;
 }
 
 // ============================================================
