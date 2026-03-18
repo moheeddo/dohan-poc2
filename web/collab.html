@@ -131,6 +131,28 @@
             cursor: pointer; font-family: inherit;
         }
         .md-preview-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* Character counter */
+        .char-counter {
+            font-size: 0.68rem; color: var(--text-secondary); text-align: right;
+            padding: 2px 4px; transition: color 0.2s;
+        }
+        .char-counter.warn { color: var(--warning); }
+        .char-counter.over { color: var(--danger); font-weight: 600; }
+
+        /* Page summary card */
+        .page-summary-card {
+            display: flex; gap: 16px; flex-wrap: wrap; padding: 12px 16px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); margin-bottom: 16px; font-size: 0.82rem;
+        }
+        .page-summary-stat {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .page-summary-stat .stat-num {
+            font-size: 1.2rem; font-weight: 700; color: var(--accent);
+        }
+        .page-summary-stat .stat-label { color: var(--text-secondary); }
         .md-preview-area {
             display: none; padding: 10px 14px; border: 1px solid var(--border);
             border-radius: 8px; min-height: 60px; font-size: 0.85rem;
@@ -236,7 +258,11 @@
             display: flex; align-items: center; gap: 8px; padding: 6px 14px;
             background: var(--bg); border-radius: 8px; font-size: 0.85rem;
         }
-        .user-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+        .user-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: onlinePulse 2s infinite; }
+        @keyframes onlinePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+        }
         .online-count { font-size: 0.8rem; color: var(--text-secondary); }
 
         /* Layout */
@@ -2588,8 +2614,8 @@ function renderComments(page) {
     // 정렬 (discussion 페이지에서만)
     if (page === 'discussion' && _sortMode === 'reactions') {
         topLevel.sort((a, b) => {
-            const ra = Object.values(a.reactions || {}).reduce((s, arr) => s + arr.length, 0);
-            const rb = Object.values(b.reactions || {}).reduce((s, arr) => s + arr.length, 0);
+            const ra = Object.values(a.reactions || {}).reduce((s, arr) => s + arr.length, 0) + (repliesMap[String(a.id)] || []).length * 2;
+            const rb = Object.values(b.reactions || {}).reduce((s, arr) => s + arr.length, 0) + (repliesMap[String(b.id)] || []).length * 2;
             return rb - ra;
         });
     } else if (page === 'discussion' && _sortMode === 'oldest') {
@@ -4826,6 +4852,80 @@ document.addEventListener('keydown', (e) => {
         switchPage(pages[Number(e.key) - 1]);
     }
 });
+
+// ============================================================
+// Character counter for textareas
+// ============================================================
+const CHAR_LIMIT = 2000;
+document.addEventListener('input', (e) => {
+    if (e.target.tagName === 'TEXTAREA' && e.target.id && e.target.id.startsWith('input-')) {
+        updateCharCounter(e.target);
+    }
+});
+
+function updateCharCounter(textarea) {
+    const len = textarea.value.length;
+    let counter = textarea.parentElement?.querySelector('.char-counter');
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.className = 'char-counter';
+        textarea.parentElement?.appendChild(counter);
+    }
+    counter.textContent = `${len} / ${CHAR_LIMIT}`;
+    counter.classList.remove('warn', 'over');
+    if (len > CHAR_LIMIT) counter.classList.add('over');
+    else if (len > CHAR_LIMIT * 0.8) counter.classList.add('warn');
+}
+
+// ============================================================
+// Page summary card (injected above comment list)
+// ============================================================
+function renderPageSummary(page) {
+    const section = getCommentSection(page);
+    let comments;
+    if (page === 'discussion' && _discussionTab === 'general') {
+        comments = [];
+        for (const [key, c] of Object.entries(_commentCache)) {
+            if (key.startsWith('discussion_')) comments.push(...c);
+        }
+    } else {
+        comments = _commentCache[section] || [];
+    }
+
+    const total = comments.length;
+    const authors = new Set(comments.map(c => c.author)).size;
+    const replies = comments.filter(c => c.parent_id).length;
+    const today = new Date().toDateString();
+    const todayCount = comments.filter(c => c.created_at && new Date(c.created_at).toDateString() === today).length;
+    const totalReactions = comments.reduce((s, c) => s + Object.values(c.reactions || {}).reduce((rs, arr) => rs + arr.length, 0), 0);
+
+    const containerId = 'page-summary-' + page;
+    let card = document.getElementById(containerId);
+    const commentsContainer = document.getElementById('comments-' + page);
+    if (!commentsContainer) return;
+
+    if (!card) {
+        card = document.createElement('div');
+        card.id = containerId;
+        card.className = 'page-summary-card';
+        commentsContainer.parentElement.insertBefore(card, commentsContainer);
+    }
+
+    card.innerHTML = `
+        <div class="page-summary-stat"><span class="stat-num">${total}</span><span class="stat-label">댓글</span></div>
+        <div class="page-summary-stat"><span class="stat-num">${authors}</span><span class="stat-label">참여자</span></div>
+        <div class="page-summary-stat"><span class="stat-num">${replies}</span><span class="stat-label">답글</span></div>
+        <div class="page-summary-stat"><span class="stat-num">${todayCount}</span><span class="stat-label">오늘</span></div>
+        <div class="page-summary-stat"><span class="stat-num">${totalReactions}</span><span class="stat-label">반응</span></div>
+    `;
+}
+
+// Hook into renderComments
+const _origRenderForSummary = renderComments;
+renderComments = function(page) {
+    _origRenderForSummary(page);
+    setTimeout(() => renderPageSummary(page), 60);
+};
 </script>
 </body>
 </html>
