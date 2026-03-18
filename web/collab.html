@@ -362,6 +362,47 @@
         .mention-popup-item .m-color { width: 8px; height: 8px; border-radius: 50%; }
         .mention-popup-item .m-org { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
 
+        /* Search & Sort toolbar */
+        .comment-toolbar {
+            display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap;
+        }
+        .comment-search {
+            flex: 1; min-width: 140px; padding: 7px 12px 7px 32px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.82rem; outline: none; font-family: inherit;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") 10px center no-repeat;
+        }
+        .comment-search:focus { border-color: var(--accent); }
+        .sort-select {
+            padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.78rem; background: white; cursor: pointer; font-family: inherit;
+        }
+
+        /* Unread badge */
+        .unread-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            background: #ef4444; color: white; border-radius: 10px;
+            font-size: 0.65rem; font-weight: 700; margin-left: 4px;
+            animation: badgePop 0.3s ease-out;
+        }
+        @keyframes badgePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        /* Activity summary card */
+        .activity-summary {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px; margin-bottom: 16px;
+        }
+        .activity-card {
+            padding: 12px; background: white; border: 1px solid var(--border);
+            border-radius: 10px; text-align: center;
+        }
+        .activity-card .a-num { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+        .activity-card .a-label { font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px; }
+        .activity-card .a-sub { font-size: 0.68rem; color: var(--text-secondary); margin-top: 4px; }
+
+        /* Search highlight */
+        .search-highlight { background: #fef08a; padding: 1px 2px; border-radius: 2px; }
+
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
         .toast {
@@ -644,11 +685,24 @@
             <div class="page-title">의견/토론 게시판</div>
             <div class="page-desc">프로젝트 전반에 대한 자유 토론. 실시간으로 공유됩니다.</div>
 
+            <!-- 활동 요약 -->
+            <div class="activity-summary" id="activity-summary"></div>
+
             <div class="section-tabs">
                 <div class="section-tab active" onclick="switchDiscussionTab('general')">전체 토론</div>
                 <div class="section-tab" onclick="switchDiscussionTab('technical')">기술 이슈</div>
                 <div class="section-tab" onclick="switchDiscussionTab('content')">교육 컨텐츠</div>
                 <div class="section-tab" onclick="switchDiscussionTab('process')">프로세스/일정</div>
+            </div>
+
+            <!-- 검색 & 정렬 -->
+            <div class="comment-toolbar">
+                <input type="text" class="comment-search" id="comment-search" placeholder="댓글 검색..." oninput="onSearchChange()">
+                <select class="sort-select" id="comment-sort" onchange="onSortChange()">
+                    <option value="newest">최신순</option>
+                    <option value="oldest">오래된순</option>
+                    <option value="reactions">반응 많은순</option>
+                </select>
             </div>
 
             <div id="comments-discussion"></div>
@@ -1262,6 +1316,9 @@ let _currentPage = 'architecture';
 let _discussionTab = 'general';
 let _commentCache = {};
 let _lastEventId = 0;
+let _searchQuery = '';
+let _sortMode = 'newest';
+let _lastSeenIds = JSON.parse(localStorage.getItem('poc2_lastSeen') || '{}');
 let _sseSource = null;
 let _useLocalMode = false; // true면 localStorage 전용 (Vercel 등 서버 없는 환경)
 
@@ -1578,14 +1635,90 @@ async function loadAllComments() {
 
 function updateAllCommentCounts() {
     const sections = {discussion: 0, internal: 0};
+    const sectionBreakdown = {discussion_technical: 0, discussion_content: 0, discussion_process: 0};
+    let totalAuthors = new Set();
+    let todayCount = 0;
+    const today = new Date().toDateString();
+
     for (const [section, comments] of Object.entries(_commentCache)) {
-        if (section.startsWith('discussion_')) sections.discussion += comments.length;
+        if (section.startsWith('discussion_')) {
+            sections.discussion += comments.length;
+            if (sectionBreakdown[section] !== undefined) sectionBreakdown[section] = comments.length;
+        }
         else if (section === 'internal') sections.internal = comments.length;
+        comments.forEach(c => {
+            totalAuthors.add(c.author);
+            if (c.created_at && new Date(c.created_at).toDateString() === today) todayCount++;
+        });
     }
     const dEl = document.getElementById('count-discussion');
     const iEl = document.getElementById('count-internal');
     if (dEl) dEl.textContent = sections.discussion || '';
     if (iEl) iEl.textContent = sections.internal || '';
+
+    // Unread badges on section tabs
+    updateUnreadBadges();
+
+    // Activity summary
+    const summaryEl = document.getElementById('activity-summary');
+    if (summaryEl) {
+        summaryEl.innerHTML = `
+            <div class="activity-card"><div class="a-num">${sections.discussion}</div><div class="a-label">전체 의견</div></div>
+            <div class="activity-card"><div class="a-num">${todayCount}</div><div class="a-label">오늘 작성</div></div>
+            <div class="activity-card"><div class="a-num">${totalAuthors.size}</div><div class="a-label">참여자</div></div>
+            <div class="activity-card">
+                <div class="a-num" style="font-size:0.9rem;">
+                    <span style="color:#1e40af">${sectionBreakdown.discussion_technical}</span> /
+                    <span style="color:#7c3aed">${sectionBreakdown.discussion_content}</span> /
+                    <span style="color:#d97706">${sectionBreakdown.discussion_process}</span>
+                </div>
+                <div class="a-label">기술/컨텐츠/일정</div>
+            </div>
+        `;
+    }
+}
+
+function updateUnreadBadges() {
+    // Calculate unread per discussion tab
+    const tabs = document.querySelectorAll('.section-tabs .section-tab');
+    const tabKeys = ['general', 'technical', 'content', 'process'];
+    tabs.forEach((tab, i) => {
+        const key = tabKeys[i];
+        let badge = tab.querySelector('.unread-badge');
+        if (key === 'general') { if (badge) badge.remove(); return; } // skip 전체
+
+        const section = 'discussion_' + key;
+        const comments = _commentCache[section] || [];
+        const lastSeen = _lastSeenIds[section] || 0;
+        const unread = comments.filter(c => c.id > lastSeen).length;
+
+        if (unread > 0) {
+            if (!badge) { badge = document.createElement('span'); badge.className = 'unread-badge'; tab.appendChild(badge); }
+            badge.textContent = unread;
+        } else if (badge) {
+            badge.remove();
+        }
+    });
+}
+
+function markSectionRead(section) {
+    const comments = _commentCache[section] || [];
+    const maxId = comments.reduce((max, c) => Math.max(max, c.id || 0), 0);
+    if (maxId > 0) {
+        _lastSeenIds[section] = maxId;
+        localStorage.setItem('poc2_lastSeen', JSON.stringify(_lastSeenIds));
+        updateUnreadBadges();
+    }
+}
+
+function onSearchChange() {
+    _searchQuery = (document.getElementById('comment-search')?.value || '').trim().toLowerCase();
+    renderComments('discussion');
+}
+
+function onSortChange() {
+    _sortMode = document.getElementById('comment-sort')?.value || 'newest';
+    renderComments('discussion');
 }
 
 function renderComments(page) {
@@ -1593,6 +1726,10 @@ function renderComments(page) {
     const container = document.getElementById('comments-' + page);
     if (!container) return;
     injectReactions();
+    // Mark section as read
+    if (page === 'discussion' && _discussionTab !== 'general') {
+        markSectionRead('discussion_' + _discussionTab);
+    }
     // 전체토론: 모든 discussion 섹션 댓글 통합
     let allComments;
     if (page === 'discussion' && _discussionTab === 'general') {
@@ -1600,11 +1737,19 @@ function renderComments(page) {
         for (const [key, comments] of Object.entries(_commentCache)) {
             if (key.startsWith('discussion_')) allComments.push(...comments);
         }
-        allComments.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        // 이미 reverse로 보여주므로 다시 시간순 정렬
         allComments.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     } else {
         allComments = _commentCache[section] || [];
+    }
+
+    // 검색 필터링 (discussion 페이지에서만)
+    if (page === 'discussion' && _searchQuery) {
+        const q = _searchQuery;
+        allComments = allComments.filter(c =>
+            (c.content || '').toLowerCase().includes(q) ||
+            (c.author || '').toLowerCase().includes(q) ||
+            (c.org || '').toLowerCase().includes(q)
+        );
     }
 
     // 부모/답글 분리 (재귀 트리 구조)
@@ -1615,6 +1760,19 @@ function renderComments(page) {
         if (!repliesMap[pid]) repliesMap[pid] = [];
         repliesMap[pid].push(c);
     });
+
+    // 정렬 (discussion 페이지에서만)
+    if (page === 'discussion' && _sortMode === 'reactions') {
+        topLevel.sort((a, b) => {
+            const ra = Object.values(a.reactions || {}).reduce((s, arr) => s + arr.length, 0);
+            const rb = Object.values(b.reactions || {}).reduce((s, arr) => s + arr.length, 0);
+            return rb - ra;
+        });
+    } else if (page === 'discussion' && _sortMode === 'oldest') {
+        topLevel.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    } else {
+        topLevel.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }
 
     // Reddit 스타일 재귀 렌더링
     function renderThread(comment, depth) {
@@ -1637,13 +1795,14 @@ function renderComments(page) {
     let html = `<div class="comment-list" id="list-${page}">`;
 
     if (topLevel.length === 0) {
-        html += '<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
+        const msg = _searchQuery ? `"${escapeHtml(_searchQuery)}" 검색 결과가 없습니다.` : '아직 의견이 없습니다. 첫 번째 의견을 남겨보세요!';
+        html += `<div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.88rem;">${msg}</div>`;
     } else {
-        // 고정 댓글 먼저 표시
+        // 고정 댓글 먼저 표시 (정렬 무관하게 최상단)
         const pinned = topLevel.filter(c => _pinnedComments[String(c.id)]);
         const unpinned = topLevel.filter(c => !_pinnedComments[String(c.id)]);
         pinned.forEach(c => { html += renderThread(c, 0); });
-        [...unpinned].reverse().forEach(c => {
+        unpinned.forEach(c => {
             html += renderThread(c, 0);
         });
     }
@@ -1803,12 +1962,18 @@ function closeLightbox() {
 
 function parseMentions(text) {
     // @이름 → highlighted mention span
-    const escaped = escapeHtml(text);
+    let result = escapeHtml(text);
     const myName = _user ? _user.name : '';
-    return escaped.replace(/@(김도한|박소연|서진수|조성수|구진일|EY 컨설팅팀|Upstage 기술팀)/g, (match, name) => {
+    result = result.replace(/@(김도한|박소연|서진수|조성수|구진일|EY 컨설팅팀|Upstage 기술팀)/g, (match, name) => {
         const isMeClass = name === myName ? ' mention-me' : '';
         return `<span class="mention${isMeClass}">@${name}</span>`;
     });
+    // 검색어 하이라이트
+    if (_searchQuery) {
+        const safeQ = _searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        result = result.replace(new RegExp(`(${safeQ})`, 'gi'), '<span class="search-highlight">$1</span>');
+    }
+    return result;
 }
 
 // Pinned comments (stored in localStorage, synced per section)
