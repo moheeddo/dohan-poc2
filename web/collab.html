@@ -403,6 +403,43 @@
         /* Search highlight */
         .search-highlight { background: #fef08a; padding: 1px 2px; border-radius: 2px; }
 
+        /* Thread collapse */
+        .thread-toggle {
+            font-size: 0.72rem; color: var(--accent); cursor: pointer; padding: 4px 0;
+            display: inline-flex; align-items: center; gap: 4px; user-select: none;
+        }
+        .thread-toggle:hover { text-decoration: underline; }
+        .thread-collapsed { display: none !important; }
+
+        /* Export button */
+        .export-btn {
+            padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
+            background: white; font-size: 0.78rem; cursor: pointer; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Keyboard shortcuts modal */
+        .kb-modal {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+        }
+        .kb-modal.show { display: flex; }
+        .kb-modal-content {
+            background: white; border-radius: 14px; padding: 24px; max-width: 360px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .kb-modal h3 { margin: 0 0 16px; font-size: 1rem; }
+        .kb-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.84rem; }
+        .kb-key {
+            padding: 2px 8px; background: #f1f5f9; border: 1px solid var(--border);
+            border-radius: 4px; font-size: 0.76rem; font-family: monospace;
+        }
+
+        /* Relative time tooltip */
+        .comment-time { cursor: default; }
+        .comment-time[title]:hover { text-decoration: underline dotted; }
+
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
         .toast {
@@ -703,6 +740,7 @@
                     <option value="oldest">오래된순</option>
                     <option value="reactions">반응 많은순</option>
                 </select>
+                <button class="export-btn" onclick="exportComments()">📋 내보내기</button>
             </div>
 
             <div id="comments-discussion"></div>
@@ -1308,6 +1346,22 @@
     <img src="" alt="확대 이미지">
 </div>
 
+<!-- Keyboard shortcuts modal -->
+<div class="kb-modal" id="kb-modal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="kb-modal-content">
+        <h3>키보드 단축키</h3>
+        <div class="kb-row"><span>댓글 전송</span><span class="kb-key">Ctrl+Enter</span></div>
+        <div class="kb-row"><span>이미지 붙여넣기</span><span class="kb-key">Ctrl+V</span></div>
+        <div class="kb-row"><span>멘션</span><span class="kb-key">@이름</span></div>
+        <div class="kb-row"><span>검색 포커스</span><span class="kb-key">Ctrl+K</span></div>
+        <div class="kb-row"><span>이 도움말</span><span class="kb-key">Ctrl+/</span></div>
+        <div class="kb-row"><span>닫기</span><span class="kb-key">Esc</span></div>
+        <div style="margin-top:16px;text-align:center;">
+            <button onclick="document.getElementById('kb-modal').classList.remove('show')" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">닫기</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const API_BASE = window.location.origin + '/api/v1';
 let _session = null;
@@ -1774,20 +1828,30 @@ function renderComments(page) {
         topLevel.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     }
 
-    // Reddit 스타일 재귀 렌더링
+    // Reddit 스타일 재귀 렌더링 (스레드 접기 지원)
     function renderThread(comment, depth) {
         const maxIndent = 5;
         const indent = Math.min(depth, maxIndent);
+        const children = repliesMap[String(comment.id)] || [];
         let h = '';
         if (depth > 0) h += `<div class="reply-list" style="margin-left:${indent * 16}px;">`;
         h += renderSingleComment(comment, page, depth > 0, depth);
+        // 답글이 있는 최상위 댓글에 접기/펼치기
+        if (depth === 0 && children.length > 0) {
+            h += `<div class="thread-toggle" onclick="toggleThread(${comment.id})">
+                <span id="thread-icon-${comment.id}">▼</span> 답글 ${children.length}개
+            </div>`;
+        }
         h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${indent * 16 + 12}px;margin-bottom:6px;">
             <input type="text" id="reply-input-${comment.id}" placeholder="답글..."
                    onkeydown="if(event.key==='Enter'){event.preventDefault();postReply('${page}',${comment.id})}">
             <button onclick="postReply('${page}',${comment.id})">답글</button>
         </div>`;
-        const children = repliesMap[String(comment.id)] || [];
-        children.forEach(child => { h += renderThread(child, depth + 1); });
+        if (children.length > 0) {
+            h += `<div id="thread-${comment.id}">`;
+            children.forEach(child => { h += renderThread(child, depth + 1); });
+            h += '</div>';
+        }
         if (depth > 0) h += '</div>';
         return h;
     }
@@ -1988,7 +2052,8 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
     const oc = orgColors[c.org] || {bg:'#f3f4f6',color:'#374151'};
     const isOwn = _user && c.author === _user.name;
     const isAdmin = _user && _user.name === '김도한';
-    const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const absTime = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const time = relativeTime(c.created_at);
     const cls = isReply ? 'reply-item' : 'comment-item';
     const isPinned = _pinnedComments[String(c.id)];
     const pinnedClass = isPinned ? ' pinned' : '';
@@ -1999,7 +2064,7 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
                 <span class="comment-author" style="color:${c.color || 'inherit'}">${escapeHtml(c.author)}</span>
                 <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>${_discussionTab === 'general' && c.section && c.section.startsWith('discussion_') ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;">${{discussion_technical:'기술',discussion_content:'컨텐츠',discussion_process:'일정',discussion_general:'전체'}[c.section]||''}</span>` : ''}
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
-                <span class="comment-time">${time}</span>${editedLabel}
+                <span class="comment-time" title="${absTime}">${time}</span>${editedLabel}
             </div>
             <div class="comment-body" id="body-${c.id}">${parseMentions(c.content)}</div>${c.images && c.images.length ? `<div class="comment-image">${c.images.map(img => `<img src="${img}" alt="첨부 이미지" onclick="openLightbox(this.src)" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
@@ -2499,6 +2564,82 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+function relativeTime(dateStr) {
+    if (!dateStr) return '';
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diff = Math.floor((now - then) / 1000);
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+    if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+    if (diff < 604800) return Math.floor(diff / 86400) + '일 전';
+    return new Date(dateStr).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function toggleThread(commentId) {
+    const el = document.getElementById('thread-' + commentId);
+    const icon = document.getElementById('thread-icon-' + commentId);
+    if (!el) return;
+    el.classList.toggle('thread-collapsed');
+    if (icon) icon.textContent = el.classList.contains('thread-collapsed') ? '▶' : '▼';
+}
+
+function exportComments() {
+    let text = `=== PoC2 협업 포털 — 의견/토론 내보내기 ===\n`;
+    text += `생성일: ${new Date().toLocaleString('ko-KR')}\n\n`;
+
+    const sections = {
+        discussion_technical: '기술 이슈',
+        discussion_content: '교육 컨텐츠',
+        discussion_process: '프로세스/일정',
+    };
+
+    for (const [key, label] of Object.entries(sections)) {
+        const comments = _commentCache[key] || [];
+        if (comments.length === 0) continue;
+        text += `── ${label} (${comments.length}건) ──\n`;
+        comments.forEach(c => {
+            const time = new Date(c.created_at).toLocaleString('ko-KR', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+            const prefix = c.parent_id ? '  ↳ ' : '';
+            text += `${prefix}[${time}] ${c.author}(${c.org}): ${c.content}\n`;
+        });
+        text += '\n';
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('클립보드에 복사되었습니다. 회의록에 붙여넣기하세요!');
+    }).catch(() => {
+        // Fallback: textarea 선택
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('클립보드에 복사되었습니다.');
+    });
+}
+
+// 키보드 단축키
+document.addEventListener('keydown', (e) => {
+    // Ctrl+/ → 단축키 도움말
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        document.getElementById('kb-modal').classList.toggle('show');
+    }
+    // Ctrl+K → 검색 포커스
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const search = document.getElementById('comment-search');
+        if (search) { search.focus(); search.select(); }
+    }
+    // Esc → 모달 닫기
+    if (e.key === 'Escape') {
+        document.getElementById('kb-modal')?.classList.remove('show');
+        document.getElementById('lightbox')?.classList.remove('show');
+    }
+});
 
 function showToast(message) {
     const container = document.getElementById('toast-container');
