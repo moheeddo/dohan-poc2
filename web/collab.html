@@ -70,6 +70,48 @@
         [data-theme="dark"] .arch-flow { background: #1e293b; }
         [data-theme="dark"] .header-right button { color: var(--text-secondary); border-color: var(--border); }
         [data-theme="dark"] .sidebar-collapse-btn { color: var(--text-secondary); border-color: var(--border); }
+        [data-theme="dark"] .mobile-bottom-nav { background: #0f172a; border-color: var(--border); }
+        [data-theme="dark"] .mobile-bottom-nav .nav-tab { color: var(--text-secondary); }
+        [data-theme="dark"] .mobile-bottom-nav .nav-tab.active { color: var(--accent); }
+        [data-theme="dark"] .stats-modal-content { background: var(--bg-card); color: var(--text); }
+        [data-theme="dark"] .stats-bar-track { background: #334155; }
+        [data-theme="dark"] .search-nav-btn { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border); }
+        [data-theme="dark"] .emoji-picker-popup { background: var(--bg-card); border-color: var(--border); }
+        [data-theme="dark"] .quick-reply-btn { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border); }
+
+        /* Reading progress bar */
+        .reading-progress {
+            position: fixed; top: 0; left: 0; height: 3px; z-index: 1000;
+            background: linear-gradient(90deg, var(--accent), #8b5cf6);
+            width: 0%; transition: width 0.1s linear;
+            pointer-events: none;
+        }
+
+        /* Permalink highlight */
+        .comment-item.permalink-highlight, .reply-item.permalink-highlight {
+            animation: permalinkGlow 3s ease-out;
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+        @keyframes permalinkGlow {
+            0% { background: rgba(59,130,246,0.2); }
+            100% { background: transparent; }
+        }
+
+        /* Collapsible long comments */
+        .comment-body.collapsed {
+            max-height: 4.8em; overflow: hidden; position: relative;
+        }
+        .comment-body.collapsed::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2em;
+            background: linear-gradient(transparent, var(--bg-card));
+            pointer-events: none;
+        }
+        .comment-expand-btn {
+            display: none; border: none; background: none; color: var(--accent);
+            font-size: 0.78rem; cursor: pointer; padding: 2px 0; font-family: inherit;
+        }
+        .comment-expand-btn.visible { display: inline-block; }
 
         /* Theme toggle button */
         .theme-toggle {
@@ -1051,6 +1093,9 @@
     </style>
 </head>
 <body>
+
+<!-- Reading progress bar -->
+<div class="reading-progress" id="reading-progress"></div>
 
 <!-- Login Overlay -->
 <div class="login-overlay" id="login-overlay">
@@ -2805,7 +2850,8 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
                 <span class="comment-time" title="${absTime}" data-created="${c.created_at || ''}">${time}</span>${editedLabel}${newBadge}
             </div>
-            <div class="comment-body" id="body-${c.id}">${renderCommentContent(c)}</div>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
+            <div class="comment-body" id="body-${c.id}">${renderCommentContent(c)}</div>
+            <button class="comment-expand-btn" id="expand-${c.id}" onclick="toggleCommentExpand(${c.id})">더보기</button>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
                 ${_allReactionEmojis.slice(0,3).map(emoji => {
                     const reactions = (c.reactions || {})[emoji] || [];
@@ -4485,6 +4531,89 @@ function closeStatsModal() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeStatsModal();
 });
+
+// ============================================================
+// Reading progress bar
+// ============================================================
+(function() {
+    const bar = document.getElementById('reading-progress');
+    const main = document.querySelector('.main-content');
+    if (!bar || !main) return;
+    main.addEventListener('scroll', () => {
+        const scrollTop = main.scrollTop;
+        const scrollHeight = main.scrollHeight - main.clientHeight;
+        const pct = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0;
+        bar.style.width = pct + '%';
+    });
+})();
+
+// ============================================================
+// Permalink: scroll to #comment-{id} on page load
+// ============================================================
+function handlePermalink() {
+    const hash = window.location.hash;
+    if (!hash || !hash.startsWith('#comment-')) return;
+    const id = hash.replace('#comment-', '');
+    setTimeout(() => {
+        const el = document.getElementById('comment-' + id);
+        if (el) {
+            el.scrollIntoView({behavior: 'smooth', block: 'center'});
+            el.classList.add('permalink-highlight');
+            setTimeout(() => el.classList.remove('permalink-highlight'), 3500);
+        }
+    }, 800);
+}
+window.addEventListener('hashchange', handlePermalink);
+setTimeout(handlePermalink, 1000);
+
+// Update copyCommentLink to use permalink
+const _origCopyLink = copyCommentLink;
+copyCommentLink = function(commentId) {
+    const url = window.location.origin + window.location.pathname + '#comment-' + commentId;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('댓글 링크가 복사되었습니다.');
+    }).catch(() => {
+        showToast('링크: ' + url);
+    });
+};
+
+// ============================================================
+// Auto-collapse long comments (>3 lines ≈ >150 chars)
+// ============================================================
+function checkCollapsibleComments() {
+    document.querySelectorAll('.comment-body').forEach(el => {
+        const btn = el.nextElementSibling;
+        if (!btn || !btn.classList.contains('comment-expand-btn')) return;
+        if (el.classList.contains('expanded')) return;
+        // Check if content is long enough to collapse
+        if (el.scrollHeight > 80 && el.textContent.length > 150) {
+            el.classList.add('collapsed');
+            btn.classList.add('visible');
+        }
+    });
+}
+
+function toggleCommentExpand(commentId) {
+    const body = document.getElementById('body-' + commentId);
+    const btn = document.getElementById('expand-' + commentId);
+    if (!body || !btn) return;
+    if (body.classList.contains('collapsed')) {
+        body.classList.remove('collapsed');
+        body.classList.add('expanded');
+        btn.textContent = '접기';
+    } else {
+        body.classList.remove('expanded');
+        body.classList.add('collapsed');
+        btn.textContent = '더보기';
+    }
+}
+
+// Run collapse check after each render
+const _origRenderComments = renderComments;
+renderComments = function(page) {
+    _origRenderComments(page);
+    setTimeout(checkCollapsibleComments, 50);
+};
 </script>
 </body>
 </html>
