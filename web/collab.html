@@ -356,7 +356,7 @@
         /* Comment System */
         .comment-input-area {
             display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
-            background: white; border: 2px solid var(--border); border-radius: 12px;
+            background: var(--bg-card); border: 2px solid var(--border); border-radius: 12px;
             padding: 12px; transition: border-color 0.2s;
         }
         .comment-input-area:focus-within { border-color: var(--accent); }
@@ -364,6 +364,7 @@
             width: 100%; padding: 8px 4px; border: none; border-radius: 0;
             font-size: 0.9rem; resize: none; min-height: 48px; outline: none;
             font-family: inherit; line-height: 1.6;
+            background: transparent; color: var(--text);
         }
         .comment-input-area .input-toolbar {
             display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px;
@@ -373,7 +374,7 @@
             background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
             font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
         }
-        .comment-input-area .input-toolbar .img-btn:hover { background: #e2e8f0; color: var(--text); }
+        .comment-input-area .input-toolbar .img-btn:hover { background: var(--bg-hover, #e2e8f0); color: var(--text); }
         .comment-input-area .input-toolbar .send-btn {
             margin-left: auto; padding: 8px 20px; background: var(--accent); color: white; border: none;
             border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
@@ -482,15 +483,14 @@
         .reply-item .comment-header { margin-bottom: 4px; }
         .reply-input-area {
             display: none; gap: 8px; margin-top: 8px; align-items: flex-end;
-            overflow: hidden; max-height: 0; opacity: 0;
-            transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
         }
-        .reply-input-area.show { display: flex; max-height: 200px; opacity: 1; }
+        .reply-input-area.show { display: flex !important; }
         .reply-input-area textarea {
-            flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+            flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
             font-size: 0.84rem; outline: none; font-family: inherit;
-            min-height: 44px; max-height: 120px; resize: none; line-height: 1.5;
+            min-height: 52px; max-height: 120px; resize: none; line-height: 1.5;
         }
+        .reply-input-area textarea::placeholder { color: var(--text-secondary); }
         .reply-input-area textarea:focus { border-color: var(--accent); }
         .reply-input-area .reply-actions { display: flex; flex-direction: column; gap: 4px; }
         .reply-input-area button {
@@ -655,7 +655,7 @@
         .comment-search {
             flex: 1; min-width: 140px; padding: 7px 12px 7px 32px; border: 1px solid var(--border);
             border-radius: 8px; font-size: 0.82rem; outline: none; font-family: inherit;
-            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") 10px center no-repeat;
+            background: var(--bg-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") 10px center no-repeat; color: var(--text);
         }
         .comment-search:focus { border-color: var(--accent); }
         .sort-select {
@@ -2655,8 +2655,9 @@ function renderComments(page) {
                 <span id="thread-icon-${comment.id}">▼</span> 답글 ${children.length}개
             </div>`;
         }
-        h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${indent * 16 + 12}px;margin-bottom:6px;">
-            <textarea id="reply-input-${comment.id}" placeholder="답글... (Ctrl+Enter 전송, Shift+Enter 줄바꿈)" rows="1"
+        const replyIndent = Math.min(indent * 16, 48);
+        h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${replyIndent}px;margin-bottom:6px;">
+            <textarea id="reply-input-${comment.id}" placeholder="답글... (Ctrl+Enter 전송, Shift+Enter 줄바꿈)" rows="2"
                    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
                    onkeydown="if(event.key==='Enter'&&!event.shiftKey&&(event.ctrlKey||event.metaKey)){event.preventDefault();postReply('${page}',${comment.id})}"></textarea>
             <div class="reply-actions">
