@@ -275,15 +275,8 @@
             transition: width 0.25s ease, padding 0.25s ease;
         }
         .sidebar.collapsed {
-            width: 56px; padding: 12px 0; overflow: hidden;
+            width: 0; padding: 0; overflow: hidden; border-right: none;
         }
-        .sidebar.collapsed .sidebar-section h3,
-        .sidebar.collapsed .nav-item span:not(.icon),
-        .sidebar.collapsed .nav-item .count,
-        .sidebar.collapsed .online-list,
-        .sidebar.collapsed .sidebar-section:last-child h3 { display: none; }
-        .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
-        .sidebar.collapsed .nav-item .icon { width: auto; font-size: 1.15rem; }
         .sidebar-collapse-btn {
             display: flex; align-items: center; justify-content: center;
             width: 100%; padding: 8px 0; border: none; background: none;
@@ -1198,6 +1191,7 @@
 <header class="header" id="main-header" style="display:none;" role="banner">
     <div class="header-left">
         <button class="mobile-nav-toggle" onclick="toggleMobileSidebar()" aria-label="메뉴">&#9776;</button>
+        <button id="sidebar-open-btn" onclick="toggleSidebarCollapse()" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:0.82rem;cursor:pointer;color:var(--text-secondary);" title="사이드바 열기">☰ 메뉴</button>
         <span class="logo">PoC2 협업 포털</span>
         <span class="badge">Slides → Script & Question Bank</span>
         <span id="mode-indicator" style="font-size:0.72rem; padding:3px 10px; border-radius:12px; font-weight:600; background:#d1fae5; color:#065f46;">LIVE</span>
@@ -4280,9 +4274,11 @@ let _sidebarCollapsed = localStorage.getItem('poc2_sidebar') === 'collapsed';
 function toggleSidebarCollapse() {
     const sidebar = document.getElementById('main-sidebar');
     const btn = document.getElementById('sidebar-collapse');
+    const headerBtn = document.getElementById('sidebar-open-btn');
     _sidebarCollapsed = !_sidebarCollapsed;
     sidebar.classList.toggle('collapsed', _sidebarCollapsed);
-    btn.textContent = _sidebarCollapsed ? '▶' : '◀ 접기';
+    btn.textContent = _sidebarCollapsed ? '☰ 메뉴' : '◀ 접기';
+    if (headerBtn) headerBtn.style.display = _sidebarCollapsed ? 'inline-flex' : 'none';
     localStorage.setItem('poc2_sidebar', _sidebarCollapsed ? 'collapsed' : 'expanded');
 }
 
@@ -4291,8 +4287,10 @@ function toggleSidebarCollapse() {
     if (_sidebarCollapsed) {
         const sidebar = document.getElementById('main-sidebar');
         const btn = document.getElementById('sidebar-collapse');
+        const headerBtn = document.getElementById('sidebar-open-btn');
         if (sidebar) sidebar.classList.add('collapsed');
-        if (btn) btn.textContent = '▶';
+        if (btn) btn.textContent = '☰ 메뉴';
+        if (headerBtn) headerBtn.style.display = 'inline-flex';
     }
 })();
 
