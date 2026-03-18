@@ -221,9 +221,15 @@ class handler(BaseHTTPRequestHandler):
         section = body.get("section", "")
         content = body.get("content", "").strip()
         parent_id = body.get("parent_id", "")
+        images = body.get("images", [])
+        # Limit: max 3 images, each max ~1MB base64
+        if isinstance(images, list):
+            images = [img for img in images[:3] if isinstance(img, str) and len(img) < 1_500_000]
+        else:
+            images = []
 
-        if not content:
-            self._json(400, {"detail": "내용을 입력하세요."})
+        if not content and not images:
+            self._json(400, {"detail": "내용 또는 이미지를 입력하세요."})
             return
 
         user = self._auth(access_code, session_id)
@@ -244,6 +250,7 @@ class handler(BaseHTTPRequestHandler):
             "section": section,
             "content": content,
             "parent_id": parent_id,
+            "images": images,
             "author": user.get("name", ""),
             "org": user.get("org", ""),
             "role": user.get("role", ""),
