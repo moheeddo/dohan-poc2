@@ -99,7 +99,7 @@
         .online-user .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
         /* Main Content */
-        .main-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+        .main-content { flex: 1; overflow-y: auto; padding: 28px 40px; max-width: 960px; }
         .page { display: none; }
         .page.active { display: block; }
         .page-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
@@ -120,9 +120,11 @@
         .arch-box {
             padding: 14px 18px; border-radius: 10px; text-align: center;
             font-size: 0.82rem; font-weight: 600; min-width: 120px;
-            border: 2px solid transparent; transition: transform 0.2s;
+            border: 2px solid transparent; transition: transform 0.2s, opacity 0.2s;
         }
         .arch-box:hover { transform: translateY(-2px); }
+        .sat-phase-btn { cursor: pointer !important; }
+        .sat-phase-btn:hover { transform: translateY(-3px) scale(1.03) !important; }
         .arch-box .sub { font-size: 0.72rem; font-weight: 400; color: rgba(255,255,255,0.85); margin-top: 4px; }
         .arch-arrow { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
 
@@ -163,7 +165,7 @@
             font-weight: 600;
         }
         .comment-time { font-size: 0.72rem; color: var(--text-secondary); margin-left: auto; }
-        .comment-body { font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
+        .comment-body { font-size: 0.9rem; line-height: 1.8; white-space: pre-wrap; }
         .comment-actions { margin-top: 8px; display: flex; gap: 12px; }
         .comment-actions button {
             background: none; border: none; font-size: 0.78rem; color: var(--text-secondary);
@@ -182,8 +184,9 @@
         }
         .reply-item .comment-header { margin-bottom: 4px; }
         .reply-input-area {
-            display: flex; gap: 8px; margin-top: 8px; align-items: center;
+            display: none; gap: 8px; margin-top: 8px; align-items: center;
         }
+        .reply-input-area.show { display: flex; }
         .reply-input-area input {
             flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
             font-size: 0.84rem; outline: none; font-family: inherit;
@@ -988,47 +991,47 @@
         <!-- ===== 9. SAT 연계 ===== -->
         <div class="page" id="page-sat">
             <div class="page-title">SAT (Systematic Approach to Training) 연계</div>
-            <div class="page-desc">IAEA 권고 SAT 5단계와 AI 시스템의 매핑</div>
+            <div class="page-desc">IAEA 권고 SAT 5단계와 AI 시스템의 매핑 — 각 단계를 클릭하면 상세 내용을 확인할 수 있습니다</div>
 
             <div class="card">
-                <h3>&#x1f393; SAT 5단계 프레임워크</h3>
+                <h3>&#x1f393; SAT 5단계 — 클릭하여 상세 보기</h3>
                 <div class="arch-flow" style="background:#fefce8;">
-                    <div class="arch-box" style="background:#1e40af;color:white;">
+                    <div class="arch-box sat-phase-btn active" style="background:#1e40af;color:white;cursor:pointer;" onclick="showSATPhase('analysis',this)">
                         &#128269; Analysis<div class="sub">직무분석</div>
                     </div>
                     <span class="arch-arrow">→</span>
-                    <div class="arch-box" style="background:#7c3aed;color:white;">
+                    <div class="arch-box sat-phase-btn" style="background:#7c3aed;color:white;cursor:pointer;" onclick="showSATPhase('design',this)">
                         &#128208; Design<div class="sub">교육설계</div>
                     </div>
                     <span class="arch-arrow">→</span>
-                    <div class="arch-box" style="background:#059669;color:white;border:3px solid #fbbf24;">
+                    <div class="arch-box sat-phase-btn" style="background:#059669;color:white;cursor:pointer;border:3px solid #fbbf24;" onclick="showSATPhase('development',this)">
                         &#9881; Development<div class="sub">교재개발 (PoC 핵심)</div>
                     </div>
                     <span class="arch-arrow">→</span>
-                    <div class="arch-box" style="background:#d97706;color:white;">
+                    <div class="arch-box sat-phase-btn" style="background:#d97706;color:white;cursor:pointer;" onclick="showSATPhase('implementation',this)">
                         &#127891; Implementation<div class="sub">교육실행</div>
                     </div>
                     <span class="arch-arrow">→</span>
-                    <div class="arch-box" style="background:#dc2626;color:white;">
+                    <div class="arch-box sat-phase-btn" style="background:#dc2626;color:white;cursor:pointer;" onclick="showSATPhase('evaluation',this)">
                         &#128202; Evaluation<div class="sub">평가환류</div>
                     </div>
                 </div>
-                <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:12px;">
-                    &#11088; <strong>Development 단계</strong>가 PoC 핵심 영역. AI가 강의 스크립트 + 문제은행 자동 생성, SME가 검토.
-                </p>
             </div>
 
-            <div class="card">
-                <h3>&#9881; Development — AI 역할 vs 인간 역할</h3>
-                <table class="std-table">
-                    <thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead>
-                    <tbody>
-                        <tr><td>강의 스크립트</td><td>슬라이드 기반 초안 자동 생성</td><td>검토/수정, 경험 보충</td></tr>
-                        <tr><td>평가문항 개발</td><td>학습목표 기반 문항 자동 생성</td><td>정답 검증, 난이도 조정</td></tr>
-                        <tr><td>보충자료 연계</td><td>RAG로 관련 규정/사례 자동 검색</td><td>적절성 판단, 추가 자료 지정</td></tr>
-                        <tr><td>시각자료 해석</td><td>VLM으로 도면/차트 설명 생성</td><td>기술적 정확성 확인</td></tr>
-                    </tbody>
-                </table>
+            <!-- SAT 상세 카드 (클릭 시 변경) -->
+            <div class="card" id="sat-detail-card" style="border-left:4px solid #1e40af;transition:border-color 0.3s;">
+                <h3 id="sat-detail-title">&#128269; Analysis — 직무분석</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;" id="sat-detail-subtitle">교육 필요점 도출 및 학습목표 설정</p>
+                <div id="sat-detail-content">
+                    <table class="std-table">
+                        <thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead>
+                        <tbody>
+                            <tr><td>직무분석(JTA) 입력</td><td>JTA 문서 파싱 및 구조화</td><td>JTA 결과 검증</td></tr>
+                            <tr><td>학습목표 매핑</td><td>RAG로 관련 규정/역량 자동 연계</td><td>학습목표 최종 확정</td></tr>
+                            <tr><td>교육 필요점 분석</td><td>기존 교육과정과 JTA 갭 분석</td><td>우선순위 결정</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="card">
@@ -1333,6 +1336,84 @@ function switchDiscussionTab(tab) {
 }
 
 // ============================================================
+// SAT Phase Detail (interactive)
+// ============================================================
+const _satPhaseData = {
+    analysis: {
+        title: '&#128269; Analysis — 직무분석',
+        subtitle: '교육 필요점 도출 및 학습목표 설정',
+        color: '#1e40af',
+        content: `<table class="std-table"><thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead><tbody>
+            <tr><td>직무분석(JTA) 입력</td><td>JTA 문서 파싱 및 구조화</td><td>JTA 결과 검증</td></tr>
+            <tr><td>학습목표 매핑</td><td>RAG로 관련 규정/역량 자동 연계</td><td>학습목표 최종 확정</td></tr>
+            <tr><td>교육 필요점 분석</td><td>기존 교육과정과 JTA 갭 분석</td><td>우선순위 결정</td></tr>
+        </tbody></table>`
+    },
+    design: {
+        title: '&#128208; Design — 교육설계',
+        subtitle: '교육과정 구조 및 평가전략 설계',
+        color: '#7c3aed',
+        content: `<table class="std-table"><thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead><tbody>
+            <tr><td>교육과정 구조 설계</td><td>학습목표 기반 구조 자동 제안</td><td>구조 확정/수정</td></tr>
+            <tr><td>평가전략 수립</td><td>Bloom 수준별 문항 배분 제안</td><td>평가 기준 최종 결정</td></tr>
+            <tr><td>교수전략 선정</td><td>학습 유형별 적합 전략 추천</td><td>교수법 최종 선택</td></tr>
+        </tbody></table>`
+    },
+    development: {
+        title: '&#9881; Development — 교재개발 (PoC 핵심)',
+        subtitle: 'AI 시스템이 가장 직접적으로 기여하는 SAT 단계',
+        color: '#059669',
+        content: `<table class="std-table"><thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead><tbody>
+            <tr><td>강의 스크립트 작성</td><td>슬라이드 기반 초안 자동 생성</td><td>검토/수정, 경험 보충</td></tr>
+            <tr><td>평가문항 개발</td><td>학습목표 기반 문항 자동 생성</td><td>정답 검증, 난이도 조정</td></tr>
+            <tr><td>보충자료 연계</td><td>RAG로 관련 규정/사례 자동 검색</td><td>적절성 판단, 추가 자료 지정</td></tr>
+            <tr><td>시각자료 해석</td><td>VLM으로 도면/차트 설명 생성</td><td>기술적 정확성 확인</td></tr>
+        </tbody></table>`
+    },
+    implementation: {
+        title: '&#127891; Implementation — 교육실행',
+        subtitle: '교육 운영 및 강사 지원',
+        color: '#d97706',
+        content: `<table class="std-table"><thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead><tbody>
+            <tr><td>강사 가이드 제공</td><td>슬라이드별 스크립트, 시간 배분</td><td>교육 실행, 질의응답</td></tr>
+            <tr><td>학습자 맞춤화</td><td>수준별 보충설명 자동 제공</td><td>현장 분위기 조절</td></tr>
+            <tr><td>교육자료 갱신</td><td>최신 규정 변경 자동 감지/반영</td><td>변경사항 승인</td></tr>
+        </tbody></table>`
+    },
+    evaluation: {
+        title: '&#128202; Evaluation — 평가환류',
+        subtitle: '교육 효과성 분석 및 개선 환류',
+        color: '#dc2626',
+        content: `<table class="std-table"><thead><tr><th>기능</th><th>AI 역할</th><th>인간 역할</th></tr></thead><tbody>
+            <tr><td>문항 분석</td><td>정답률, 변별도, 난이도 자동 통계</td><td>문항 수정/교체 결정</td></tr>
+            <tr><td>교육효과 분석</td><td>학습목표 달성도 자동 분석</td><td>개선 방향 수립</td></tr>
+            <tr><td>피드백 환류</td><td>분석 결과 기반 교재 개선 제안</td><td>개선안 승인/적용</td></tr>
+            <tr><td>트렌드 분석</td><td>연도별 성취도 변화 추적</td><td>중장기 교육정책 반영</td></tr>
+        </tbody></table>`
+    }
+};
+
+function showSATPhase(phase, el) {
+    const data = _satPhaseData[phase];
+    if (!data) return;
+    // 활성 표시
+    document.querySelectorAll('.sat-phase-btn').forEach(b => {
+        b.style.opacity = '0.5';
+        b.style.transform = 'scale(0.95)';
+    });
+    el.style.opacity = '1';
+    el.style.transform = 'scale(1.05)';
+    // 상세 내용 업데이트
+    const card = document.getElementById('sat-detail-card');
+    card.style.borderLeftColor = data.color;
+    document.getElementById('sat-detail-title').innerHTML = data.title;
+    document.getElementById('sat-detail-subtitle').textContent = data.subtitle;
+    document.getElementById('sat-detail-content').innerHTML = data.content;
+    // 스크롤
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ============================================================
 // Comments
 // ============================================================
 function getCommentSection(page) {
@@ -1465,8 +1546,8 @@ function renderSingleComment(c, page, isReply = false) {
             </div>
             <div class="comment-body">${escapeHtml(c.content)}</div>
             <div class="comment-actions">
-                ${!isReply ? `<button onclick="document.getElementById('reply-input-${c.id}').focus()">답글</button>` : ''}
-                ${isOwn ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
+                ${!isReply ? `<button onclick="toggleReply(${c.id})">답글</button>` : ''}
+                ${(isOwn || (_user && _user.name === '김도한')) ? `<button onclick="deleteComment(${c.id},'${page}')">삭제</button>` : ''}
             </div>
         </div>
     `;
@@ -1706,6 +1787,16 @@ async function loadOnlineUsers() {
 // ============================================================
 // Utilities
 // ============================================================
+function toggleReply(commentId) {
+    const area = document.getElementById('reply-area-' + commentId);
+    if (!area) return;
+    area.classList.toggle('show');
+    if (area.classList.contains('show')) {
+        const input = document.getElementById('reply-input-' + commentId);
+        if (input) input.focus();
+    }
+}
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;

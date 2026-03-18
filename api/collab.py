@@ -284,7 +284,8 @@ class handler(BaseHTTPRequestHandler):
                 try:
                     c = json.loads(raw) if isinstance(raw, str) else raw
                     if c.get("id") == comment_id:
-                        if c.get("author") != user.get("name"):
+                        is_admin = user.get("name") == "김도한"
+                        if c.get("author") != user.get("name") and not is_admin:
                             self._json(403, {"detail": "본인의 댓글만 삭제할 수 있습니다."})
                             return
                         _redis(["LREM", "collab:comments", "1", raw if isinstance(raw, str) else json.dumps(c)])
@@ -293,9 +294,10 @@ class handler(BaseHTTPRequestHandler):
                     continue
         else:
             data = _tmp_load()
+            is_admin = user.get("name") == "김도한"
             data["comments"] = [
                 c for c in data.get("comments", [])
-                if not (c.get("id") == comment_id and c.get("author") == user.get("name"))
+                if not (c.get("id") == comment_id and (c.get("author") == user.get("name") or is_admin))
             ]
             _tmp_save(data)
 
