@@ -995,6 +995,59 @@
             .comment-org { font-size: 0.65rem; }
             .comment-time { font-size: 0.65rem; }
         }
+
+        /* Mobile bottom navigation bar */
+        .mobile-bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+            background: var(--bg-card); border-top: 1px solid var(--border);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+            padding: 4px 0 calc(4px + env(safe-area-inset-bottom));
+        }
+        .mobile-bottom-nav .nav-items {
+            display: flex; justify-content: space-around; align-items: center;
+        }
+        .mobile-bottom-nav .nav-tab {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 6px 8px; border: none; background: none; cursor: pointer;
+            color: var(--text-secondary); font-size: 0.62rem; font-family: inherit;
+            transition: color 0.15s; position: relative; min-width: 56px;
+        }
+        .mobile-bottom-nav .nav-tab .nav-icon { font-size: 1.2rem; }
+        .mobile-bottom-nav .nav-tab.active { color: var(--accent); }
+        .mobile-bottom-nav .nav-tab .mob-badge {
+            position: absolute; top: 2px; right: 4px;
+            min-width: 14px; height: 14px; padding: 0 3px;
+            background: #ef4444; color: white; border-radius: 7px;
+            font-size: 0.55rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav { display: block; }
+            body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+            .theme-toggle { bottom: calc(70px + env(safe-area-inset-bottom)); }
+            .scroll-top-btn { bottom: calc(70px + env(safe-area-inset-bottom)) !important; }
+        }
+
+        /* Stats modal */
+        .stats-modal {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.5); align-items: center; justify-content: center;
+        }
+        .stats-modal.show { display: flex; }
+        .stats-modal-content {
+            background: var(--bg-card); border-radius: var(--radius); padding: 28px;
+            max-width: 520px; width: 92%; max-height: 80vh; overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+        .stats-modal-content h3 { margin-bottom: 16px; font-size: 1.1rem; }
+        .stats-bar-row {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+            font-size: 0.82rem;
+        }
+        .stats-bar-label { min-width: 70px; text-align: right; color: var(--text-secondary); }
+        .stats-bar-track { flex: 1; height: 20px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+        .stats-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; display: flex; align-items: center; padding-left: 6px; font-size: 0.7rem; color: white; font-weight: 600; }
+        .stats-bar-count { min-width: 28px; text-align: center; font-weight: 600; font-size: 0.78rem; }
     </style>
 </head>
 <body>
@@ -1020,7 +1073,7 @@
 </div>
 
 <!-- Header -->
-<header class="header" id="main-header" style="display:none;">
+<header class="header" id="main-header" style="display:none;" role="banner">
     <div class="header-left">
         <button class="mobile-nav-toggle" onclick="toggleMobileSidebar()" aria-label="메뉴">&#9776;</button>
         <span class="logo">PoC2 협업 포털</span>
@@ -1043,7 +1096,7 @@
     <!-- Sidebar overlay (mobile) -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
     <!-- Sidebar -->
-    <nav class="sidebar" id="main-sidebar">
+    <nav class="sidebar" id="main-sidebar" role="navigation" aria-label="사이드바 네비게이션">
         <div class="sidebar-section">
             <h3>메뉴</h3>
             <div class="nav-item active" onclick="switchPage('architecture')" data-page="architecture">
@@ -1217,6 +1270,7 @@
                 <button class="bookmark-filter-btn" id="bookmark-filter" onclick="toggleBookmarkFilter()">★ 북마크</button>
                 <button class="export-btn" onclick="exportComments()">📋 내보내기</button>
                 <button class="export-btn" onclick="downloadCommentsJSON()" title="JSON 파일 다운로드">⬇ JSON</button>
+                <button class="export-btn" onclick="openStatsModal()" title="댓글 통계">📊 통계</button>
             </div>
 
             <div class="comment-filter-tabs">
@@ -1827,6 +1881,32 @@
 <!-- Theme toggle -->
 <button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="다크모드 전환">🌙</button>
 
+<!-- Mobile bottom navigation -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="모바일 네비게이션">
+    <div class="nav-items">
+        <button class="nav-tab" onclick="switchPage('discussion')" data-page="discussion" aria-label="토론">
+            <span class="nav-icon">💬</span>토론
+        </button>
+        <button class="nav-tab" onclick="switchPage('standards')" data-page="standards" aria-label="기준">
+            <span class="nav-icon">📋</span>기준
+        </button>
+        <button class="nav-tab" onclick="switchPage('timeline')" data-page="timeline" aria-label="일정">
+            <span class="nav-icon">📅</span>일정
+        </button>
+        <button class="nav-tab" onclick="switchPage('architecture')" data-page="architecture" aria-label="아키텍처">
+            <span class="nav-icon">🏗</span>아키텍처
+        </button>
+        <button class="nav-tab" onclick="openStatsModal()" aria-label="통계">
+            <span class="nav-icon">📊</span>통계
+        </button>
+    </div>
+</nav>
+
+<!-- Stats modal -->
+<div class="stats-modal" id="stats-modal" onclick="if(event.target===this)closeStatsModal()" role="dialog" aria-label="댓글 통계">
+    <div class="stats-modal-content" id="stats-modal-content"></div>
+</div>
+
 <!-- Lightbox for image zoom -->
 <div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
     <button class="lightbox-nav prev" id="lb-prev" onclick="event.stopPropagation();navLightbox(-1)">◀</button>
@@ -1869,7 +1949,7 @@ let _discussionTab = 'general';
 let _commentCache = {};
 let _lastEventId = 0;
 let _searchQuery = '';
-let _sortMode = 'newest';
+let _sortMode = localStorage.getItem('poc2_sortMode') || 'newest';
 let _searchResultIds = [];
 let _searchCurrentIdx = -1;
 let _lastVisitTimestamp = JSON.parse(localStorage.getItem('poc2_lastVisit') || '{}');
@@ -2343,8 +2423,14 @@ function navSearchResult(dir) {
 
 function onSortChange() {
     _sortMode = document.getElementById('comment-sort')?.value || 'newest';
+    localStorage.setItem('poc2_sortMode', _sortMode);
     renderComments('discussion');
 }
+// Restore sort select on load
+(function() {
+    const sel = document.getElementById('comment-sort');
+    if (sel) sel.value = _sortMode;
+})();
 
 function renderComments(page) {
     const section = getCommentSection(page);
@@ -4253,6 +4339,152 @@ setTimeout(() => {
     _lastVisitTimestamp[section] = Date.now() / 1000;
     localStorage.setItem('poc2_lastVisit', JSON.stringify(_lastVisitTimestamp));
 }, 3000);
+
+// ============================================================
+// Mobile bottom nav — active state sync
+// ============================================================
+function updateMobileNav() {
+    document.querySelectorAll('.mobile-bottom-nav .nav-tab').forEach(tab => {
+        const page = tab.getAttribute('data-page');
+        tab.classList.toggle('active', page === _currentPage);
+    });
+    // Update badges on mobile nav
+    const pages = {discussion: 'discussion', standards: 'standards', timeline: 'timeline', architecture: 'architecture'};
+    for (const [page, key] of Object.entries(pages)) {
+        const tab = document.querySelector(`.mobile-bottom-nav .nav-tab[data-page="${page}"]`);
+        if (!tab) continue;
+        let count = 0;
+        if (page === 'discussion') {
+            ['discussion_technical','discussion_content','discussion_process'].forEach(s => {
+                count += (_commentCache[s] || []).length;
+            });
+        } else {
+            count = (_commentCache[key] || []).length;
+        }
+        let badge = tab.querySelector('.mob-badge');
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'mob-badge';
+                tab.appendChild(badge);
+            }
+            badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+}
+
+// Hook mobile nav update into switchPage
+const _origSP2 = switchPage;
+switchPage = function(page) {
+    _origSP2(page);
+    updateMobileNav();
+};
+setTimeout(updateMobileNav, 500);
+
+// ============================================================
+// Stats modal
+// ============================================================
+function openStatsModal() {
+    const modal = document.getElementById('stats-modal');
+    const content = document.getElementById('stats-modal-content');
+    if (!modal || !content) return;
+
+    // Gather all comments
+    let all = [];
+    for (const comments of Object.values(_commentCache)) {
+        all.push(...comments);
+    }
+
+    // Author stats
+    const authorCounts = {};
+    all.forEach(c => {
+        const key = c.author || '익명';
+        authorCounts[key] = (authorCounts[key] || 0) + 1;
+    });
+    const sortedAuthors = Object.entries(authorCounts).sort((a, b) => b[1] - a[1]);
+    const maxAuthorCount = sortedAuthors.length > 0 ? sortedAuthors[0][1] : 1;
+
+    // Section stats
+    const sectionLabels = {
+        discussion_technical: '기술 이슈',
+        discussion_content: '교육 컨텐츠',
+        discussion_process: '프로세스/일정',
+        standards: '품질 기준',
+        timeline: '타임라인',
+        architecture: '아키텍처',
+    };
+    const sectionCounts = {};
+    all.forEach(c => {
+        const s = c.section || 'unknown';
+        sectionCounts[s] = (sectionCounts[s] || 0) + 1;
+    });
+    const sortedSections = Object.entries(sectionCounts)
+        .filter(([k]) => sectionLabels[k])
+        .sort((a, b) => b[1] - a[1]);
+    const maxSectionCount = sortedSections.length > 0 ? sortedSections[0][1] : 1;
+
+    const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+
+    let html = `<h3>댓글 통계</h3>`;
+    html += `<div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px;">전체 ${all.length}건</div>`;
+
+    // Author chart
+    html += `<h4 style="font-size:0.88rem;margin-bottom:10px;">작성자별</h4>`;
+    sortedAuthors.forEach(([name, count], i) => {
+        const pct = Math.round((count / maxAuthorCount) * 100);
+        const color = colors[i % colors.length];
+        html += `<div class="stats-bar-row">
+            <span class="stats-bar-label">${name}</span>
+            <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${pct}%;background:${color}">${count > 1 ? count : ''}</div></div>
+            <span class="stats-bar-count">${count}</span>
+        </div>`;
+    });
+
+    // Section chart
+    html += `<h4 style="font-size:0.88rem;margin:20px 0 10px;">섹션별</h4>`;
+    sortedSections.forEach(([key, count], i) => {
+        const pct = Math.round((count / maxSectionCount) * 100);
+        const color = colors[(i + 3) % colors.length];
+        html += `<div class="stats-bar-row">
+            <span class="stats-bar-label">${sectionLabels[key]}</span>
+            <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${pct}%;background:${color}">${count > 1 ? count : ''}</div></div>
+            <span class="stats-bar-count">${count}</span>
+        </div>`;
+    });
+
+    // Recent activity
+    const recent = [...all].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 5);
+    if (recent.length > 0) {
+        html += `<h4 style="font-size:0.88rem;margin:20px 0 10px;">최근 활동</h4>`;
+        html += `<div style="font-size:0.8rem;">`;
+        recent.forEach(c => {
+            html += `<div style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:baseline;">
+                <span style="font-weight:600;color:${c.color || 'inherit'}">${c.author}</span>
+                <span style="flex:1;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(c.content || '').slice(0, 40)}</span>
+                <span style="color:var(--text-secondary);font-size:0.72rem;white-space:nowrap;">${relativeTime(c.created_at)}</span>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+
+    html += `<div style="margin-top:20px;text-align:center;">
+        <button onclick="closeStatsModal()" style="padding:8px 24px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">닫기</button>
+    </div>`;
+
+    content.innerHTML = html;
+    modal.classList.add('show');
+}
+
+function closeStatsModal() {
+    document.getElementById('stats-modal')?.classList.remove('show');
+}
+
+// Escape key closes stats modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeStatsModal();
+});
 </script>
 </body>
 </html>
