@@ -40,7 +40,7 @@
         [data-theme="dark"] .reaction-btn { background: var(--bg-card); }
         [data-theme="dark"] .comment-search,
         [data-theme="dark"] .sort-select,
-        [data-theme="dark"] .reply-input-area input { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+        [data-theme="dark"] .reply-input-area textarea { background: var(--bg-card); color: var(--text); border-color: var(--border); }
         [data-theme="dark"] .kb-modal-content { background: var(--bg-card); color: var(--text); }
         [data-theme="dark"] .mention-popup { background: var(--bg-card); border-color: var(--border); }
         [data-theme="dark"] .std-table th { background: var(--bg-card); }
@@ -464,19 +464,24 @@
         }
         .reply-item .comment-header { margin-bottom: 4px; }
         .reply-input-area {
-            display: none; gap: 8px; margin-top: 8px; align-items: center;
+            display: none; gap: 8px; margin-top: 8px; align-items: flex-end;
             overflow: hidden; max-height: 0; opacity: 0;
-            transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+            transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
         }
-        .reply-input-area.show { display: flex; max-height: 60px; opacity: 1; }
-        .reply-input-area input {
-            flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+        .reply-input-area.show { display: flex; max-height: 200px; opacity: 1; }
+        .reply-input-area textarea {
+            flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
             font-size: 0.84rem; outline: none; font-family: inherit;
+            min-height: 44px; max-height: 120px; resize: none; line-height: 1.5;
         }
-        .reply-input-area input:focus { border-color: var(--accent); }
+        .reply-input-area textarea:focus { border-color: var(--accent); }
+        .reply-input-area .reply-actions { display: flex; flex-direction: column; gap: 4px; }
         .reply-input-area button {
             padding: 8px 16px; background: var(--accent); color: white; border: none;
             border-radius: 8px; font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+        }
+        .reply-input-area .reply-hint {
+            font-size: 0.62rem; color: var(--text-secondary); white-space: nowrap; text-align: center;
         }
 
         /* Section Tabs */
@@ -1048,7 +1053,8 @@
             .comment-body { font-size: 0.84rem; }
             .reply-list { margin-left: 10px; padding-left: 8px; }
             .reply-input-area { flex-direction: column; gap: 6px; margin-left: 10px !important; }
-            .reply-input-area button { width: 100%; padding: 8px; }
+            .reply-input-area .reply-actions { flex-direction: row; }
+            .reply-input-area button { flex: 1; padding: 8px; }
 
             /* Cards */
             .card { padding: 16px; }
@@ -2633,9 +2639,13 @@ function renderComments(page) {
             </div>`;
         }
         h += `<div class="reply-input-area" id="reply-area-${comment.id}" style="margin-left:${indent * 16 + 12}px;margin-bottom:6px;">
-            <input type="text" id="reply-input-${comment.id}" placeholder="답글..."
-                   onkeydown="if(event.key==='Enter'){event.preventDefault();postReply('${page}',${comment.id})}">
-            <button onclick="postReply('${page}',${comment.id})">답글</button>
+            <textarea id="reply-input-${comment.id}" placeholder="답글... (Ctrl+Enter 전송, Shift+Enter 줄바꿈)" rows="1"
+                   oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+                   onkeydown="if(event.key==='Enter'&&!event.shiftKey&&(event.ctrlKey||event.metaKey)){event.preventDefault();postReply('${page}',${comment.id})}"></textarea>
+            <div class="reply-actions">
+                <button onclick="postReply('${page}',${comment.id})">답글</button>
+                <span class="reply-hint">Ctrl+↵</span>
+            </div>
         </div>`;
         if (children.length > 0) {
             h += `<div id="thread-${comment.id}">`;
