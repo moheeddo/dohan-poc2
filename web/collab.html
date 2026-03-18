@@ -546,6 +546,46 @@
         }
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
+        /* Scroll to top button */
+        .scroll-top-btn {
+            position: fixed; bottom: 24px; right: 80px; z-index: 90;
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--bg-card); cursor: pointer; font-size: 1.1rem;
+            display: none; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); transition: all 0.2s;
+        }
+        .scroll-top-btn.visible { display: flex; }
+        .scroll-top-btn:hover { transform: scale(1.1); background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* Lightbox zoom controls */
+        .lightbox-controls {
+            position: absolute; bottom: 20px; display: flex; gap: 8px;
+        }
+        .lightbox-controls button {
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+            color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+            font-size: 1rem; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px); transition: background 0.2s;
+        }
+        .lightbox-controls button:hover { background: rgba(255,255,255,0.4); }
+        .lightbox img { transition: transform 0.2s ease; }
+
+        /* Comment new indicator pulse */
+        @keyframes newPulse {
+            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(59,130,246,0); }
+            100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+        }
+        .comment-new { animation: newPulse 1s ease-out, fadeInUp 0.3s ease; }
+
+        /* Comment count badge in header nav */
+        .nav-item .count {
+            min-width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; font-weight: 700; border-radius: 10px;
+            background: #e2e8f0; color: var(--text-secondary); padding: 0 5px;
+        }
+        .nav-item .count.has-new { background: var(--accent); color: white; }
+
         /* ========== Mobile Nav (hamburger) ========== */
         .mobile-nav-toggle { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 4px 8px; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 49; }
@@ -640,6 +680,12 @@
 
             /* Bookmark button */
             .bookmark-btn { font-size: 1rem; min-width: 36px; min-height: 36px; }
+
+            /* Scroll to top — move left of theme toggle */
+            .scroll-top-btn { right: auto; left: 66px; bottom: 20px; }
+
+            /* Lightbox controls */
+            .lightbox-controls button { width: 44px; height: 44px; }
         }
 
         @media (max-width: 400px) {
@@ -683,6 +729,7 @@
             <span class="user-dot"></span>
             <span id="user-name-display"></span>
         </div>
+        <button id="notif-toggle" onclick="toggleNotifSound()" title="알림 소리 설정" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:0.9rem;cursor:pointer;">🔔</button>
         <button onclick="doLogout()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:0.8rem;cursor:pointer;color:var(--text-secondary);">로그아웃</button>
     </div>
 </header>
@@ -1461,9 +1508,17 @@
 <button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="다크모드 전환">🌙</button>
 
 <!-- Lightbox for image zoom -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <img src="" alt="확대 이미지">
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+    <img src="" alt="확대 이미지" id="lightbox-img">
+    <div class="lightbox-controls">
+        <button onclick="event.stopPropagation();zoomLightbox(-1)" title="축소">−</button>
+        <button onclick="event.stopPropagation();zoomLightbox(0)" title="원래크기">⟲</button>
+        <button onclick="event.stopPropagation();zoomLightbox(1)" title="확대">+</button>
+    </div>
 </div>
+
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scroll-top" onclick="scrollToTop()" title="맨 위로">↑</button>
 
 <!-- Keyboard shortcuts modal -->
 <div class="kb-modal" id="kb-modal" onclick="if(event.target===this)this.classList.remove('show')">
@@ -1473,6 +1528,7 @@
         <div class="kb-row"><span>이미지 붙여넣기</span><span class="kb-key">Ctrl+V</span></div>
         <div class="kb-row"><span>멘션</span><span class="kb-key">@이름</span></div>
         <div class="kb-row"><span>검색 포커스</span><span class="kb-key">Ctrl+K</span></div>
+        <div class="kb-row"><span>맨 위로</span><span class="kb-key">Ctrl+↑</span></div>
         <div class="kb-row"><span>이 도움말</span><span class="kb-key">Ctrl+/</span></div>
         <div class="kb-row"><span>닫기</span><span class="kb-key">Esc</span></div>
         <div style="margin-top:16px;text-align:center;">
@@ -2142,11 +2198,16 @@ function removePendingImage(page, idx) {
 
 function openLightbox(src) {
     const lb = document.getElementById('lightbox');
-    lb.querySelector('img').src = src;
+    const img = document.getElementById('lightbox-img');
+    img.src = src;
+    _lbZoom = 1;
+    img.style.transform = 'scale(1)';
     lb.classList.add('show');
 }
 function closeLightbox() {
     document.getElementById('lightbox').classList.remove('show');
+    const img = document.getElementById('lightbox-img');
+    if (img) { _lbZoom = 1; img.style.transform = 'scale(1)'; }
 }
 
 function parseMentions(text) {
@@ -2764,9 +2825,14 @@ document.addEventListener('keydown', (e) => {
         const search = document.getElementById('comment-search');
         if (search) { search.focus(); search.select(); }
     }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowUp') {
+        e.preventDefault();
+        scrollToTop();
+    }
     if (e.key === 'Escape') {
         document.getElementById('kb-modal')?.classList.remove('show');
-        document.getElementById('lightbox')?.classList.remove('show');
+        closeLightbox();
+        closeProfile();
     }
 });
 
@@ -2811,6 +2877,19 @@ function playNotifSound() {
     } catch (e) { /* audio not supported */ }
 }
 
+function toggleNotifSound() {
+    _notifEnabled = !_notifEnabled;
+    localStorage.setItem('poc2_notif', _notifEnabled ? 'on' : 'off');
+    const btn = document.getElementById('notif-toggle');
+    if (btn) btn.textContent = _notifEnabled ? '🔔' : '🔕';
+    showToast(_notifEnabled ? '알림 소리가 켜졌습니다.' : '알림 소리가 꺼졌습니다.');
+}
+// Restore notif icon on load
+(function() {
+    const btn = document.getElementById('notif-toggle');
+    if (btn) btn.textContent = _notifEnabled ? '🔔' : '🔕';
+})();
+
 function showToast(message) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
@@ -2819,6 +2898,63 @@ function showToast(message) {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
 }
+
+// ============================================================
+// Scroll to top
+// ============================================================
+(function() {
+    const mainContent = document.querySelector('.main-content');
+    const scrollBtn = document.getElementById('scroll-top');
+    if (mainContent && scrollBtn) {
+        mainContent.addEventListener('scroll', () => {
+            scrollBtn.classList.toggle('visible', mainContent.scrollTop > 300);
+        });
+    }
+    // Also listen on window scroll for mobile
+    window.addEventListener('scroll', () => {
+        if (scrollBtn) scrollBtn.classList.toggle('visible', window.scrollY > 300);
+    });
+})();
+
+function scrollToTop() {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTo({top: 0, behavior: 'smooth'});
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ============================================================
+// Lightbox zoom
+// ============================================================
+let _lbZoom = 1;
+function zoomLightbox(dir) {
+    const img = document.getElementById('lightbox-img');
+    if (!img) return;
+    if (dir === 0) { _lbZoom = 1; }
+    else { _lbZoom = Math.max(0.5, Math.min(3, _lbZoom + dir * 0.5)); }
+    img.style.transform = `scale(${_lbZoom})`;
+}
+
+// Touch pinch-zoom for lightbox
+(function() {
+    const lb = document.getElementById('lightbox');
+    if (!lb) return;
+    let startDist = 0;
+    let startZoom = 1;
+    lb.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            startDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            startZoom = _lbZoom;
+        }
+    }, {passive: true});
+    lb.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            _lbZoom = Math.max(0.5, Math.min(3, startZoom * (dist / startDist)));
+            const img = document.getElementById('lightbox-img');
+            if (img) img.style.transform = `scale(${_lbZoom})`;
+        }
+    }, {passive: true});
+})();
 
 // ============================================================
 // Mobile sidebar toggle
