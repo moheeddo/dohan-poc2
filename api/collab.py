@@ -287,24 +287,7 @@ class handler(BaseHTTPRequestHandler):
         elif ep == "online":
             self._get_online(params)
         elif ep == "health":
-            # Debug: test gist write capability
-            write_ok = False
-            if gist_ok():
-                try:
-                    test_data = {"_health_check": time.time()}
-                    body = json.dumps({"files": {"_health_test.json": {"content": json.dumps(test_data)}}}).encode()
-                    req = urllib.request.Request(
-                        f"https://api.github.com/gists/{GIST_ID}",
-                        data=body,
-                        headers={"Authorization": f"token {GIST_TOKEN}", "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json", "User-Agent": "collab-api"},
-                        method="PATCH",
-                    )
-                    with urllib.request.urlopen(req, timeout=8) as resp:
-                        write_ok = resp.status == 200
-                        resp.read()
-                except Exception as e:
-                    write_ok = str(e)
-            self._json(200, {"status": "ok", "storage": "gist" if gist_ok() else "tmpfile", "gist_id": GIST_ID[:8] + "..." if GIST_ID else "", "write_ok": write_ok, "token_len": len(GIST_TOKEN)})
+            self._json(200, {"status": "ok", "storage": "gist" if gist_ok() else "tmpfile", "gist_id": GIST_ID[:8] + "..." if GIST_ID else ""})
         else:
             self._json(404, {"detail": "Not found"})
 
