@@ -422,6 +422,40 @@
         .reaction-btn .r-count { font-size: 0.72rem; color: var(--text-secondary); min-width: 8px; text-align: center; }
         .reaction-btn.active .r-count { color: var(--accent); font-weight: 600; }
 
+        /* Emoji picker panel */
+        .emoji-add-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 14px; border: 1px dashed var(--border);
+            background: transparent; cursor: pointer; font-size: 0.82rem; color: var(--text-secondary);
+            transition: all 0.15s; position: relative;
+        }
+        .emoji-add-btn:hover { background: #f1f5f9; border-style: solid; }
+        [data-theme="dark"] .emoji-add-btn:hover { background: #334155; }
+        .emoji-picker-popup {
+            display: none; position: absolute; bottom: 100%; left: 0; z-index: 50;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 8px; box-shadow: var(--shadow-lg); min-width: 200px;
+        }
+        .emoji-picker-popup.show { display: flex; flex-wrap: wrap; gap: 2px; }
+        .emoji-picker-popup button {
+            width: 32px; height: 32px; border: none; background: transparent;
+            border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: background 0.1s;
+        }
+        .emoji-picker-popup button:hover { background: #e2e8f0; }
+        [data-theme="dark"] .emoji-picker-popup button:hover { background: #475569; }
+
+        /* Quick reply templates */
+        .quick-reply-bar {
+            display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+        }
+        .quick-reply-btn {
+            padding: 4px 12px; border-radius: 16px; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-secondary); font-size: 0.78rem;
+            cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .quick-reply-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+        [data-theme="dark"] .quick-reply-btn:hover { background: #1e3a5f; }
+
         /* Heart burst animation */
         @keyframes heartBurst {
             0% { transform: scale(1); }
@@ -1142,6 +1176,7 @@
                 </select>
                 <button class="bookmark-filter-btn" id="bookmark-filter" onclick="toggleBookmarkFilter()">★ 북마크</button>
                 <button class="export-btn" onclick="exportComments()">📋 내보내기</button>
+                <button class="export-btn" onclick="downloadCommentsJSON()" title="JSON 파일 다운로드">⬇ JSON</button>
             </div>
 
             <div class="comment-filter-tabs">
@@ -2605,11 +2640,11 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
                 <span class="comment-author" style="color:${c.color || 'inherit'};cursor:pointer;" onclick="showProfile('${escapeHtml(c.author)}',this)">${escapeHtml(c.author)}</span>
                 <span class="comment-org" style="background:${oc.bg};color:${oc.color}">${c.org}</span>${_discussionTab === 'general' && c.section && c.section.startsWith('discussion_') ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#475569;">${{discussion_technical:'기술',discussion_content:'컨텐츠',discussion_process:'일정',discussion_general:'전체'}[c.section]||''}</span>` : ''}
                 ${c.role ? `<span style="font-size:0.72rem;color:var(--text-secondary)">${c.role}</span>` : ''}
-                <span class="comment-time" title="${absTime}">${time}</span>${editedLabel}
+                <span class="comment-time" title="${absTime}" data-created="${c.created_at || ''}">${time}</span>${editedLabel}
             </div>
             <div class="comment-body" id="body-${c.id}">${renderCommentContent(c)}</div>${c.images && c.images.length ? `<div class="comment-image${c.images.length === 1 ? ' single' : ''}">${c.images.map((img, idx) => `<img src="${img}" alt="첨부 이미지" onclick="openLightboxGallery(${c.id},${idx})" loading="lazy">`).join('')}</div>` : ''}
             <div class="reaction-bar">
-                ${['❤️','👍','✅'].map(emoji => {
+                ${_allReactionEmojis.slice(0,3).map(emoji => {
                     const reactions = (c.reactions || {})[emoji] || [];
                     const myName = _user ? _user.name : '';
                     const active = reactions.includes(myName);
@@ -2617,6 +2652,19 @@ function renderSingleComment(c, page, isReply = false, depth = 0) {
                         <span class="r-emoji">${emoji}</span><span class="r-count">${reactions.length || ''}</span>
                     </button>`;
                 }).join('')}
+                ${Object.keys((c.reactions || {})).filter(e => !_allReactionEmojis.slice(0,3).includes(e) && ((c.reactions||{})[e]||[]).length > 0).map(emoji => {
+                    const reactions = c.reactions[emoji];
+                    const myName = _user ? _user.name : '';
+                    const active = reactions.includes(myName);
+                    return `<button class="reaction-btn${active ? ' active' : ''}" onclick="toggleReaction(${c.id},'${emoji}','${page}',this)" data-emoji="${emoji}">
+                        <span class="r-emoji">${emoji}</span><span class="r-count">${reactions.length || ''}</span>
+                    </button>`;
+                }).join('')}
+                <span class="emoji-add-btn" onclick="toggleEmojiPicker(event,${c.id},'${page}')">+
+                    <div class="emoji-picker-popup" id="emoji-picker-${c.id}">
+                        ${_allReactionEmojis.map(e => `<button onclick="event.stopPropagation();pickEmoji(${c.id},'${e}','${page}')">${e}</button>`).join('')}
+                    </div>
+                </span>
             </div>
             <div class="comment-actions">
                 <button onclick="toggleReply(${c.id})">답글</button>
@@ -3056,8 +3104,48 @@ function insertMention(textarea, name) {
 // ============================================================
 // Reactions
 // ============================================================
-// Local reactions store (persisted in localStorage)
+// Emoji reaction system
+// ============================================================
+const _allReactionEmojis = ['❤️','👍','✅','🎉','🔥','💡','👀','🚀','💯','🤔','😂','🙏'];
 let _reactions = JSON.parse(localStorage.getItem('poc2_reactions') || '{}');
+
+function toggleEmojiPicker(e, commentId, page) {
+    e.stopPropagation();
+    const popup = document.getElementById('emoji-picker-' + commentId);
+    if (!popup) return;
+    // Close all other pickers
+    document.querySelectorAll('.emoji-picker-popup.show').forEach(el => {
+        if (el !== popup) el.classList.remove('show');
+    });
+    popup.classList.toggle('show');
+}
+
+function pickEmoji(commentId, emoji, page) {
+    closeAllEmojiPickers();
+    // Create a virtual button to pass to toggleReaction, or re-render
+    const key = String(commentId);
+    if (!_reactions[key]) _reactions[key] = {};
+    if (!_reactions[key][emoji]) _reactions[key][emoji] = [];
+    const idx = _reactions[key][emoji].indexOf(_user ? _user.name : '');
+    if (idx < 0 && _user) {
+        _reactions[key][emoji].push(_user.name);
+    }
+    for (const section of Object.keys(_commentCache)) {
+        _commentCache[section].forEach(c => {
+            if (c.id === commentId) c.reactions = _reactions[key];
+        });
+    }
+    localStorage.setItem('poc2_reactions', JSON.stringify(_reactions));
+    renderComments(page);
+}
+
+function closeAllEmojiPickers() {
+    document.querySelectorAll('.emoji-picker-popup.show').forEach(el => el.classList.remove('show'));
+}
+// Close pickers on outside click
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.emoji-add-btn')) closeAllEmojiPickers();
+});
 
 function toggleReaction(commentId, emoji, page, btn) {
     if (!_user) { alert('로그인이 필요합니다.'); return; }
@@ -3195,6 +3283,46 @@ function exportComments() {
         document.body.removeChild(ta);
         showToast('클립보드에 복사되었습니다.');
     });
+}
+
+function downloadCommentsJSON() {
+    const exportData = {
+        exported_at: new Date().toISOString(),
+        portal: 'PoC2 협업 포털',
+        sections: {}
+    };
+    const sectionLabels = {
+        discussion_technical: '기술 이슈',
+        discussion_content: '교육 컨텐츠',
+        discussion_process: '프로세스/일정',
+        discussion_general: '전체 토론',
+        standards: '품질 기준',
+        timeline: '타임라인',
+        architecture: '아키텍처',
+    };
+    for (const [key, comments] of Object.entries(_commentCache)) {
+        if (comments.length === 0) continue;
+        exportData.sections[key] = {
+            label: sectionLabels[key] || key,
+            count: comments.length,
+            comments: comments.map(c => ({
+                id: c.id, author: c.author, org: c.org, role: c.role || '',
+                content: c.content, created_at: c.created_at,
+                parent_id: c.parent_id || null,
+                images_count: (c.images || []).length,
+            }))
+        };
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `poc2_collab_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('JSON 파일이 다운로드되었습니다.');
 }
 
 // 키보드 단축키
@@ -3922,6 +4050,52 @@ document.addEventListener('drop', () => {
 
 // Initial render for architecture page
 setTimeout(() => renderComments('architecture'), 100);
+
+// ============================================================
+// Auto-refresh relative timestamps every 60 seconds
+// ============================================================
+setInterval(() => {
+    document.querySelectorAll('.comment-time').forEach(el => {
+        const absTime = el.getAttribute('title');
+        if (absTime) {
+            // Reconstruct the ISO-like date from absTime (ko-KR locale)
+            // We stored created_at as data attribute instead
+        }
+    });
+    // Simpler approach: just re-render the visible page's timestamps
+    document.querySelectorAll('.comment-time[data-created]').forEach(el => {
+        el.textContent = relativeTime(el.getAttribute('data-created'));
+    });
+}, 60000);
+
+// ============================================================
+// Quick reply templates
+// ============================================================
+const _quickReplies = ['👍 동의합니다', '✅ 확인했습니다', '📝 검토하겠습니다', '🔄 수정 반영하겠습니다', '💬 논의 필요합니다'];
+
+function insertQuickReply(page, text) {
+    const input = document.getElementById('input-' + page);
+    if (!input) return;
+    input.value = text;
+    input.focus();
+    input.dispatchEvent(new Event('input'));
+}
+
+// Monkey-patch setupInputArea to add quick reply bar
+const _origSetupInput = setupInputArea;
+setupInputArea = function(page) {
+    _origSetupInput(page);
+    // Add quick reply bar if not exists
+    const container = document.getElementById('input-' + page)?.closest('.comment-input-area');
+    if (container && !container.querySelector('.quick-reply-bar')) {
+        const bar = document.createElement('div');
+        bar.className = 'quick-reply-bar';
+        bar.innerHTML = _quickReplies.map(t =>
+            `<button class="quick-reply-btn" onclick="insertQuickReply('${page}',${JSON.stringify(t)})">${t}</button>`
+        ).join('');
+        container.insertBefore(bar, container.firstChild);
+    }
+};
 </script>
 </body>
 </html>
