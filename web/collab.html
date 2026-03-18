@@ -21,6 +21,41 @@
             --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
+        /* Dark mode overrides */
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --khnp-primary: #1e3a5f;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+        }
+        [data-theme="dark"] .comment-item,
+        [data-theme="dark"] .reply-item,
+        [data-theme="dark"] .activity-card,
+        [data-theme="dark"] .module-card,
+        [data-theme="dark"] .card { background: var(--bg-card); }
+        [data-theme="dark"] .reaction-btn { background: var(--bg-card); }
+        [data-theme="dark"] .comment-search,
+        [data-theme="dark"] .sort-select,
+        [data-theme="dark"] .reply-input-area input { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+        [data-theme="dark"] .kb-modal-content { background: var(--bg-card); color: var(--text); }
+        [data-theme="dark"] .mention-popup { background: var(--bg-card); border-color: var(--border); }
+        [data-theme="dark"] .std-table th { background: var(--bg-card); }
+        [data-theme="dark"] textarea { background: var(--bg-card); color: var(--text); }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed; bottom: 20px; left: 20px; z-index: 90;
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--bg-card); cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); transition: all 0.2s;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
@@ -439,6 +474,12 @@
         /* Relative time tooltip */
         .comment-time { cursor: default; }
         .comment-time[title]:hover { text-decoration: underline dotted; }
+
+        /* Auto-link */
+        .comment-body a.auto-link {
+            color: var(--accent); text-decoration: none; word-break: break-all;
+        }
+        .comment-body a.auto-link:hover { text-decoration: underline; }
 
         /* Toast */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
@@ -1341,6 +1382,9 @@
 <!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
 
+<!-- Theme toggle -->
+<button class="theme-toggle" id="theme-toggle" onclick="toggleDarkMode()" title="다크모드 전환">🌙</button>
+
 <!-- Lightbox for image zoom -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <img src="" alt="확대 이미지">
@@ -1903,6 +1947,11 @@ function setupInputArea(page) {
                 postComment(page);
             }
         });
+        // Textarea 자동 리사이즈
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        });
         // @ 멘션 자동완성
         setupMentionAutocomplete(textarea);
         // Ctrl+V 이미지 붙여넣기
@@ -2028,6 +2077,9 @@ function parseMentions(text) {
     // @이름 → highlighted mention span
     let result = escapeHtml(text);
     const myName = _user ? _user.name : '';
+    // URL 자동 링크
+    result = result.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" class="auto-link" target="_blank" rel="noopener">$1</a>');
+    // 멘션 하이라이트
     result = result.replace(/@(김도한|박소연|서진수|조성수|구진일|EY 컨설팅팀|Upstage 기술팀)/g, (match, name) => {
         const isMeClass = name === myName ? ' mention-me' : '';
         return `<span class="mention${isMeClass}">@${name}</span>`;
@@ -2277,12 +2329,15 @@ function startPolling() {
                 newComments.forEach(c => addCommentToCache(c));
                 updateAllCommentCounts();
                 renderComments(_currentPage);
-                // 알림
+                // 알림 (toast + 소리)
+                let hasOtherComment = false;
                 newComments.forEach(c => {
                     if (_user && c.author !== _user.name) {
                         showToast(`${c.author} (${c.org}): ${c.content.substring(0, 50)}...`);
+                        hasOtherComment = true;
                     }
                 });
+                if (hasOtherComment) playNotifSound();
             }
         } catch (e) { /* 무시 - 다음 polling에서 재시도 */ }
     }, 3000);
@@ -2623,23 +2678,61 @@ function exportComments() {
 
 // 키보드 단축키
 document.addEventListener('keydown', (e) => {
-    // Ctrl+/ → 단축키 도움말
     if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault();
         document.getElementById('kb-modal').classList.toggle('show');
     }
-    // Ctrl+K → 검색 포커스
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         const search = document.getElementById('comment-search');
         if (search) { search.focus(); search.select(); }
     }
-    // Esc → 모달 닫기
     if (e.key === 'Escape') {
         document.getElementById('kb-modal')?.classList.remove('show');
         document.getElementById('lightbox')?.classList.remove('show');
     }
 });
+
+// ============================================================
+// Dark mode
+// ============================================================
+function toggleDarkMode() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('poc2_theme', newTheme);
+    document.getElementById('theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+// Restore theme on load
+(function() {
+    const saved = localStorage.getItem('poc2_theme');
+    if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const btn = document.getElementById('theme-toggle');
+        if (btn) btn.textContent = '☀️';
+    }
+})();
+
+// ============================================================
+// Notification sound (Web Audio API — no file needed)
+// ============================================================
+let _notifEnabled = localStorage.getItem('poc2_notif') !== 'off';
+function playNotifSound() {
+    if (!_notifEnabled) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+    } catch (e) { /* audio not supported */ }
+}
 
 function showToast(message) {
     const container = document.getElementById('toast-container');
