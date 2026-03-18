@@ -69,6 +69,7 @@
         [data-theme="dark"] .std-table td { border-color: var(--border); }
         [data-theme="dark"] .arch-flow { background: #1e293b; }
         [data-theme="dark"] .header-right button { color: var(--text-secondary); border-color: var(--border); }
+        [data-theme="dark"] .sidebar-collapse-btn { color: var(--text-secondary); border-color: var(--border); }
 
         /* Theme toggle button */
         .theme-toggle {
@@ -152,7 +153,25 @@
         .sidebar {
             width: 240px; background: white; border-right: 1px solid var(--border);
             padding: 20px 0; flex-shrink: 0; overflow-y: auto;
+            transition: width 0.25s ease, padding 0.25s ease;
         }
+        .sidebar.collapsed {
+            width: 56px; padding: 12px 0; overflow: hidden;
+        }
+        .sidebar.collapsed .sidebar-section h3,
+        .sidebar.collapsed .nav-item span:not(.icon),
+        .sidebar.collapsed .nav-item .count,
+        .sidebar.collapsed .online-list,
+        .sidebar.collapsed .sidebar-section:last-child h3 { display: none; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
+        .sidebar.collapsed .nav-item .icon { width: auto; font-size: 1.15rem; }
+        .sidebar-collapse-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; padding: 8px 0; border: none; background: none;
+            cursor: pointer; font-size: 0.82rem; color: var(--text-secondary);
+            border-top: 1px solid var(--border); margin-top: 8px; transition: color 0.15s;
+        }
+        .sidebar-collapse-btn:hover { color: var(--accent); }
         .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
         .sidebar-section h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 8px; padding: 0 8px; }
         .nav-item {
@@ -176,7 +195,7 @@
         .online-user .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
         /* Main Content */
-        .main-content { flex: 1; overflow-y: auto; padding: 28px 40px; max-width: 960px; }
+        .main-content { flex: 1; overflow-y: auto; padding: 28px 40px; }
         .page { display: none; }
         .page.active { display: block; }
         .page-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
@@ -819,6 +838,9 @@
             .layout { flex-direction: column; height: auto; min-height: calc(100vh - 60px); }
             .main-content { padding: 12px 14px; overflow-y: visible; }
 
+            /* Hide sidebar collapse on mobile */
+            .sidebar-collapse-btn { display: none; }
+
             /* Header compact */
             .header { padding: 10px 14px; position: sticky; top: 0; gap: 6px; }
             .header-left .logo { font-size: 0.92rem; }
@@ -968,9 +990,11 @@
             </div>
             <div class="nav-item" onclick="switchPage('standards')" data-page="standards">
                 <span class="icon">&#x1f4d0;</span> 기준/표준 관리
+                <span class="count" id="count-standards" style="display:none">0</span>
             </div>
             <div class="nav-item" onclick="switchPage('timeline')" data-page="timeline">
                 <span class="icon">&#x1f4c5;</span> 프로젝트 일정
+                <span class="count" id="count-timeline" style="display:none">0</span>
             </div>
         </div>
         <div class="sidebar-section">
@@ -995,6 +1019,7 @@
             <h3>접속 중</h3>
             <div id="online-list" class="online-list"></div>
         </div>
+        <button class="sidebar-collapse-btn" id="sidebar-collapse" onclick="toggleSidebarCollapse()" title="사이드바 접기/펼치기">◀ 접기</button>
     </nav>
 
     <!-- Content -->
@@ -3815,6 +3840,85 @@ function copyCommentLink(commentId) {
         }, 1500);
     }
 })();
+
+// ============================================================
+// Sidebar collapse
+// ============================================================
+let _sidebarCollapsed = localStorage.getItem('poc2_sidebar') === 'collapsed';
+
+function toggleSidebarCollapse() {
+    const sidebar = document.getElementById('main-sidebar');
+    const btn = document.getElementById('sidebar-collapse');
+    _sidebarCollapsed = !_sidebarCollapsed;
+    sidebar.classList.toggle('collapsed', _sidebarCollapsed);
+    btn.textContent = _sidebarCollapsed ? '▶' : '◀ 접기';
+    localStorage.setItem('poc2_sidebar', _sidebarCollapsed ? 'collapsed' : 'expanded');
+}
+
+// Restore sidebar state on load
+(function() {
+    if (_sidebarCollapsed) {
+        const sidebar = document.getElementById('main-sidebar');
+        const btn = document.getElementById('sidebar-collapse');
+        if (sidebar) sidebar.classList.add('collapsed');
+        if (btn) btn.textContent = '▶';
+    }
+})();
+
+// ============================================================
+// Sidebar comment counts for all pages
+// ============================================================
+function updateSidebarCounts() {
+    const pageSections = {
+        standards: ['standards'],
+        timeline: ['timeline'],
+        architecture: ['architecture'],
+    };
+    for (const [page, sections] of Object.entries(pageSections)) {
+        let count = 0;
+        for (const s of sections) {
+            count += (_commentCache[s] || []).length;
+        }
+        const el = document.getElementById('count-' + page);
+        if (el) {
+            if (count > 0) { el.textContent = count; el.style.display = ''; }
+            else { el.style.display = 'none'; }
+        }
+    }
+}
+
+// Hook into updateAllCommentCounts
+const _origUpdateAll = updateAllCommentCounts;
+updateAllCommentCounts = function() {
+    _origUpdateAll();
+    updateSidebarCounts();
+};
+
+// ============================================================
+// Image drop zone visual feedback improvement
+// ============================================================
+document.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    // Highlight all drop zones
+    document.querySelectorAll('.comment-input-area').forEach(area => {
+        area.style.outline = '2px dashed var(--accent)';
+        area.style.outlineOffset = '-2px';
+    });
+});
+document.addEventListener('dragleave', (e) => {
+    if (e.relatedTarget === null || !document.contains(e.relatedTarget)) {
+        document.querySelectorAll('.comment-input-area').forEach(area => {
+            area.style.outline = '';
+            area.style.outlineOffset = '';
+        });
+    }
+});
+document.addEventListener('drop', () => {
+    document.querySelectorAll('.comment-input-area').forEach(area => {
+        area.style.outline = '';
+        area.style.outlineOffset = '';
+    });
+});
 
 // Initial render for architecture page
 setTimeout(() => renderComments('architecture'), 100);
