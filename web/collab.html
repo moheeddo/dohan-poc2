@@ -516,6 +516,42 @@
         .online-user .last-seen {
             font-size: 0.68rem; color: var(--text-secondary); margin-left: auto;
         }
+        .online-user .u-avatar {
+            width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; color: white; font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
+        }
+        .online-user .u-comments {
+            font-size: 0.65rem; color: var(--text-secondary); background: #f1f5f9;
+            padding: 1px 6px; border-radius: 8px;
+        }
+        [data-theme="dark"] .online-user .u-comments { background: #334155; }
+
+        /* Format help */
+        .format-help {
+            display: none; padding: 8px 12px; font-size: 0.74rem; color: var(--text-secondary);
+            background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+            margin-top: 4px; line-height: 1.8;
+        }
+        .format-help.show { display: block; }
+        .format-help code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 0.72rem; }
+        [data-theme="dark"] .format-help code { background: #334155; }
+        .format-toggle {
+            background: none; border: none; font-size: 0.72rem; color: var(--text-secondary);
+            cursor: pointer; padding: 0; text-decoration: underline;
+        }
+        .format-toggle:hover { color: var(--accent); }
+
+        /* Mini activity chart */
+        .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-top: 8px; }
+        .mini-chart .bar {
+            flex: 1; min-width: 0; background: var(--accent); border-radius: 3px 3px 0 0;
+            opacity: 0.7; transition: opacity 0.2s; position: relative;
+        }
+        .mini-chart .bar:hover { opacity: 1; }
+        .mini-chart .bar-label {
+            position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
+            font-size: 0.55rem; color: var(--text-secondary); white-space: nowrap;
+        }
 
         /* Typing indicator */
         .typing-indicator {
@@ -1710,6 +1746,10 @@ function enterApp() {
         startRealtime();
         setInterval(loadOnlineUsers, 30000);
     }
+    // Request desktop notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
 }
 
 function doLogout() {
@@ -1935,6 +1975,30 @@ function updateAllCommentCounts() {
                 <div class="a-label">기술/컨텐츠/일정</div>
             </div>
         `;
+        // Mini activity chart — last 7 days
+        const dayLabels = [];
+        const dayCounts = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            const key = d.toISOString().slice(0, 10);
+            dayLabels.push(d.toLocaleDateString('ko-KR', {weekday:'short'}));
+            let cnt = 0;
+            for (const section of Object.keys(_commentCache)) {
+                if (!section.startsWith('discussion_')) continue;
+                (_commentCache[section] || []).forEach(c => {
+                    if (c.created_at && c.created_at.startsWith(key)) cnt++;
+                });
+            }
+            dayCounts.push(cnt);
+        }
+        const maxDay = Math.max(...dayCounts, 1);
+        let chartHtml = '<div class="activity-card" style="grid-column: 1/-1;"><div class="a-label" style="margin-bottom:4px;">최근 7일 활동</div><div class="mini-chart">';
+        dayCounts.forEach((cnt, i) => {
+            const h = Math.max(2, (cnt / maxDay) * 36);
+            chartHtml += `<div class="bar" style="height:${h}px" title="${dayLabels[i]}: ${cnt}건"><div class="bar-label">${dayLabels[i]}</div></div>`;
+        });
+        chartHtml += '</div></div>';
+        summaryEl.innerHTML += chartHtml;
     }
 }
 
@@ -2088,8 +2152,17 @@ function renderComments(page) {
                     &#128247; 사진
                     <input type="file" id="img-upload-${page}" accept="image/*" multiple style="display:none" onchange="handleImageSelect('${page}', this.files)">
                 </label>
-                <span style="font-size:0.72rem;color:var(--text-secondary);">Ctrl+V로 붙여넣기 가능</span>
+                <button class="format-toggle" onclick="document.getElementById('fmt-help-${page}').classList.toggle('show')">서식 도움말</button>
                 <button class="send-btn" onclick="postComment('${page}')">전송</button>
+            </div>
+            <div class="format-help" id="fmt-help-${page}">
+                <code>**볼드**</code> → <strong>볼드</strong> &nbsp;
+                <code>*이탤릭*</code> → <em>이탤릭</em> &nbsp;
+                <code>\`코드\`</code> → <code>코드</code> &nbsp;
+                <code>~~취소선~~</code> → <del>취소선</del><br>
+                <code>> 인용</code> → 인용 블록 &nbsp;
+                <code>@이름</code> → 멘션 &nbsp;
+                URL 자동 링크 &nbsp; 이미지: Ctrl+V 또는 드래그
             </div>
         </div>`;
     container.innerHTML = html;
@@ -2513,7 +2586,20 @@ function startPolling() {
                         hasOtherComment = true;
                     }
                 });
-                if (hasOtherComment) playNotifSound();
+                if (hasOtherComment) {
+                    playNotifSound();
+                    // Desktop push notification
+                    if (Notification.permission === 'granted') {
+                        const last = newComments.filter(c => _user && c.author !== _user.name).pop();
+                        if (last) {
+                            new Notification(`${last.author} (${last.org})`, {
+                                body: last.content.substring(0, 80),
+                                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>',
+                                tag: 'collab-' + last.id
+                            });
+                        }
+                    }
+                }
             }
         } catch (e) { /* 무시 - 다음 polling에서 재시도 */ }
     }, 3000);
@@ -2523,15 +2609,22 @@ function startPolling() {
 // Online Users
 // ============================================================
 async function loadOnlineUsers() {
+    // Count comments per author
+    const authorCounts = {};
+    for (const section of Object.keys(_commentCache)) {
+        (_commentCache[section] || []).forEach(c => {
+            authorCounts[c.author] = (authorCounts[c.author] || 0) + 1;
+        });
+    }
+
     if (_useLocalMode) {
-        // 로컬 모드: 현재 사용자만 표시
         const list = _user ? [{name: _user.name, org: _user.org, color: _user.color}] : [];
         document.getElementById('online-count').textContent = `${list.length}명 (로컬)`;
         document.getElementById('online-list').innerHTML = list.map(u => `
             <div class="online-user">
-                <span class="dot" style="background:${u.color || '#10b981'}"></span>
+                <span class="u-avatar" style="background:${u.color || '#10b981'}">${u.name.charAt(0)}</span>
                 <span>${u.name}</span>
-                <span style="font-size:0.7rem;color:var(--text-secondary);margin-left:auto;">${u.org}</span>
+                ${authorCounts[u.name] ? `<span class="u-comments">${authorCounts[u.name]}건</span>` : ''}
             </div>
         `).join('');
         return;
@@ -2544,10 +2637,12 @@ async function loadOnlineUsers() {
         document.getElementById('online-count').textContent = `${list.length}명 접속중`;
         document.getElementById('online-list').innerHTML = list.map(u => {
             const lastSeen = u.last_seen ? relativeTime(new Date(u.last_seen * 1000).toISOString()) : '';
+            const cnt = authorCounts[u.name] || 0;
             return `
             <div class="online-user">
-                <span class="dot" style="background:${u.color || '#10b981'}"></span>
+                <span class="u-avatar" style="background:${u.color || '#10b981'}">${(u.name || '?').charAt(0)}</span>
                 <span>${u.name}</span>
+                ${cnt ? `<span class="u-comments">${cnt}건</span>` : ''}
                 <span class="last-seen">${lastSeen || u.org}</span>
             </div>`;
         }).join('');
